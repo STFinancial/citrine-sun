@@ -1,0 +1,9 @@
+out/*
+lib/*
+**/.idea/ # Not sure about this one at the moment
+.idea
+.idea/*
+
+*.class
+
+.DS_Store

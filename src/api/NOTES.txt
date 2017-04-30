@@ -1,0 +1,24 @@
+General:
+    Get O
+
+Trades:
+    Get price
+    Get fees
+    Get public trade history
+    Buy, Sell, Cancel
+    Get open trade orders
+    Get private trade history
+    Get order book
+
+Margin:
+    Buy, Sell, Cancel
+    Close position
+    Get open trade orders
+    Get trade history
+
+Lending:
+    Get private active loans
+    Get public loan offers and demands
+
+
+NOTE: BigDecimal is causing more trouble than it's worth at the moment. Consider moving back to double for now.

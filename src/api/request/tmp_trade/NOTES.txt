@@ -1,0 +1,6 @@
+Place trade  (private)
+Get current trade orders (private)
+get trade history (private)
+cancel trade (private)
+get public order book (public)
+get market trade history (public)

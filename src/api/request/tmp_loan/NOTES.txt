@@ -1,0 +1,8 @@
+Create a loan offer (private) x
+Get my personal loan offers (private) x
+Get my lending history (private) x
+Get my active loans (private) x
+cancel loan (private) x
+Get public loan order book (public) x
+
+// TODO(stfinancial): Try to make this a little less verbose.
