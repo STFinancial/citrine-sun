@@ -38,7 +38,6 @@ public final class CurrencyPair {
      */
     public static CurrencyPair of(Currency base, Currency quote) {
         // TODO(stfinancial): There may be a function that maps these ordinal values to something we can use as a map key.
-        System.out.println("Base: " + base.toString() + "    Quote: " + quote.toString());
         return pairs[base.ordinal()][quote.ordinal()];
     }
 

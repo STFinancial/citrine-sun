@@ -1,5 +1,6 @@
 package api.gdax;
 
+import api.AccountType;
 import api.request.*;
 
 /**
@@ -16,6 +17,8 @@ final class GdaxRequestRewriter {
             return rewriteOrderBookRequest((OrderBookRequest) request);
         } else if (request instanceof TickerRequest) {
             return rewriteTickerRequest((TickerRequest) request);
+        } else if (request instanceof AccountBalanceRequest) {
+            return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
         } else if (request instanceof FeeRequest) {
             return rewriteFeeRequest((FeeRequest) request);
         }
@@ -85,6 +88,17 @@ final class GdaxRequestRewriter {
         builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()));
         builder.isPublic(false);
         builder.httpRequestType(RestArgs.HttpRequestType.POST);
+        return builder.build();
+    }
+
+    private static RestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
+        if (request.getType() == AccountType.LOAN) {
+            return RestArgs.unsupported();
+        }
+        RestArgs.Builder builder = new RestArgs.Builder();
+        builder.withResource("accounts");
+        builder.isPublic(false);
+        builder.httpRequestType(RestArgs.HttpRequestType.GET);
         return builder.build();
     }
 
