@@ -1,8 +1,7 @@
 package api.gdax;
 
-import api.CurrencyPair;
-import api.FeeInfo;
-import api.Ticker;
+import api.*;
+import api.Currency;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
@@ -33,6 +32,8 @@ final class GdaxResponseParser {
             return createCancelResponse(jsonResponse, (CancelRequest) request, timestamp);
         } else if (request instanceof TickerRequest) {
             return createTickerResponse(jsonResponse, (TickerRequest) request, timestamp);
+        } else if (request instanceof AccountBalanceRequest) {
+            return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
         } else if (request instanceof FeeRequest) {
             return createFeeResponse(jsonResponse, (FeeRequest) request, timestamp);
         }
@@ -75,6 +76,24 @@ final class GdaxResponseParser {
         Map<CurrencyPair, Ticker> tickers = new HashMap<>();
         tickers.put(request.getPairs().get().get(0), ticker.build());
         return new TickerResponse(tickers, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private static MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
+        Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
+        Map<Currency, Double> exchangeBalances = new HashMap<>();
+        Map<Currency, Double> marginBalances = new HashMap<>();
+        System.out.println(jsonResponse);
+        // TODO(stfinancial): Maybe make a Balance class that has available and total balances as well as other info.
+        jsonResponse.forEach((balance) -> {
+            if (balance.has("margin_enabled") && balance.get("margin_enabled").asBoolean()) {
+                marginBalances.put(Currency.getCanonicalRepresentation(balance.get("currency").asText()), balance.get("available").asDouble());
+            } else {
+                exchangeBalances.put(Currency.getCanonicalRepresentation(balance.get("currency").asText()), balance.get("available").asDouble());
+            }
+        });
+        balances.put(AccountType.EXCHANGE, exchangeBalances);
+        balances.put(AccountType.MARGIN, marginBalances);
+        return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
     private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
