@@ -86,7 +86,7 @@ final class GdaxRequestRewriter {
         builder.withParam("size", String.valueOf(request.getAmount()));
         builder.withParam("side", GdaxUtils.getCommandForTradeType(request.getType()));
         builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()));
-        builder.withParam("post_only", request.isPostOnly() ? "1" : "0");
+        builder.withParam("post_only", request.isPostOnly() ? "true" : "false");
         builder.isPublic(false);
         builder.httpRequestType(RestArgs.HttpRequestType.POST);
         return builder.build();

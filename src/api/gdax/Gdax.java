@@ -118,6 +118,7 @@ public class Gdax extends Market {
             String CB_ACCESS_PASSPHRASE = passphrase;
 //            System.out.println("Passphrase: " + CB_ACCESS_PASSPHRASE);
             JsonNode json = args.asJson();
+            System.out.println(json);
             String what;
             if (json.isNull()) {
                 what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath();
@@ -125,7 +126,7 @@ public class Gdax extends Market {
                 what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + args.asJson().toString();
             }
 
-            System.out.println("what: " + what);
+//            System.out.println("what: " + what);
             httpRequest.addHeader("CB-ACCESS-KEY", CB_ACCESS_KEY);
             httpRequest.addHeader("CB-ACCESS-SIGN", signer.getBase64Digest(what.getBytes()));
             httpRequest.addHeader("CB-ACCESS-TIMESTAMP", CB_ACCESS_TIMESTAMP);

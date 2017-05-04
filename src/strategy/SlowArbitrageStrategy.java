@@ -32,13 +32,13 @@ public class SlowArbitrageStrategy extends Strategy {
     private static final double CURRENT_GDAX_FEE = 0.003;
 
     // TODO(stfinancial): Eventually we will scale with the size of the arbitrage
-    private static final double MAX_AMOUNT = 1;
+    private static final double MAX_AMOUNT = 0.1;
     private static final double MIN_AMOUNT = 0.01;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 
-    private static final boolean DRY_RUN = true;
+    private static final boolean DRY_RUN = false;
     Poloniex polo;
     Gdax gdax;
 
@@ -146,7 +146,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     response = polo.processMarketRequest(poloTradeRequest);
                     if (!response.isSuccess()) {
                         System.out.println("Failure: " + response.getJsonResponse());
-                        continue;
+                        return;
                     }
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -157,7 +157,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (!response.isSuccess()) {
                         System.out.println("Failure: " + response.getJsonResponse());
                         polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-                        continue;
+                        return;
                     }
                     String gdaxTradeId = ((TradeResponse) response).getOrderNumber();
 

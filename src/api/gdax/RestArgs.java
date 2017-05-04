@@ -107,8 +107,15 @@ final class RestArgs {
         }
         StringBuilder output = new StringBuilder("{\n");
         params.forEach((key, value) -> {
-            // TODO(stfinancial): Test that we actually need these extra quotes here.
-            output.append("\"").append(key).append("\"").append(":").append("\"").append(value).append("\",\n");
+            // TODO(stfinancial): Awful hack for now, refactor to a pair that allows modifiers such as "no quotes in json"  for example
+            if (value.equals("false") || value.equals("true")) {
+                output.append("\"").append(key).append("\"").append(":").append(value).append(",\n");
+            } else {
+                // TODO(stfinancial): Test that we actually need these extra quotes here.
+                output.append("\"").append(key).append("\"").append(":").append("\"").append(value).append("\",\n");
+            }
+
+
         });
         // TODO(stfinancial): This is kind of gross. Fix this later.
         output.deleteCharAt(output.length() - 2);
