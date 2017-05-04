@@ -67,7 +67,7 @@ final class GdaxUtils {
     @Nullable
     static CurrencyPair parseCurrencyPair(String pair) {
         // TODO(stfinancial): Convert this to optional?
-        System.out.println(pair);
+//        System.out.println(pair);
         String[] currencies = pair.split("-", 2);
         if (currencies.length != 2) {
             return null;

@@ -85,7 +85,7 @@ final class GdaxResponseParser {
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
         Map<Currency, Double> exchangeBalances = new HashMap<>();
         Map<Currency, Double> marginBalances = new HashMap<>();
-        System.out.println(jsonResponse);
+//        System.out.println(jsonResponse);
         // TODO(stfinancial): Maybe make a Balance class that has available and total balances as well as other info.
         jsonResponse.forEach((balance) -> {
             if (balance.has("margin_enabled") && balance.get("margin_enabled").asBoolean()) {
@@ -101,7 +101,7 @@ final class GdaxResponseParser {
 
     private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
-        System.out.println(jsonResponse);
+//        System.out.println(jsonResponse);
         FeeResponse feeResponse;
         for (JsonNode feeSet : jsonResponse) {
             if (GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()) != request.getCurrencyPair().get()) {

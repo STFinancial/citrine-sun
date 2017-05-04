@@ -55,7 +55,6 @@ public class Gdax extends Market {
 
     public Gdax(Credentials credentials) {
         this.apiKey = credentials.getApiKey();
-        System.out.println(credentials.getSecretKey());
         this.passphrase = credentials.getPassphrase();
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
         httpClient = HttpClients.createDefault();

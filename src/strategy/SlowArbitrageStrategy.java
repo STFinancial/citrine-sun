@@ -32,13 +32,14 @@ public class SlowArbitrageStrategy extends Strategy {
     private static final double CURRENT_GDAX_FEE = 0.003;
 
     // TODO(stfinancial): Eventually we will scale with the size of the arbitrage
-    private static final double MAX_AMOUNT = 0.1;
+    private static final double MAX_AMOUNT = 2.5;
     private static final double MIN_AMOUNT = 0.01;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 
     private static final boolean DRY_RUN = false;
+    private static final int REFRESH_INTERVAL = 400;
     Poloniex polo;
     Gdax gdax;
 
@@ -54,22 +55,13 @@ public class SlowArbitrageStrategy extends Strategy {
         strategy.run();
     }
 
-//    public static void main(String[] args) {
-//        SlowArbitrageStrategy strategy = new SlowArbitrageStrategy();
-//        strategy.test();
-//    }
-//
-//    private void test() {
-//        printTradeAmounts()
-//    }
-
     @Override
     public void run() {
         polo = new Poloniex(Credentials.fromFileString(POLONIEX_KEYS));
         gdax = new Gdax(Credentials.fromFileString(GDAX_KEYS));
         // TODO(stfinancial): Do this on a timer.
-        refreshFees();
-        if (!refreshBalances()) {
+        while (!updateAccountInfo()) {
+            System.out.println("Failure updating account info. Sleeping...");
             sleep(10000);
         }
 
@@ -83,8 +75,16 @@ public class SlowArbitrageStrategy extends Strategy {
         List<Trade> gdaxAsks;
         MarketResponse response;
         TradeResponse tradeResponse;
+        int refreshIterations = 0;
         while (true) {
             sleep(500);
+            if (++refreshIterations > REFRESH_INTERVAL) {
+                refreshIterations = 0;
+                while (!updateAccountInfo()) {
+                    System.out.println("Failure updating account info. Sleeping...");
+                    sleep(10000);
+                }
+            }
             response = polo.processMarketRequest(orderBookRequest);
             if (!response.isSuccess()) {
                 System.out.println("error: " + response.getJsonResponse());
@@ -106,12 +106,14 @@ public class SlowArbitrageStrategy extends Strategy {
             TradeRequest gdaxTradeRequest;
             // Test buy on poloniex and sell on GDAX
             if (isArbitrage(gdaxBids.get(0), gdaxTakerFee, poloAsks.get(0), poloTakerFee)) {
+                Trade lowestAsk = poloAsks.get(0);
+                Trade highestBid = gdaxBids.get(0);
                 System.out.println("Arbitrage found!!!");
-                System.out.println("Polo (Buy): " + poloAsks.get(0).getRate() + " - " + poloAsks.get(0).getAmount());
-                System.out.println("Gdax (Sell): " + gdaxBids.get(0).getRate() + " - " + gdaxBids.get(0).getAmount());
+                System.out.println("Polo (Buy): " + lowestAsk.getRate() + " - " + lowestAsk.getAmount());
+                System.out.println("Gdax (Sell): " + highestBid.getRate() + " - " + highestBid.getAmount());
 
-                double gdaxMinAmount = Math.min(MAX_AMOUNT, Math.min(gdaxBids.get(0).getAmount(), gdaxBaseBalance));
-                double poloMinAmount = Math.min(MAX_AMOUNT, Math.min(poloAsks.get(0).getAmount(), poloQuoteBalance / poloAsks.get(0).getRate()));
+                double gdaxMinAmount = Math.min(MAX_AMOUNT, Math.min(highestBid.getAmount(), gdaxBaseBalance));
+                double poloMinAmount = Math.min(MAX_AMOUNT, Math.min(lowestAsk.getAmount(), poloQuoteBalance / lowestAsk.getRate()));
 
                 if (gdaxMinAmount < MIN_AMOUNT) {
                     System.out.println("Gdax minAmount below min amount: " + gdaxMinAmount);
@@ -135,12 +137,14 @@ public class SlowArbitrageStrategy extends Strategy {
                     gdaxAmount = gdaxMinAmount;
                     poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
                 }
+                gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
+                poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : Math.round((poloAmount * 100000000.0) - 1) / 100000000.0;
                 System.out.println("Polo Amount: " + poloAmount);
                 System.out.println("Gdax Amount: " + gdaxAmount);
 
                 if (!DRY_RUN) {
                     // TODO(stfinancial): Immediate or cancel, test what the resposne looks like.
-                    poloTradeRequest = new TradeRequest(new Trade(poloAmount, poloAsks.get(0).getRate(), PAIR, TradeType.BUY), 5, 1);
+                    poloTradeRequest = new TradeRequest(new Trade(poloAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 1);
                     poloTradeRequest.setIsPostOnly(false);
                     poloTradeRequest.setIsMarket(false);
                     response = polo.processMarketRequest(poloTradeRequest);
@@ -150,7 +154,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     }
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
-                    gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, gdaxBids.get(0).getRate(), PAIR, TradeType.SELL), 5, 1);
+                    gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 1);
                     gdaxTradeRequest.setIsPostOnly(false);
                     gdaxTradeRequest.setIsMarket(false);
                     response = gdax.processMarketRequest(gdaxTradeRequest);
@@ -174,12 +178,14 @@ public class SlowArbitrageStrategy extends Strategy {
             }
             // Test sell on poloniex and buy on GDAX
             if (isArbitrage(poloBids.get(0), poloTakerFee, gdaxAsks.get(0), gdaxTakerFee)) {
+                Trade lowestAsk = gdaxAsks.get(0);
+                Trade highestBid = poloBids.get(0);
                 System.out.println("Arbitrage found!!!");
-                System.out.println("Gdax (Buy): " + gdaxAsks.get(0).getRate() + " - " + gdaxAsks.get(0).getAmount());
-                System.out.println("Polo (Sell): " + poloBids.get(0).getRate() + " - " + poloBids.get(0).getAmount());
+                System.out.println("Gdax (Buy): " + lowestAsk.getRate() + " - " + lowestAsk.getAmount());
+                System.out.println("Polo (Sell): " + highestBid.getRate() + " - " + highestBid.getAmount());
 
-                double gdaxMinAmount = Math.min(MAX_AMOUNT, Math.min(gdaxAsks.get(0).getAmount(), gdaxQuoteBalance / gdaxAsks.get(0).getRate()));
-                double poloMinAmount = Math.min(MAX_AMOUNT, Math.min(poloBids.get(0).getAmount(), poloBaseBalance));
+                double gdaxMinAmount = Math.min(MAX_AMOUNT, Math.min(lowestAsk.getAmount(), gdaxQuoteBalance / lowestAsk.getRate()));
+                double poloMinAmount = Math.min(MAX_AMOUNT, Math.min(highestBid.getAmount(), poloBaseBalance));
 
 
                 if (gdaxMinAmount < MIN_AMOUNT) {
@@ -204,13 +210,15 @@ public class SlowArbitrageStrategy extends Strategy {
                     gdaxAmount = gdaxMinAmount;
                     poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
                 }
+                gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
+                poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : Math.round((poloAmount * 100000000.0) - 1) / 100000000.0;
 
                 System.out.println("Polo Amount: " + poloAmount);
                 System.out.println("Gdax Amount: " + gdaxAmount);
 
 
                 if (!DRY_RUN) {
-                    poloTradeRequest = new TradeRequest(new Trade(poloAmount, poloBids.get(0).getRate(), PAIR, TradeType.SELL), 5, 1);
+                    poloTradeRequest = new TradeRequest(new Trade(poloAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 1);
                     poloTradeRequest.setIsPostOnly(false);
                     poloTradeRequest.setIsMarket(false);
                     response = polo.processMarketRequest(poloTradeRequest);
@@ -220,7 +228,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     }
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
-                    gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, gdaxAsks.get(0).getRate(), PAIR, TradeType.BUY), 5, 1);
+                    gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 1);
                     gdaxTradeRequest.setIsPostOnly(false);
                     gdaxTradeRequest.setIsMarket(false);
                     response = gdax.processMarketRequest(gdaxTradeRequest);
@@ -258,47 +266,18 @@ public class SlowArbitrageStrategy extends Strategy {
 
         double buyingPrice = ask.getRate();
         double requiredSellingPrice = buyingPrice / ((1 - buyFee) * (1 - sellFee));
-        System.out.println("Buying Price (Lowest Ask): " + buyingPrice);
-        System.out.println("Selling Price (Highest Bid): " + bid.getRate());
-        System.out.println("Required Selling Price: " + requiredSellingPrice);
+        System.out.println("Buy (Lowest Ask): " + buyingPrice + "\tSell (Highest Bid): " + bid.getRate() + "\tRequired Sell: " + requiredSellingPrice);
         return requiredSellingPrice < bid.getRate();
     }
 
-    private boolean refreshBalances() {
-        AccountBalanceRequest request = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
-        MarketResponse response;
-        Map<Currency, Double> balances;
-        response = polo.processMarketRequest(request);
-        // TODO(stfinancial): How do we handle failure here... for now we will return boolean...?
-        if (!response.isSuccess()) {
-            System.out.println(response.getJsonResponse());
-            return false;
-        }
-        // TODO(stfinancial): What about the case where the account is totally empty? There still should be an empty map...
-        balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
-        poloBaseBalance = balances.containsKey(PAIR.getBase()) ? balances.get(PAIR.getBase()) : 0;
-        poloQuoteBalance = balances.containsKey(PAIR.getQuote()) ? balances.get(PAIR.getQuote()) : 0;
-
-        response = gdax.processMarketRequest(request);
-        // TODO(stfinancial): How do we handle failure here... for now we will return boolean...?
-        if (!response.isSuccess()) {
-            System.out.println(response.getJsonResponse());
-            return false;
-        }
-        // TODO(stfinancial): What about the case where the account is totally empty? There still should be an empty map...
-        balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
-        gdaxBaseBalance = balances.containsKey(PAIR.getBase()) ? balances.get(PAIR.getBase()) : 0;
-        gdaxQuoteBalance = balances.containsKey(PAIR.getQuote()) ? balances.get(PAIR.getQuote()) : 0;
-        return true;
-    }
-
-    private boolean refreshFees() {
+    private boolean updateAccountInfo() {
+        System.out.println("Refreshing Fees...");
         // WE can gracefully recover from failure here... we just be as conservative as needed.
         FeeRequest feeRequest = new FeeRequest(PAIR, 1, 1);
         MarketResponse response;
         response = polo.processMarketRequest(feeRequest);
         if (!response.isSuccess()) {
-            System.out.println(response.getJsonResponse());
+            System.out.println("Poloniex Fee Request unsuccessful: " + response.getJsonResponse());
             poloTakerFee = CURRENT_POLO_FEE;
             gdaxTakerFee = CURRENT_GDAX_FEE;
             return false;
@@ -306,13 +285,33 @@ public class SlowArbitrageStrategy extends Strategy {
         poloTakerFee = ((FeeResponse) response).getFeeInfo().getTakerFee();
         response = gdax.processMarketRequest(feeRequest);
         if (!response.isSuccess()) {
-            System.out.println(response.getJsonResponse());
-            poloTakerFee = CURRENT_POLO_FEE;
+            System.out.println("Gdax Fee Request unsuccessful: " + response.getJsonResponse());
             gdaxTakerFee = CURRENT_GDAX_FEE;
             return false;
         }
         // TODO(stfinancial): Gotta handle GDAX's stupid way of handling fees.
         gdaxTakerFee = ((FeeResponse) response).getFeeInfo().getTakerFee();
+
+        System.out.println("Refreshing Account Balances...");
+        AccountBalanceRequest request = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
+        Map<Currency, Double> balances;
+        response = polo.processMarketRequest(request);
+        if (!response.isSuccess()) {
+            System.out.println(response.getJsonResponse());
+            return false;
+        }
+        balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
+        poloBaseBalance = balances.containsKey(PAIR.getBase()) ? balances.get(PAIR.getBase()) : 0;
+        poloQuoteBalance = balances.containsKey(PAIR.getQuote()) ? balances.get(PAIR.getQuote()) : 0;
+
+        response = gdax.processMarketRequest(request);
+        if (!response.isSuccess()) {
+            System.out.println(response.getJsonResponse());
+            return false;
+        }
+        balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
+        gdaxBaseBalance = balances.containsKey(PAIR.getBase()) ? balances.get(PAIR.getBase()) : 0;
+        gdaxQuoteBalance = balances.containsKey(PAIR.getQuote()) ? balances.get(PAIR.getQuote()) : 0;
         return true;
     }
 
