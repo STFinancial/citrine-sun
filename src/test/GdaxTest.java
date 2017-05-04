@@ -25,9 +25,11 @@ public class GdaxTest {
     public void test() {
         Credentials c = Credentials.fromFileString(GDAX_KEY);
         Gdax gdax = new Gdax(c);
-        TradeRequest req = new TradeRequest(new Trade(1, 0.01, CurrencyPair.of(Currency.ETH, Currency.BTC), TradeType.BUY), 1, 1);
+        TradeRequest req = new TradeRequest(new Trade(0.001, 0.07, CurrencyPair.of(Currency.ETH, Currency.BTC), TradeType.BUY), 1, 1);
+        req.setIsPostOnly(false);
 //        TickerRequest req = new TickerRequest(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.BTC)}), 1, 1);
         MarketResponse resp = gdax.processMarketRequest(req);
+        System.out.println(resp.getJsonResponse());
         if (!resp.isSuccess()) {
             System.out.println("Failure: " + resp.getJsonResponse().toString());
             return;

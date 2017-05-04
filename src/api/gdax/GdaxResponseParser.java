@@ -43,6 +43,9 @@ final class GdaxResponseParser {
     // TODO(stfinancial): Think carefully about what is at stake for returning MarketResponse vs. the specific response type.
 
     private static MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
+        if (jsonResponse.has("status") && jsonResponse.get("status").asText().equals("rejected")) {
+            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("reject_reason").asText()));
+        }
 
         // TODO(stfinancial): Add support for all of the other stuff.
         return new TradeResponse(jsonResponse.get("id").asText(), jsonResponse, request, timestamp, RequestStatus.success());

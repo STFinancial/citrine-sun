@@ -11,8 +11,8 @@ import api.tmp_trade.TradeType;
  * Created by Timothy on 1/7/17.
  */
 public class TradeTester {
-//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
     private static final double PRICE = 0.01;
     private static final double AMOUNT = 1;
     private static final TradeType TYPE = TradeType.BUY;
