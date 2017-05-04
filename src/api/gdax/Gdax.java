@@ -141,7 +141,6 @@ public class Gdax extends Market {
 //                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
 //            }
         }
-        System.out.println("About to try");
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
             statusCode = response.getStatusLine().getStatusCode();

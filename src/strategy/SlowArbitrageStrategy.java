@@ -9,8 +9,10 @@ import api.poloniex.Poloniex;
 import api.request.*;
 import api.tmp_trade.Trade;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 /**
  * Created by Timothy on 4/23/17.
@@ -23,7 +25,7 @@ public class SlowArbitrageStrategy extends Strategy {
     private static final double CURRENT_GDAX_FEE = 0.003;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
-    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.ETH, Currency.BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 
     private static final boolean DRY_RUN = true;
     Poloniex polo;
@@ -41,6 +43,15 @@ public class SlowArbitrageStrategy extends Strategy {
         strategy.run();
     }
 
+//    public static void main(String[] args) {
+//        SlowArbitrageStrategy strategy = new SlowArbitrageStrategy();
+//        strategy.test();
+//    }
+//
+//    private void test() {
+//        printTradeAmounts()
+//    }
+
     @Override
     public void run() {
         polo = new Poloniex(Credentials.fromFileString(POLONIEX_KEYS));
@@ -50,6 +61,8 @@ public class SlowArbitrageStrategy extends Strategy {
         if (!refreshBalances()) {
             sleep(10000);
         }
+
+        // TODO(stfinancial): GDAX does not support immediateorcancel, but for now we will use it on poloniex.
 
         OrderBookRequest orderBookRequest = new OrderBookRequest(PAIR, 20, 2, 1);
         OrderBookResponse orderBookResponse;
@@ -66,9 +79,7 @@ public class SlowArbitrageStrategy extends Strategy {
             }
             orderBookResponse = (OrderBookResponse) response;
             poloBids = orderBookResponse.getBids().get(PAIR);
-            if (poloBids == null) System.out.println("Null 1WTF");
             poloAsks = orderBookResponse.getAsks().get(PAIR);
-            if (poloAsks == null) System.out.println("Null 2WTF");
             response = gdax.processMarketRequest(orderBookRequest);
             if (!response.isSuccess()) {
                 System.out.println("error: " + response.getJsonResponse());
@@ -76,23 +87,63 @@ public class SlowArbitrageStrategy extends Strategy {
             }
             orderBookResponse = (OrderBookResponse) response;
             gdaxBids = orderBookResponse.getBids().get(PAIR);
-            if (gdaxBids == null) System.out.println("Null 3WTF");
             gdaxAsks = orderBookResponse.getAsks().get(PAIR);
-            if (gdaxAsks == null) System.out.println("Null 4WTF");
 
+            TradeRequest poloTradeRequest;
+            TradeRequest gdaxTradeRequest;
             // Test buy on poloniex and sell on GDAX
             if (isArbitrage(gdaxBids.get(0), gdaxTakerFee, poloAsks.get(0), poloTakerFee)) {
                 System.out.println("Arbitrage found!!!");
                 System.out.println("Polo (Buy): " + poloAsks.get(0).getRate() + " - " + poloAsks.get(0).getAmount());
                 System.out.println("Gdax (Sell): " + gdaxBids.get(0).getRate() + " - " + gdaxBids.get(0).getAmount());
-                System.exit(1);
+
+                double gdaxMinAmount = Math.min(gdaxBids.get(0).getAmount(), gdaxBaseBalance);
+                double poloMinAmount = Math.min(poloAsks.get(0).getAmount(), poloQuoteBalance / poloAsks.get(0).getRate());
+
+                double gdaxPostFeeMin = gdaxMinAmount * (1 - gdaxTakerFee);
+                double poloPostFeeMin = poloMinAmount * (1 - poloTakerFee);
+//                double minAmount = Math.min(gdaxMinAmount, poloMinAmount);
+
+                double gdaxAmount;
+                double poloAmount;
+                if (gdaxPostFeeMin > poloPostFeeMin) {
+                    gdaxAmount = poloPostFeeMin / (1 - gdaxTakerFee);
+                    poloAmount = poloMinAmount;
+                } else {
+                    gdaxAmount = gdaxMinAmount;
+                    poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
+                }
+                
+
+                System.out.println("Polo Amount: " + poloAmount);
+                System.out.println("Gdax Amount: " + gdaxAmount);
+
             }
             // Test sell on poloniex and buy on GDAX
             if (isArbitrage(poloBids.get(0), poloTakerFee, gdaxAsks.get(0), gdaxTakerFee)) {
                 System.out.println("Arbitrage found!!!");
                 System.out.println("Gdax (Buy): " + gdaxAsks.get(0).getRate() + " - " + gdaxAsks.get(0).getAmount());
                 System.out.println("Polo (Sell): " + poloBids.get(0).getRate() + " - " + poloBids.get(0).getAmount());
-                System.exit(1);
+
+                double gdaxMinAmount = (1 - gdaxTakerFee) * Math.min(gdaxAsks.get(0).getAmount(), gdaxQuoteBalance / gdaxAsks.get(0).getRate());
+                double poloMinAmount = (1 - poloTakerFee) * Math.min(poloBids.get(0).getAmount(), poloBaseBalance);
+
+                double gdaxPostFeeMin = gdaxMinAmount * (1 - gdaxTakerFee);
+                double poloPostFeeMin = poloMinAmount * (1 - poloTakerFee);
+
+
+                double gdaxAmount;
+                double poloAmount;
+                if (gdaxPostFeeMin > poloPostFeeMin) {
+                    gdaxAmount = poloPostFeeMin / (1 - gdaxTakerFee);
+                    poloAmount = poloMinAmount;
+                } else {
+                    gdaxAmount = gdaxMinAmount;
+                    poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
+                }
+
+                System.out.println("Polo Amount: " + poloAmount);
+                System.out.println("Gdax Amount: " + gdaxAmount);
             }
             sleep(500);
         }
