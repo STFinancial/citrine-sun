@@ -18,8 +18,11 @@ import java.util.Queue;
  * Created by Timothy on 4/23/17.
  */
 public class SlowArbitrageStrategy extends Strategy {
-    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+//    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+
+    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     private static final double CURRENT_POLO_FEE = 0.0022;
     private static final double CURRENT_GDAX_FEE = 0.003;

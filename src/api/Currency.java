@@ -40,6 +40,7 @@ public enum Currency {
     FLO(Arrays.asList("FLO")),
     GAME(Arrays.asList("GAME")),
     GBP(Arrays.asList("GBP")),
+    GNO(Arrays.asList("GNO")),
     GNT(Arrays.asList("GNT")),
     GRC(Arrays.asList("GRC")),
     HUC(Arrays.asList("HUC")),
