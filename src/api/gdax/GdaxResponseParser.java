@@ -47,6 +47,8 @@ final class GdaxResponseParser {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("reject_reason").asText()));
         }
 
+        // TODO(stfinancial): Amount filled is not set correctly for limit take orders.
+
         // TODO(stfinancial): Add support for all of the other stuff.
         return new TradeResponse(jsonResponse.get("id").asText(), jsonResponse, request, timestamp, RequestStatus.success());
     }
