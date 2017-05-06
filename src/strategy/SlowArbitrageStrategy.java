@@ -23,11 +23,11 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Withdrawal support.
     // TODO(stfinancial): Market should return futures to be able to process in parallel. Can have multiple threads to simulate for now.
 
-//    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
-    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+//    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     private static final double CURRENT_POLO_FEE = 0.0022;
     private static final double CURRENT_GDAX_FEE = 0.003;
@@ -163,6 +163,9 @@ public class SlowArbitrageStrategy extends Strategy {
                     }
                     System.out.println("Amount filled on Polo: " + ((TradeResponse) response).getQuoteAmountFilled());
                     gdaxAmount = (((TradeResponse) response).getQuoteAmountFilled() * (1 - poloTakerFee)) / (1 - gdaxTakerFee);
+                    if (gdaxAmount < 0.001) {
+                        continue;
+                    }
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -234,6 +237,9 @@ public class SlowArbitrageStrategy extends Strategy {
                     }
                     System.out.println("Amount filled on Polo: " + ((TradeResponse) response).getQuoteAmountFilled());
                     gdaxAmount = (((TradeResponse) response).getQuoteAmountFilled() * (1 - poloTakerFee)) / (1 - gdaxTakerFee);
+                    if (gdaxAmount < 0.001) {
+                        continue;
+                    }
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.

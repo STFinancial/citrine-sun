@@ -60,6 +60,11 @@ final class GdaxUtils {
         }
     }
 
+    static long getTimestampFromGdaxTimestamp(String gdaxTimestamp) {
+        // TODO(stfinancial): Implement... 2014-11-07T22:19:28.578544Z
+        return 0;
+    }
+
 
     // TODO(stfinancial): ****** NOTE ****** GDAX DOES CURRENCY PAIRS BACKWARDS FROM POLO... See if this is true in all cases on GDAX and POLO.
     // See how this affects trades. See what is the canonical way on other exchanges.

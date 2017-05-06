@@ -3,6 +3,7 @@ package api.gdax;
 import api.*;
 import api.Currency;
 import api.request.*;
+import api.tmp_trade.CompletedTrade;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -32,6 +33,8 @@ final class GdaxResponseParser {
             return createCancelResponse(jsonResponse, (CancelRequest) request, timestamp);
         } else if (request instanceof TickerRequest) {
             return createTickerResponse(jsonResponse, (TickerRequest) request, timestamp);
+        } else if (request instanceof OrderTradesRequest) {
+            return createOrderTradesResponse(jsonResponse, (OrderTradesRequest) request, timestamp);
         } else if (request instanceof AccountBalanceRequest) {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
         } else if (request instanceof FeeRequest) {
@@ -72,6 +75,18 @@ final class GdaxResponseParser {
         });
         asksSet.put(pair, asks);
         return new OrderBookResponse(asksSet, bidsSet, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private static MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
+        List<CompletedTrade> trades = new ArrayList<>();
+        System.out.println("CreateOrderTradesResponse - GDAX: " + jsonResponse);
+        jsonResponse.forEach((trade) -> {
+            // TODO(stfinancial): Clean this up, refactor to utils class for constructing trade from json
+            // TODO(stfinancial): See if different markets need to have different interpretations of the fee parameter.
+            // TODO(stfinancial): Make sure created_at means what we think it means.
+            trades.add(new CompletedTrade.Builder(new Trade(jsonResponse.get("amount").asDouble(), jsonResponse.get("price").asDouble(), GdaxUtils.parseCurrencyPair(jsonResponse.get("product_id").asText()), GdaxUtils.getTradeTypeFromString(jsonResponse.get("side").asText())), jsonResponse.get("trade_id").asText(), GdaxUtils.getTimestampFromGdaxTimestamp(jsonResponse.get("created_at").asText())).fee(jsonResponse.get("fee").asDouble()).build());
+        });
+        return new OrderTradesResponse(trades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
     private static MarketResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {

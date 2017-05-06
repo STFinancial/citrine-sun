@@ -17,6 +17,8 @@ final class GdaxRequestRewriter {
             return rewriteOrderBookRequest((OrderBookRequest) request);
         } else if (request instanceof TickerRequest) {
             return rewriteTickerRequest((TickerRequest) request);
+        } else if (request instanceof OrderTradesRequest) {
+            return rewriteOrderTradesRequest((OrderTradesRequest) request);
         } else if (request instanceof AccountBalanceRequest) {
             return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
         } else if (request instanceof FeeRequest) {
@@ -89,6 +91,16 @@ final class GdaxRequestRewriter {
         builder.withParam("post_only", request.isPostOnly() ? "true" : "false");
         builder.isPublic(false);
         builder.httpRequestType(RestArgs.HttpRequestType.POST);
+        return builder.build();
+    }
+
+    private static RestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
+        RestArgs.Builder builder = new RestArgs.Builder();
+        builder.withResource("fills");
+        // TODO(stfinancial): Support for product_id
+        builder.withParam("order_id", request.getId());
+        builder.isPublic(false);
+        builder.httpRequestType(RestArgs.HttpRequestType.GET);
         return builder.build();
     }
 

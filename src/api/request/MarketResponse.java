@@ -43,4 +43,7 @@ public class MarketResponse {
     public final RequestStatus getError() { return error; }
 
 //    public abstract Class<? extends MarketRequest> getRequestType(); // Maybe requesttype
+
+    // TODO(stfinancial): I'm thinking of making a builder that we can subclass (perhaps an interface or something... not sure). This makes  the constructors more manageable.
+    
 }

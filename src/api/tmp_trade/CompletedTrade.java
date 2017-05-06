@@ -21,6 +21,7 @@ public final class CompletedTrade {
     private final String globalTradeId;
     private final double total;
     private final double fee;
+    private final boolean isMake; // Whether this trade was a market make or take. Potentially make this an enum as well. Perhaps LiquidityType or something?
     // TODO(stfinancial): Should this be margin for margin sales and exchange for normal sales?
     private final Category category;
     // I believe this is used to get all trades for a given order number.
@@ -33,6 +34,7 @@ public final class CompletedTrade {
         this.globalTradeId = builder.globalTradeId;
         this.total = builder.total;
         this.fee = builder.fee;
+        this.isMake = builder.isMake;
         this.category = builder.category;
         this.orderNumber = builder.orderNumber;
     }
@@ -44,6 +46,7 @@ public final class CompletedTrade {
     public String getGlobalTradeId() { return globalTradeId; }
     public double getTotal() { return total; }
     public double getFee() { return fee; }
+    public boolean isMake() { return isMake; }
     public Category getCategory() { return category; }
     public int getOrderNumber() { return orderNumber; }
 
@@ -56,6 +59,7 @@ public final class CompletedTrade {
         sb.append("\tglobalTradeId: " + globalTradeId).append("\n");
         sb.append("\ttotal: " + total).append("\n");
         sb.append("\tfee: " + fee).append("\n");
+        sb.append("\tisMake: " + (isMake ? "true" : "false")).append("\n");
         if (category != null) {
             sb.append("\tcategory: " + category.toString()).append("\n");
         }
@@ -74,6 +78,7 @@ public final class CompletedTrade {
         private Category category;
         private double total;
         private double fee;
+        private boolean isMake;
         private int orderNumber;
 
         public Builder(Trade trade, String tradeId, long completionTimestamp) {
@@ -89,6 +94,8 @@ public final class CompletedTrade {
         public Builder total(double total) { this.total = total; return this; }
 
         public Builder fee(double fee) { this.fee = fee; return this; }
+
+        public Builder isMake(boolean isMake) { this.isMake = isMake; return this; }
 
 //        public Builder orderNumber(int orderNumber) { this.orderNumber = orderNumber; return this; } // TODO(stfinancial): Where is this?
 
