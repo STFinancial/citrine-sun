@@ -16,6 +16,8 @@ import java.util.Queue;
  * Created by Timothy on 4/23/17.
  */
 public class SlowArbitrageStrategy extends Strategy {
+    // TODO(stfinancial): Choice whether we increase base or quote holdings.
+
     // TODO(stfinancial): Multiple accounts to circumvent withdrawal limits.
 
     // TODO(stfinancial): Withdrawal support.
@@ -159,6 +161,8 @@ public class SlowArbitrageStrategy extends Strategy {
                         return;
                     }
                     System.out.println("Amount filled on Polo: " + ((TradeResponse) response).getQuoteAmountFilled());
+                    gdaxAmount = (((TradeResponse) response).getQuoteAmountFilled() * (1 - poloTakerFee)) / (1 - gdaxTakerFee);
+                    System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
                     gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 1);
@@ -219,12 +223,15 @@ public class SlowArbitrageStrategy extends Strategy {
                     poloTradeRequest = new TradeRequest(new Trade(poloAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 1);
                     poloTradeRequest.setIsPostOnly(false);
                     poloTradeRequest.setIsMarket(false);
+                    poloTradeRequest.setIsImmediateOrCancel(true);
                     response = polo.processMarketRequest(poloTradeRequest);
                     if (!response.isSuccess()) {
                         System.out.println("Failure: " + response.getJsonResponse());
                         continue;
                     }
                     System.out.println("Amount filled on Polo: " + ((TradeResponse) response).getQuoteAmountFilled());
+                    gdaxAmount = (((TradeResponse) response).getQuoteAmountFilled() * (1 - poloTakerFee)) / (1 - gdaxTakerFee);
+                    System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
                     gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 1);
@@ -400,6 +407,7 @@ public class SlowArbitrageStrategy extends Strategy {
         // So that means give buy price B... arbitrage exists if sell price S > B / (1 - buyfee) / (1 - sellfee)
         double buyingPrice = ask.getRate();
         double sellingPrice = bid.getRate();
+        // TODO(stfinancial): We can precompute this ratio.
         double requiredSellingPrice = buyingPrice / ((1 - buyFee) * (1 - sellFee));
         System.out.println("Buy (Lowest Ask): " + buyingPrice + "\tSell (Highest Bid): " + sellingPrice + "\tRequired Sell: " + requiredSellingPrice + "\t\tRatio: " + sellingPrice / requiredSellingPrice);
         return sellingPrice / requiredSellingPrice;
