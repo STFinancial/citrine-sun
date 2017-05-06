@@ -34,7 +34,7 @@ public class SlowArbitrageStrategy extends Strategy {
     private static final double MAX_AMOUNT = 3.5;
     private static final double MIN_AMOUNT = 0.01;
     private static final double STANDARD_AMOUNT = 0.69;
-    private static final double MIN_ADJUSTED_AMOUNT = 0.01;
+//    private static final double MIN_ADJUSTED_AMOUNT = 0.5;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
@@ -188,6 +188,8 @@ public class SlowArbitrageStrategy extends Strategy {
                 System.out.println("Arbitrage found!!!");
                 System.out.println("Gdax (Buy): " + lowestAsk.getRate() + " - " + lowestAsk.getAmount());
                 System.out.println("Polo (Sell): " + highestBid.getRate() + " - " + highestBid.getAmount());
+
+//                double scaledAmount = getScaledAmount(arbitrageRatio, )
 
                 double gdaxMinAmount = Math.min(getScaledAmount(arbitrageRatio), Math.min(lowestAsk.getAmount(), gdaxQuoteBalance / lowestAsk.getRate()));
                 double poloMinAmount = Math.min(getScaledAmount(arbitrageRatio), Math.min(highestBid.getAmount(), poloBaseBalance));
@@ -469,9 +471,10 @@ public class SlowArbitrageStrategy extends Strategy {
     }
 
     // The better the arbitrage, the more we we want to transfer.
+//    private double getScaledAmount(double arbitrageRatio, double rebalanceBonus) {
     private double getScaledAmount(double arbitrageRatio) {
         // TODO(stfinancial): Could also be a function of how imbalanced our portfolio is. If arbitrages are skewed, could be useful. I like this.
-        return Math.max(MIN_ADJUSTED_AMOUNT, STANDARD_AMOUNT * Math.pow((arbitrageRatio - 1) * 100, 2));
+        return Math.max(STANDARD_AMOUNT, STANDARD_AMOUNT * Math.pow((arbitrageRatio - 0.995) * 100, 2));
     }
 
     private void sleep(long millis) {
