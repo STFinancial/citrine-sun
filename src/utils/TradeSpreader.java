@@ -43,9 +43,9 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 846;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-    private static final double PRICE = 0.0565;
-    private static final double RANGE = 0.0013;
-    private static final double AMOUNT = 25;
+    private static final double PRICE = 0.05666;
+    private static final double RANGE = 0.0015;
+    private static final double AMOUNT = 109;
     private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.00425;
@@ -63,7 +63,7 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 30;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
 
-    private static final int BUCKETS = 53;
+    private static final int BUCKETS = 151;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 

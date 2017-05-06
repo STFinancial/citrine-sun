@@ -1,16 +1,14 @@
 package strategy;
 
 import api.*;
+import api.Currency;
 import api.gdax.Gdax;
 import api.poloniex.Poloniex;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Queue;
+import java.util.*;
 
 /**
  * Created by Timothy on 4/23/17.
@@ -35,7 +33,7 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Eventually we will scale with the size of the arbitrage
     private static final double MAX_AMOUNT = 3.5;
     private static final double MIN_AMOUNT = 0.01;
-    private static final double STANDARD_AMOUNT = 0.69;
+    private static final double STANDARD_AMOUNT = 0.1;
 //    private static final double MIN_ADJUSTED_AMOUNT = 0.5;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
@@ -43,6 +41,8 @@ public class SlowArbitrageStrategy extends Strategy {
 
     private static final boolean DRY_RUN = false;
     private static final int REFRESH_INTERVAL = 400;
+    // TODO(stfinancial): Think about if we actually want to be cancelling orders
+    private static final int CANCEL_WAIT = 60;
     Poloniex polo;
     Gdax gdax;
 
@@ -76,6 +76,7 @@ public class SlowArbitrageStrategy extends Strategy {
         List<Trade> poloAsks;
         List<Trade> gdaxBids;
         List<Trade> gdaxAsks;
+        HashSet<String> gdaxOrders = new HashSet<>();
         MarketResponse response;
         TradeResponse tradeResponse;
         int refreshIterations = 0;
@@ -83,6 +84,18 @@ public class SlowArbitrageStrategy extends Strategy {
         double arbitrageRatio;
         while (true) {
             sleep(500);
+            if (gdaxOrders.size() > 500) {
+                Iterator<String> it = gdaxOrders.iterator();
+                String id;
+                while (it.hasNext()) {
+                    id = it.next();
+                    response = gdax.processMarketRequest(new CancelRequest(id, CancelRequest.CancelType.TRADE, 1, 1));
+                    if (response.isSuccess()) {
+                        it.remove();
+                    }
+                    sleep(300);
+                }
+            }
             if (++refreshIterations > REFRESH_INTERVAL) {
                 refreshIterations = 0;
                 while (!updateAccountInfo()) {
@@ -175,7 +188,6 @@ public class SlowArbitrageStrategy extends Strategy {
                     response = gdax.processMarketRequest(gdaxTradeRequest);
                     if (!response.isSuccess()) {
                         System.out.println("Failure: " + response.getJsonResponse());
-                        polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
                         return;
                     }
                     System.out.println(response.getJsonResponse());
@@ -183,9 +195,15 @@ public class SlowArbitrageStrategy extends Strategy {
                     // Poloniex has higher volume so we make the trade there first.
                     // Wait to see if they get filled if they weren't...
                     // TODO(stfinancial): Check if they actually weren't filled before sleeping.
-                    sleep(60000);
-                    gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-                    polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
+                    // Test without canceling.
+                    // TODO(stfinancial): Handle case where we accidentally try to fill our own unfilled order.
+                    // TODO(stfinancial): Once portfolio rebalancing is in place, we shouldn't need to worry about unfilled orders.
+//                    response = gdax.processMarketRequest(new OrderTradesRequest(gdaxTradeId, 1, 1));
+                    gdaxOrders.add(gdaxTradeId);
+
+                    // TODO(stfinancial): One solution is to hold all the orders in a list and cancel them all at once later.
+//                    sleep(60000);
+//                    gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
                 }
             }
             // Test sell on poloniex and buy on GDAX
@@ -249,7 +267,6 @@ public class SlowArbitrageStrategy extends Strategy {
                     response = gdax.processMarketRequest(gdaxTradeRequest);
                     if (!response.isSuccess()) {
                         System.out.println("Failure: " + response.getJsonResponse());
-                        polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
                         continue;
                     }
                     System.out.println(response.getJsonResponse());
@@ -257,9 +274,15 @@ public class SlowArbitrageStrategy extends Strategy {
                     // Poloniex has higher volume so we make the trade there first.
                     // Wait to see if they get filled if they weren't...
                     // TODO(stfinancial): Check if they actually weren't filled before sleeping.
-                    sleep(60000);
-                    gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-                    polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
+                    // Test without canceling.
+                    // TODO(stfinancial): Handle case where we accidentally try to fill our own unfilled order.
+                    // TODO(stfinancial): Once portfolio rebalancing is in place, we shouldn't need to worry about unfilled orders.
+//                    response = gdax.processMarketRequest(new OrderTradesRequest(gdaxTradeId, 1, 1));
+                    gdaxOrders.add(gdaxTradeId);
+
+                    // TODO(stfinancial): One solution is to hold all the orders in a list and cancel them all at once later.
+//                    sleep(60000);
+//                    gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
                 }
 
             }
