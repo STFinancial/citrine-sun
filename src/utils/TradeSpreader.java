@@ -43,27 +43,32 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 846;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-    private static final double PRICE = 0.05666;
-    private static final double RANGE = 0.0015;
-    private static final double AMOUNT = 109;
-    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+//    private static final double PRICE = 0.05666;
+//    private static final double RANGE = 0.0015;
+//    private static final double AMOUNT = 109;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.00425;
 //    private static final double RANGE = 0.0004;
 //    private static final double AMOUNT = 1228;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(FCT, BTC);
 
-//    private static final double PRICE = 0.0001532;
-//    private static final double RANGE = 0.000006;
-//    private static final double AMOUNT = 40200;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
+    private static final double PRICE = 0.000208;
+    private static final double RANGE = 0.000008;
+    private static final double AMOUNT = 20000;
+    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 
 //    private static final double PRICE = 0.01585;
 //    private static final double RANGE = 0.0002;
 //    private static final double AMOUNT = 30;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
 
-    private static final int BUCKETS = 151;
+//    private static final double PRICE = 0.00001525;
+//    private static final double RANGE = 0.00000125;
+//    private static final double AMOUNT = 369000;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
+
+    private static final int BUCKETS = 65;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 

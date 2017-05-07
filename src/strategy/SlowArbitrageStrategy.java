@@ -21,11 +21,11 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Withdrawal support.
     // TODO(stfinancial): Market should return futures to be able to process in parallel. Can have multiple threads to simulate for now.
 
-//    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
-    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+//    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     private static final double CURRENT_POLO_FEE = 0.0022;
     private static final double CURRENT_GDAX_FEE = 0.003;
@@ -33,7 +33,7 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Eventually we will scale with the size of the arbitrage
     private static final double MAX_AMOUNT = 3.5;
     private static final double MIN_AMOUNT = 0.01;
-    private static final double STANDARD_AMOUNT = 0.08;
+    private static final double STANDARD_AMOUNT = 0.23;
 //    private static final double MIN_ADJUSTED_AMOUNT = 0.5;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
@@ -515,7 +515,7 @@ public class SlowArbitrageStrategy extends Strategy {
 //    private double getScaledAmount(double arbitrageRatio, double rebalanceBonus) {
     private double getScaledAmount(double arbitrageRatio) {
         // TODO(stfinancial): Could also be a function of how imbalanced our portfolio is. If arbitrages are skewed, could be useful. I like this.
-        return Math.max(STANDARD_AMOUNT, STANDARD_AMOUNT * Math.pow((arbitrageRatio - 0.995) * 100, 2));
+        return Math.max(MIN_AMOUNT, STANDARD_AMOUNT * Math.pow((arbitrageRatio - 0.995) * 100, 2));
     }
 
     private void sleep(long millis) {
