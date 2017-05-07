@@ -21,11 +21,11 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Withdrawal support.
     // TODO(stfinancial): Market should return futures to be able to process in parallel. Can have multiple threads to simulate for now.
 
-    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+//    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
-//    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-//    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     private static final double CURRENT_POLO_FEE = 0.0022;
     private static final double CURRENT_GDAX_FEE = 0.003;
@@ -33,7 +33,7 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Eventually we will scale with the size of the arbitrage
     private static final double MAX_AMOUNT = 3.5;
     private static final double MIN_AMOUNT = 0.01;
-    private static final double STANDARD_AMOUNT = 0.1;
+    private static final double STANDARD_AMOUNT = 0.08;
 //    private static final double MIN_ADJUSTED_AMOUNT = 0.5;
 
     // TODO(stfinancial): We will expand to more pairs as we hook up the WAMP and socket endpoints.
@@ -84,7 +84,9 @@ public class SlowArbitrageStrategy extends Strategy {
         double arbitrageRatio;
         while (true) {
             sleep(500);
+            // TODO(stfinancial): Check that the arbitrage ratio is not good at the moment (and we have money in our account), because we want to wait if that's the case.
             if (gdaxOrders.size() > 500) {
+                System.out.println("Clearing orders.");
                 Iterator<String> it = gdaxOrders.iterator();
                 String id;
                 while (it.hasNext()) {
@@ -179,6 +181,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (gdaxAmount < 0.001) {
                         continue;
                     }
+                    gdaxAmount = Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -258,6 +261,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (gdaxAmount < 0.001) {
                         continue;
                     }
+                    gdaxAmount = Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
