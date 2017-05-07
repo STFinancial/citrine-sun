@@ -161,8 +161,10 @@ public class SlowArbitrageStrategy extends Strategy {
                     poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
                 }
                 // TODO(stfinancial): This is leaving 1 satoshi on the board and messing up my bot, potentially remove the -1 (or figure a way to make it so we never fail due to being 1 satoshi off funds)
-                gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
-                poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : Math.round((poloAmount * 100000000.0) - 1) / 100000000.0;
+                // TODO(stfinancial): Sometimes this is 2 satoshi. It's really messing up the arbitrage. Need to fix ASAP.
+                // Truncate artifacts of calculation by casting.
+                gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
+                poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : ((long) (poloAmount * 100000000.0)) / 100000000.0;
                 System.out.println("Polo Amount: " + poloAmount);
                 System.out.println("Gdax Amount: " + gdaxAmount);
 
@@ -181,7 +183,8 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (gdaxAmount < 0.001) {
                         continue;
                     }
-                    gdaxAmount = Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
+                    // Truncate artifacts of calculation by casting.
+                    gdaxAmount = ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -242,8 +245,9 @@ public class SlowArbitrageStrategy extends Strategy {
                     gdaxAmount = gdaxMinAmount;
                     poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
                 }
-                gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
-                poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : Math.round((poloAmount * 100000000.0) - 1) / 100000000.0;
+                // Truncate artifacts of calculation by casting.
+                gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
+                poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : ((long) (poloAmount * 100000000.0)) / 100000000.0;
                 System.out.println("Polo Amount: " + poloAmount);
                 System.out.println("Gdax Amount: " + gdaxAmount);
                 if (!DRY_RUN) {
@@ -261,7 +265,8 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (gdaxAmount < 0.001) {
                         continue;
                     }
-                    gdaxAmount = Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
+                    // Truncate artifacts of calculation by casting.
+                    gdaxAmount = ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -448,23 +453,6 @@ public class SlowArbitrageStrategy extends Strategy {
         System.out.println("Buy (Lowest Ask): " + buyingPrice + "\tSell (Highest Bid): " + sellingPrice + "\tRequired Sell: " + requiredSellingPrice + "\t\tRatio: " + sellingPrice / requiredSellingPrice);
         return sellingPrice / requiredSellingPrice;
     }
-
-//    // TODO(stfinancial): We can probably precompute the fee coefficient and stuff.
-//    private boolean isArbitrage(Trade bid, double buyFee, Trade ask, double sellFee) {
-//        // Say both fees are 20%
-//        // Buy 1 BTC at 100 dollars. I get 1 * (1- 0.2) = 0.8 BTC
-//        // Sell 0.8 BTC at what price to get 100 dollars?
-//        // Say 200 bucks... I get 0.8 * 200 = 160 -> 160 * (1 - 0.2) = 128 bucks
-//        // The actual price would be (100 / (1 - 0.2)) / (1 - 0.2) = 156.25
-//        // Lets test
-//        // 0.8 * 156.25 * (1- 0.2) = 100 √
-//        // So that means give buy price B... arbitrage exists if sell price S > B / (1 - buyfee) / (1 - sellfee)
-//
-//        double buyingPrice = ask.getRate();
-//        double requiredSellingPrice = buyingPrice / ((1 - buyFee) * (1 - sellFee));
-//        System.out.println("Buy (Lowest Ask): " + buyingPrice + "\tSell (Highest Bid): " + bid.getRate() + "\tRequired Sell: " + requiredSellingPrice);
-//        return requiredSellingPrice < bid.getRate();
-//    }
 
     private boolean updateAccountInfo() {
         System.out.println("Refreshing Fees...");
