@@ -1,14 +1,16 @@
 package api.gdax;
 
 import api.AccountType;
+import api.RequestArgs;
 import api.request.*;
 
 /**
- * Created by Timothy on 3/7/17.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} which can be used to construct an {@link org.apache.http.HttpRequest}.
  */
 final class GdaxRequestRewriter {
+    private static final String API_ENDPOINT = "https://api.gdax.com";
 
-    static RestArgs rewriteRequest(MarketRequest request) {
+    static RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof CancelRequest) {
@@ -24,62 +26,63 @@ final class GdaxRequestRewriter {
         } else if (request instanceof FeeRequest) {
             return rewriteFeeRequest((FeeRequest) request);
         }
-        return RestArgs.unsupported();
+        return RequestArgs.unsupported();
     }
 
-    private static RestArgs rewriteTickerRequest(TickerRequest request) {
+    private static RequestArgs rewriteTickerRequest(TickerRequest request) {
         if (!request.getPairs().isPresent() || request.getPairs().get().size() != 1) {
             // TODO(stfinancial): Probably need to throw something here.
-            return RestArgs.unsupported();
+            return RequestArgs.unsupported();
         }
-        RestArgs.Builder builder = new RestArgs.Builder();
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("products");
         // TODO(stfinancial): Awful...
         builder.withResource(GdaxUtils.formatCurrencyPair(request.getPairs().get().get(0)));
         builder.withResource("ticker");
-        builder.isPublic(true);
-        builder.httpRequestType(RestArgs.HttpRequestType.GET);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(false);
         return builder.build();
     }
 
-    private static RestArgs rewriteCancelRequest(CancelRequest request) {
-        RestArgs.Builder builder = new RestArgs.Builder();
+    private static RequestArgs rewriteCancelRequest(CancelRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("orders");
         builder.withResource(request.getId());
-        builder.isPublic(false);
-        builder.httpRequestType(RestArgs.HttpRequestType.DELETE);
+        builder.httpRequestType(RequestArgs.HttpRequestType.DELETE);
+        builder.isPrivate(true);
         return builder.build();
     }
 
-    private static RestArgs rewriteOrderBookRequest(OrderBookRequest request) {
+    private static RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
         if (!request.getCurrencyPair().isPresent()) {
-            return RestArgs.unsupported();
+            return RequestArgs.unsupported();
         }
-        RestArgs.Builder builder = new RestArgs.Builder();
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("products");
         // TODO(stfinancial): Also awful.
         builder.withResource(GdaxUtils.formatCurrencyPair(request.getCurrencyPair().get()));
         builder.withResource("book");
         if (request.getDepth() == 1) {
-            builder.withParam("level", "1");
+            builder.withParam("level", "1", true, true);
         } else if (request.getDepth() <= 50) {
-            builder.withParam("level", "2");
+            builder.withParam("level", "2", true, true);
         } else {
             // TODO(stfinancial): Need to inform client somehow that these are non aggregated (every order listed, even at same price)
-            builder.withParam("level", "3");
+            builder.withParam("level", "3", true, true);
         }
-        builder.isPublic(true);
-        builder.httpRequestType(RestArgs.HttpRequestType.GET);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(false);
         return builder.build();
     }
 
-    private static RestArgs rewriteTradeRequest(TradeRequest request) {
+    private static RequestArgs rewriteTradeRequest(TradeRequest request) {
+        // TODO(stfinancial): Self trade prevention behavior.
         if (request.isMargin() || request.isStopLimit() || request.isMarket()) {
             // TODO(stfinancial): Implement these, along with fill or kill, post only, immediate or cancel.
-            return RestArgs.unsupported();
+            return RequestArgs.unsupported();
         }
         // TODO(stfinancial): This is currently only valid for limit orders.
-        RestArgs.Builder builder = new RestArgs.Builder();
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("orders");
         // TODO(stfinancial): Add support for this.
 //        builder.withParam("client_oid")
@@ -88,46 +91,46 @@ final class GdaxRequestRewriter {
         builder.withParam("size", String.valueOf(request.getAmount()));
         builder.withParam("side", GdaxUtils.getCommandForTradeType(request.getType()));
         builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()));
-        builder.withParam("post_only", request.isPostOnly() ? "true" : "false");
-        builder.isPublic(false);
-        builder.httpRequestType(RestArgs.HttpRequestType.POST);
+        builder.withParam("post_only", request.isPostOnly() ? "true" : "false", false, false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
         return builder.build();
     }
 
-    private static RestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
-        RestArgs.Builder builder = new RestArgs.Builder();
+    private static RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("fills");
         // TODO(stfinancial): Support for product_id
         builder.withParam("order_id", request.getId());
-        builder.isPublic(false);
-        builder.httpRequestType(RestArgs.HttpRequestType.GET);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(true);
         return builder.build();
     }
 
-    private static RestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
+    private static RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
         if (request.getType() == AccountType.LOAN) {
-            return RestArgs.unsupported();
+            return RequestArgs.unsupported();
         }
-        RestArgs.Builder builder = new RestArgs.Builder();
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("accounts");
-        builder.isPublic(false);
-        builder.httpRequestType(RestArgs.HttpRequestType.GET);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(true);
         return builder.build();
     }
 
-    private static RestArgs rewriteFeeRequest(FeeRequest request) {
+    private static RequestArgs rewriteFeeRequest(FeeRequest request) {
         // TODO(stfinancial): Apparently this is a cached value that is calculated every night at midnight.
         // TODO(stfinancial): Does this mean that if we go over the next fee tier, it will have to wait?
         if (!request.getCurrencyPair().isPresent()) {
             // TODO(stfinancial): This is actually supported... implement this.
-            return RestArgs.unsupported();
+            return RequestArgs.unsupported();
         }
-        RestArgs.Builder builder = new RestArgs.Builder();
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("users");
         builder.withResource("self");
         builder.withResource("trailing-volume");
-        builder.httpRequestType(RestArgs.HttpRequestType.GET);
-        builder.isPublic(false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(true);
         return builder.build();
     }
 

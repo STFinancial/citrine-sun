@@ -142,13 +142,15 @@ public final class Poloniex extends Market { //implements Tradable {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }
 
-        if (isPublicMethod(args.getCommand())) {
-            StringBuilder url = (new StringBuilder(PUBLIC_URI).append("?").append(args.toString()));
-            httpRequest = new HttpGet(url.toString());
+        if (!args.isPrivate()) {
+            // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
+            httpRequest = new HttpGet(args.getUrl());
         } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce.
 //            args.refreshNonce();
-            String sign = signer.getHexDigest(args.toString().getBytes());
+            String sign = signer.getHexDigest(args.getQueryString().getBytes());
+//            System.out.println(args.getUrl());
+            // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
             httpRequest = new HttpPost(PRIVATE_URI);
             httpRequest.addHeader("Key", apiKey);
             httpRequest.addHeader("Sign", sign);
@@ -199,19 +201,5 @@ public final class Poloniex extends Market { //implements Tradable {
         // TODO(stfinancial): Post-processing and add/convert timestamp.
 
         return PoloniexResponseParser.constructMarketResponse(jsonResponse, request, timestamp);
-    }
-
-    // TODO(stfinancial): Eventually pass this as an argument to RequestArgs.
-    // TODO(stfinancial): Should this be private?
-    static boolean isPublicMethod(String command) {
-        // TODO(stfinancial): Need to do a null check here probably.
-        // TODO(stfinancial): Order by frequency/criticality.
-        // TODO(stfinancial): Change command to an enum instead?
-        return (command.equals("returnTicker") ||
-                command.equals("return24hVolume") ||
-                command.equals("returnOrderBook") ||
-                command.equals("returnMarketTradeHistory") ||
-                command.equals("returnLoanOrders") ||
-                command.equals("returnChartData"));
     }
 }

@@ -21,11 +21,11 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Withdrawal support.
     // TODO(stfinancial): Market should return futures to be able to process in parallel. Can have multiple threads to simulate for now.
 
-    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+//    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
-//    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-//    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     private static final double CURRENT_POLO_FEE = 0.0022;
     private static final double CURRENT_GDAX_FEE = 0.003;
@@ -81,20 +81,20 @@ public class SlowArbitrageStrategy extends Strategy {
         TradeResponse tradeResponse;
         int refreshIterations = 0;
 
+        double previousArbitrageRatio = 0;
         double arbitrageRatio;
         while (true) {
             sleep(500);
             // TODO(stfinancial): Check that the arbitrage ratio is not good at the moment (and we have money in our account), because we want to wait if that's the case.
-            if (gdaxOrders.size() > 500) {
+            if (gdaxOrders.size() > 500 && previousArbitrageRatio < 0.995) {
                 System.out.println("Clearing orders.");
                 Iterator<String> it = gdaxOrders.iterator();
                 String id;
                 while (it.hasNext()) {
                     id = it.next();
                     response = gdax.processMarketRequest(new CancelRequest(id, CancelRequest.CancelType.TRADE, 1, 1));
-                    if (response.isSuccess()) {
-                        it.remove();
-                    }
+                    // TODO(stfinancial): Currently failure is returned if the order has already been filled. Need a way around this.
+                    it.remove();
                     sleep(300);
                 }
             }
@@ -160,8 +160,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     gdaxAmount = gdaxMinAmount;
                     poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
                 }
-                // TODO(stfinancial): This is leaving 1 satoshi on the board and messing up my bot, potentially remove the -1 (or figure a way to make it so we never fail due to being 1 satoshi off funds)
-                // TODO(stfinancial): Sometimes this is 2 satoshi. It's really messing up the arbitrage. Need to fix ASAP.
+                // TODO(stfinancial): Still getting off by 1 satoshi errors. Need to make sure we're not limited by account amount and fix this.
                 // Truncate artifacts of calculation by casting.
                 gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
                 poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : ((long) (poloAmount * 100000000.0)) / 100000000.0;
@@ -185,6 +184,9 @@ public class SlowArbitrageStrategy extends Strategy {
                     }
                     // Truncate artifacts of calculation by casting.
                     gdaxAmount = ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
+                    if (highestBid.getAmount() - gdaxAmount == 0.00000001 && gdaxAmount != gdaxBaseBalance) {
+                        gdaxAmount += 0.00000001;
+                    }
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -211,7 +213,9 @@ public class SlowArbitrageStrategy extends Strategy {
 //                    sleep(60000);
 //                    gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
                 }
+                continue;
             }
+            previousArbitrageRatio = arbitrageRatio;
             // Test sell on poloniex and buy on GDAX
             if ((arbitrageRatio = getArbitrageRatio(poloBids.get(0), poloTakerFee, gdaxAsks.get(0), gdaxTakerFee)) > 1) {
                 Trade lowestAsk = gdaxAsks.get(0);
@@ -267,6 +271,9 @@ public class SlowArbitrageStrategy extends Strategy {
                     }
                     // Truncate artifacts of calculation by casting.
                     gdaxAmount = ((long) (gdaxAmount * 100000000.0)) / 100000000.0;
+                    if (lowestAsk.getAmount() - gdaxAmount == 0.00000001 && gdaxAmount != ((long) ((gdaxQuoteBalance / lowestAsk.getRate()) * 100000000.0)) / 100000000.0) {
+                        gdaxAmount += 0.00000001;
+                    }
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -292,9 +299,11 @@ public class SlowArbitrageStrategy extends Strategy {
                     // TODO(stfinancial): One solution is to hold all the orders in a list and cancel them all at once later.
 //                    sleep(60000);
 //                    gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-                }
 
+                }
+                continue;
             }
+            previousArbitrageRatio = Math.max(arbitrageRatio, previousArbitrageRatio);
         }
     }
 

@@ -20,13 +20,13 @@ public class TradeSpreader {
     private static final Random random = new Random();
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
-    private static final double PRIMARY_LIMIT = 12.4;
+    private static final double PRIMARY_LIMIT = 15;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
     private static final boolean ALLOW_MARKET_TAKES = true;
     private static final double RANDOMIZER_RATE = 0.02;
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -38,14 +38,14 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 125770;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-//    private static final double PRICE = 0.01062;
-//    private static final double RANGE = 0.00033;
-//    private static final double AMOUNT = 846;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+    private static final double PRICE = 0.01799;
+    private static final double RANGE = 0.0004;
+    private static final double AMOUNT = 515;
+    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.05666;
-//    private static final double RANGE = 0.0015;
-//    private static final double AMOUNT = 109;
+//    private static final double PRICE = 0.0546;
+//    private static final double RANGE = 0.0046;
+//    private static final double AMOUNT = 256;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.00425;
@@ -53,10 +53,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 1228;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(FCT, BTC);
 
-    private static final double PRICE = 0.000208;
-    private static final double RANGE = 0.000008;
-    private static final double AMOUNT = 20000;
-    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
+//    private static final double PRICE = 0.000208;
+//    private static final double RANGE = 0.000008;
+//    private static final double AMOUNT = 20000;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 
 //    private static final double PRICE = 0.01585;
 //    private static final double RANGE = 0.0002;
@@ -68,7 +68,7 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 369000;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final int BUCKETS = 65;
+    private static final int BUCKETS = 161;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 
@@ -116,7 +116,12 @@ public class TradeSpreader {
         }
         getTrades().forEach((req)->{
             // TODO(stfinancial): Do something if it fails?
-            polo.processMarketRequest(req);
+            while (!polo.processMarketRequest(req).isSuccess()) {
+                try {
+                    System.out.println("Failed request, sleeping...");
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {}
+            }
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {}

@@ -85,27 +85,26 @@ public class Gdax extends Market {
         JsonNode jsonResponse;
         long timestamp = System.currentTimeMillis();
 
-        RestArgs args = GdaxRequestRewriter.rewriteRequest(request);
+        RequestArgs args = GdaxRequestRewriter.rewriteRequest(request);
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }
 
         int statusCode = -1;
-        if (args.isPublic()) {
+        if (!args.isPrivate()) {
             // TODO(stfinancial): Should probably check the httprequesttype.
             httpRequest = new HttpGet(args.getUrl());
         } else {
-            if (args.getHttpRequestType() == RestArgs.HttpRequestType.GET) {
+            if (args.getHttpRequestType() == RequestArgs.HttpRequestType.GET) {
                 httpRequest = new HttpGet(args.getUrl());
-            } else if (args.getHttpRequestType() == RestArgs.HttpRequestType.POST) {
+            } else if (args.getHttpRequestType() == RequestArgs.HttpRequestType.POST) {
 //                System.out.println(args.getUrl());
                 httpRequest = new HttpPost(args.getUrl());
                 ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
-            } else if (args.getHttpRequestType() == RestArgs.HttpRequestType.DELETE) {
+            } else if (args.getHttpRequestType() == RequestArgs.HttpRequestType.DELETE) {
 //                System.out.println(args.getUrl());
                 httpRequest = new HttpDelete(args.getUrl());
             } else {
-                // TODO(stfinancial): Need to implement http DELETE type.
                 System.out.println("Invalid HttpRequestType: " + args.getHttpRequestType());
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST,"Invalid HttpRequestType: " + args.getHttpRequestType()));
             }
@@ -117,6 +116,7 @@ public class Gdax extends Market {
             String CB_ACCESS_PASSPHRASE = passphrase;
 //            System.out.println("Passphrase: " + CB_ACCESS_PASSPHRASE);
             JsonNode json = args.asJson();
+//            System.out.println("Hello?");
             System.out.println(json);
             String what;
             if (json.isNull()) {

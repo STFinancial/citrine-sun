@@ -1,6 +1,7 @@
 package api.poloniex;
 
 import api.CurrencyPair;
+import api.RequestArgs;
 import api.request.*;
 import api.request.tmp_loan.CreateLoanOfferRequest;
 import api.request.tmp_loan.GetLendingHistoryRequest;
@@ -15,6 +16,12 @@ import api.tmp_loan.PrivateLoanOrder;
  * data object used to send a request to Poloniex.
  */
 final class PoloniexRequestRewriter {
+    // TODO(stfinancial): Separate into public and private method sections. Easier to debug then.
+    // TODO(stfinancial): Need a way to gracefully handle nonce here, probably will set request type and is private before calling the other functions... maybe, then we have a pass a Builder which I don't like.
+    private static final String PUBLIC_URI = "https://poloniex.com/public";
+    private static final String PRIVATE_URI = "https://poloniex.com/tradingApi";
+    private static final String COMMAND_STRING = "command";
+
     /**
      * Converts a {@link MarketRequest} into {@link RequestArgs} which can be used to construct an encoded URL and signed
      * data object used to send a request to Poloniex.
@@ -24,6 +31,7 @@ final class PoloniexRequestRewriter {
      * valid command.
      */
     static RequestArgs rewriteRequest(MarketRequest request) {
+        // TODO(stfinancial): Could set request type and private in this function.
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof CancelRequest) {
@@ -62,144 +70,189 @@ final class PoloniexRequestRewriter {
     }
 
     private static RequestArgs rewriteCancelRequest(CancelRequest request) {
-        String command;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         switch (request.getType()) {
             case TRADE:
-                command = "cancelOrder";
+                builder.withParam(COMMAND_STRING, "cancelOrder", true, true);
                 break;
             case LOAN:
-                command = "cancelLoanOffer";
+                builder.withParam(COMMAND_STRING, "cancelLoanOffer", true, true);
                 break;
             default:
                 System.out.println("Invalid CancelType in rewriteCancelRequest: " + request.getType());
                 return RequestArgs.unsupported();
         }
-        RequestArgs args = new RequestArgs(command);
-        args.addParam("orderNumber", String.valueOf(request.getId()));
-        return args;
+        builder.withParam("orderNumber", String.valueOf(request.getId()), true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
-        RequestArgs args = new RequestArgs("returnOrderBook");
+        RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
+        builder.withParam(COMMAND_STRING, "returnOrderBook", true, true);
         if (request.getCurrencyPair().isPresent()) {
-            args.addParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getCurrencyPair().get()));
+            builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getCurrencyPair().get()), true, true);
         } else {
-            args.addParam("currencyPair", "all");
+            builder.withParam("currencyPair", "all", true, true);
         }
-        args.addParam("depth", String.valueOf(request.getDepth()));
-        return args;
+        builder.withParam("depth", String.valueOf(request.getDepth()), true, true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(false);
+        return builder.build();
     }
 
     private static RequestArgs rewriteMarginPositionRequest(MarginPositionRequest request) {
-        RequestArgs args = new RequestArgs("getMarginPosition");
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "getMarginPosition", true, true);
         // TODO(stfinancial): Potentially add support for "all" by making CurrencyPair optional field.
-        args.addParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getPair()));
-        return args;
+        builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getPair()), true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteMarginAccountSummaryRequest(MarginAccountSummaryRequest request) {
-        return new RequestArgs("returnMarginAccountSummary");
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnMarginAccountSummary", true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteGetPublicLoanOrdersRequest(GetPublicLoanOrdersRequest request) {
-        RequestArgs args = new RequestArgs("returnLoanOrders");
-        args.addParam("currency", PoloniexUtils.getCurrencyString(request.getCurrency()));
+        RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
+        builder.withParam(COMMAND_STRING, "returnLoanOrders", true, true);
+        builder.withParam("currency", PoloniexUtils.getCurrencyString(request.getCurrency()), true, true);
         // TODO(stfinancial): Get this value from the request instead.
-        args.addParam("limit", String.valueOf(999999));
-        return args;
+        builder.withParam("limit", String.valueOf(999999), true, true);
+        builder.isPrivate(false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        return builder.build();
     }
 
     private static RequestArgs rewriteGetPrivateLoanOffersRequest(GetPrivateLoanOffersRequest request) {
-        RequestArgs args = new RequestArgs("returnOpenLoanOffers");
-        return args;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnOpenLoanOffers", true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteCreateLoanOfferRequest(CreateLoanOfferRequest request) {
-        RequestArgs args = new RequestArgs("createLoanOffer");
         PrivateLoanOrder order = request.getOrder();
         if (order.getType() != LoanType.OFFER) {
             System.out.println("Cannot create a LoanOffer without a LoanType of OFFER: " + order.getType());
             return RequestArgs.unsupported();
         }
-        args.addParam("currency", PoloniexUtils.getCurrencyString(order.getCurrency()));
-        args.addParam("amount", String.valueOf(order.getAmount()));
-        args.addParam("lendingRate", String.valueOf(order.getRate()));
-        args.addParam("duration", String.valueOf(order.getDuration()));
-        args.addParam("isAutoRenew", order.isAutoRenew() ? "1" : "0");
-        return args;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "createLoanOffer", true, true);
+        builder.withParam("currency", PoloniexUtils.getCurrencyString(order.getCurrency()), true, true);
+        builder.withParam("amount", String.valueOf(order.getAmount()), true, true);
+        builder.withParam("lendingRate", String.valueOf(order.getRate()), true, true);
+        builder.withParam("duration", String.valueOf(order.getDuration()), true, true);
+        builder.withParam("isAutoRenew", order.isAutoRenew() ? "1" : "0", true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
-        RequestArgs args = new RequestArgs("returnAvailableAccountBalances");
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnAvailableAccountBalances", true, true);
         switch (request.getType()) {
             case MARGIN:
-                args.addParam("account", "margin");
+                builder.withParam("account", "margin", true, true);
                 break;
             case EXCHANGE:
-                args.addParam("account", "exchange");
+                builder.withParam("account", "exchange", true, true);
                 break;
             case LOAN:
-                args.addParam("account", "lending");
+                builder.withParam("account", "lending", true, true);
                 break;
             case ALL:
-                args.addParam("account", "all");
+                builder.withParam("account", "all", true, true);
                 break;
             default:
-                args.addParam("account", "all");
+                builder.withParam("account", "all", true, true);
                 break;
         }
-        return args;
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteOpenOrderRequest(OpenOrderRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnOpenOrders", true, true);
         // TODO(stfinancial): Replace with returnAllOpenOrders, but check that this works with currencyPair?
 
-        RequestArgs args = new RequestArgs("returnOpenOrders");
         CurrencyPair pair = request.getCurrencyPair();
         if (pair == null) {
-            args.addParam("currencyPair", "all");
+            builder.withParam("currencyPair", "all", true, true);
         } else {
-            args.addParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getCurrencyPair()));
+            builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getCurrencyPair()), true, true);
         }
-        return args;
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteTickerRequest(TickerRequest request) {
-        RequestArgs args = new RequestArgs("returnTicker");
-        return args;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
+        builder.withParam(COMMAND_STRING, "returnTicker", true, true);
+        // TODO(stfinancial): Optional pairs from request?
+        builder.isPrivate(false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        return builder.build();
     }
 
     private static RequestArgs rewriteTransferBalanceRequest(TransferBalanceRequest request) {
-        RequestArgs args = new RequestArgs("transferBalance");
-        args.addParam("currency", PoloniexUtils.getCurrencyString(request.getCurrency()));
-        args.addParam("amount", String.valueOf(request.getAmount()));
-        args.addParam("fromAccount", PoloniexUtils.getNameForAccountType(request.from()));
-        args.addParam("toAccount", PoloniexUtils.getNameForAccountType(request.to()));
-        return args;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "transferBalance", true, true);
+        builder.withParam("currency", PoloniexUtils.getCurrencyString(request.getCurrency()), true, true);
+        builder.withParam("amount", String.valueOf(request.getAmount()), true, true);
+        builder.withParam("fromAccount", PoloniexUtils.getNameForAccountType(request.from()), true, true);
+        builder.withParam("toAccount", PoloniexUtils.getNameForAccountType(request.to()), true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteMoveOrderRequest(MoveOrderRequest request) {
-        RequestArgs args = new RequestArgs("moveOrder");
-        args.addParam("orderNumber", String.valueOf(request.getOrderNumber()));
-        args.addParam("rate", String.valueOf(request.getRate()));
-        args.addParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0");
-        args.addParam("postOnly", request.isPostOnly() ? "1" : "0");
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "moveOrder", true, true);
+        builder.withParam("orderNumber", String.valueOf(request.getOrderNumber()), true, true);
+        builder.withParam("rate", String.valueOf(request.getRate()), true, true);
+        builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0", true, true);
+        builder.withParam("postOnly", request.isPostOnly() ? "1" : "0", true, true);
         if (request.getAmount() != 0) {
-            args.addParam("amount", String.valueOf(request.getAmount()));
+            builder.withParam("amount", String.valueOf(request.getAmount()), true, true);
         }
-        return args;
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteTradeRequest(TradeRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         // TODO(stfinancial): Handle market type requests somehow.
-        String command;
         if (!request.isStopLimit()) {
             switch (request.getTrade().getType()) {
                 case BUY:
-                    command = request.isMargin() ? "marginBuy" : "buy";
+                    builder.withParam(COMMAND_STRING, request.isMargin() ? "marginBuy" : "buy", true, true);
                     break;
                 case SELL:
-                    command = request.isMargin() ? "marginSell" : "sell";
+                    builder.withParam(COMMAND_STRING, request.isMargin() ? "marginSell" : "sell", true, true);
                     break;
                 default:
                     System.out.println("Invalid TradeType in rewriteTradeRequest: " + request.getType());
@@ -208,45 +261,58 @@ final class PoloniexRequestRewriter {
         } else {
             switch (request.getTrade().getType()) {
                 case BUY:
-                    command = request.isMargin() ? "marginStopLimitBuy" : "stopLimitBuy";
+                    builder.withParam(COMMAND_STRING, request.isMargin() ? "marginStopLimitBuy" : "stopLimitBuy", true, true);
                     break;
                 case SELL:
-                    command = request.isMargin() ? "marginStopLimitSell" : "stopLimitSell";
+                    builder.withParam(COMMAND_STRING, request.isMargin() ? "marginStopLimitSell" : "stopLimitSell", true, true);
                     break;
                 default:
                     System.out.println("Invalid TradeType in rewriteTradeRequest: " + request.getType());
                     return RequestArgs.unsupported();
             }
         }
-        RequestArgs args = new RequestArgs(command);
         if (request.isStopLimit()) {
-            args.addParam("stopRate", String.valueOf(request.getStop()));
+            builder.withParam("stopRate", String.valueOf(request.getStop()), true, true);
         }
-        args.addParam("amount", String.valueOf(request.getAmount()));
-        args.addParam("rate", String.valueOf(request.getRate()));
-        args.addParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getPair()));
-        args.addParam("fillOrKill", request.isFillOrKill() ? "1" : "0");
-        args.addParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0");
-        args.addParam("postOnly", request.isPostOnly() ? "1" : "0");
-        return args;
+        builder.withParam("amount", String.valueOf(request.getAmount()), true, true);
+        builder.withParam("rate", String.valueOf(request.getRate()), true, true);
+        builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getPair()), true, true);
+        builder.withParam("fillOrKill", request.isFillOrKill() ? "1" : "0", true, true);
+        builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0", true, true);
+        builder.withParam("postOnly", request.isPostOnly() ? "1" : "0", true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteVolumeRequest(VolumeRequest request) {
-        RequestArgs args = new RequestArgs("return24hVolume");
-        return args;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
+        builder.withParam(COMMAND_STRING, "return24hVolume", true, true);
+        builder.isPrivate(false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        return builder.build();
     }
 
     private static RequestArgs rewriteGetLendingHistoryRequest(GetLendingHistoryRequest request) {
-        RequestArgs args = new RequestArgs("returnLendingHistory");
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnLendingHistory", true, true);
         System.out.println("Start: " + String.valueOf(request.getStart() / 1000L));
         System.out.println("End: " + String.valueOf(request.getEnd() / 1000L));
-        args.addParam("start", String.valueOf(request.getStart() / 1000L));
-        args.addParam("end", String.valueOf(request.getEnd() / 1000L));
-        return args;
+        builder.withParam("start", String.valueOf(request.getStart() / 1000L), true, true);
+        builder.withParam("end", String.valueOf(request.getEnd() / 1000L), true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 
     private static RequestArgs rewriteFeeRequest(FeeRequest request) {
-        RequestArgs args = new RequestArgs("returnFeeInfo");
-        return args;
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnFeeInfo", true, true);
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()), true, true);
+        return builder.build();
     }
 }

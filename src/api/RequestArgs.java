@@ -40,6 +40,7 @@ public final class RequestArgs {
 
     private final String uri;
     private final HttpRequestType type;
+    private final boolean isPrivate;
     private List<String> resources;
     private List<RequestParam> params;
     private boolean hasQueryParams;
@@ -55,6 +56,7 @@ public final class RequestArgs {
     private RequestArgs(Builder builder) {
         this.uri = builder.uri;
         this.type = builder.type;
+        this.isPrivate = builder.isPrivate;
         this.resources = builder.resources;
         this.params = builder.params;
         this.hasQueryParams = builder.hasQueryParams;
@@ -74,6 +76,14 @@ public final class RequestArgs {
         return this == UNSUPPORTED;
     }
 
+    public HttpRequestType getHttpRequestType() {
+        return type;
+    }
+
+    public boolean isPrivate() {
+        return isPrivate;
+    }
+
     public List<NameValuePair> asNameValuePairs() {
         if (nameValuePairs != null) {
             return Collections.unmodifiableList(nameValuePairs);
@@ -83,6 +93,26 @@ public final class RequestArgs {
         return pairs;
     }
 
+    public String getResourcePath() {
+        return resourcePath;
+    }
+
+    public String getQueryString() {
+        // TODO(stfinancial): Do what we did with resourcePath.
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (RequestParam param : params) {
+            if (first) {
+                first = false;
+            } else {
+                sb.append(AND);
+            }
+            sb.append(param.name).append(EQUALS).append(param.value);
+        }
+        return sb.toString();
+    }
+
+    // TODO(stfinancial): asUrl?
     public String getUrl() {
         if (url != null && !url.isEmpty()) {
             return url;
@@ -93,6 +123,7 @@ public final class RequestArgs {
             // Since hasQueryParams is true, we know that there will be params.
             sb.append(QUESTION_MARK);
             boolean first = true;
+            // TODO(stfinancial): This code is duplicated with getQueryString
             for (RequestParam param : params) {
                 if (!param.isQueryParam) {
                     continue;
@@ -124,7 +155,7 @@ public final class RequestArgs {
                 output.append(QUOTE).append(param.name).append(QUOTE).append(COLON).append(QUOTE).append(param.value).append(QUOTE).append(COMMA_NEWLINE);
             } else {
                 // TODO(stfinancial): Test that we actually need these extra quotes here.
-                output.append(QUOTE).append(param.name).append(QUOTE).append(COLON).append(param.value).append(QUOTE).append(COMMA_NEWLINE);
+                output.append(QUOTE).append(param.name).append(QUOTE).append(COLON).append(param.value).append(COMMA_NEWLINE);
             }
         });
         // TODO(stfinancial): This is kind of gross. Fix this later.
@@ -145,7 +176,9 @@ public final class RequestArgs {
         // TODO(stfinancial): Replace this with a string builder?
         private List<String> resources;
         private List<RequestParam> params;
-        private HttpRequestType type = HttpRequestType.GET;
+        // TODO(stfinancial): Make type and isPrivate part of the constructor?
+        private HttpRequestType type = HttpRequestType.GET; // TODO(stfinancial): Could this be a part of the market request?
+        private boolean isPrivate = false;
         private boolean hasQueryParams = false;
 
         public Builder(String uri) {
@@ -203,6 +236,11 @@ public final class RequestArgs {
 
         public Builder httpRequestType(HttpRequestType type) {
             this.type = type;
+            return this;
+        }
+
+        public Builder isPrivate(boolean isPrivate) {
+            this.isPrivate = isPrivate;
             return this;
         }
 
