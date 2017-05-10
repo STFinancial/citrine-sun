@@ -14,6 +14,7 @@ import java.util.*;
  * Created by Timothy on 4/23/17.
  */
 public class SlowArbitrageStrategy extends Strategy {
+
     // TODO(stfinancial): ******** FAILED WITH INSUFFICIENT FUNDS ******** MUST FIX BEFORE RUNNING AGAIN... LOOK AT BONUS AND SEE WHAT HAPPENED. LIKELY NEED TO TAKE MIN AFTER CHECKED HOW MUCH WAS SOLD ON POLO.
 
 
@@ -44,7 +45,7 @@ public class SlowArbitrageStrategy extends Strategy {
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 
     private static final boolean DRY_RUN = false;
-    private static final int REFRESH_INTERVAL = 400;
+    private static final int REFRESH_INTERVAL = 10;
     // TODO(stfinancial): Think about if we actually want to be cancelling orders
     private static final int CANCEL_WAIT = 60;
     Poloniex polo;
@@ -191,6 +192,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (highestBid.getAmount() - gdaxAmount == 0.00000001 && gdaxAmount != gdaxBaseBalance) {
                         gdaxAmount += 0.00000001;
                     }
+                    gdaxAmount = Math.min(gdaxBaseBalance, gdaxAmount);
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -278,6 +280,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     if (lowestAsk.getAmount() - gdaxAmount == 0.00000001 && gdaxAmount != ((long) ((gdaxQuoteBalance / lowestAsk.getRate()) * 100000000.0)) / 100000000.0) {
                         gdaxAmount += 0.00000001;
                     }
+                    gdaxAmount = Math.min(gdaxQuoteBalance / lowestAsk.getRate(), gdaxAmount);
                     System.out.println("Revised Gdax Amount: " + gdaxAmount);
                     String poloTradeId = ((TradeResponse) response).getOrderNumber();
                     // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
@@ -310,144 +313,6 @@ public class SlowArbitrageStrategy extends Strategy {
             previousArbitrageRatio = Math.max(arbitrageRatio, previousArbitrageRatio);
         }
     }
-
-    // TODO(stfinancial): Remove the priority flag once the application is multithreaded.
-//    private boolean doArbitrage(MarketInfo sellSide, MarketInfo buySide, boolean buySidePriority) {
-//        if (isArbitrage(gdaxBids.get(0), gdaxTakerFee, poloAsks.get(0), poloTakerFee)) {
-//            Trade lowestAsk = poloAsks.get(0);
-//            Trade highestBid = gdaxBids.get(0);
-//            System.out.println("Arbitrage found!!!");
-//            System.out.println("Polo (Buy): " + lowestAsk.getRate() + " - " + lowestAsk.getAmount());
-//            System.out.println("Gdax (Sell): " + highestBid.getRate() + " - " + highestBid.getAmount());
-//
-//            double gdaxMinAmount = Math.min(MAX_AMOUNT, Math.min(highestBid.getAmount(), gdaxBaseBalance));
-//            double poloMinAmount = Math.min(MAX_AMOUNT, Math.min(lowestAsk.getAmount(), poloQuoteBalance / lowestAsk.getRate()));
-//
-//            if (gdaxMinAmount < MIN_AMOUNT) {
-//                System.out.println("Gdax minAmount below min amount: " + gdaxMinAmount);
-//                // TODO(stfinancial): Check if other arbitrage exists (sell on polo, buy on gdax).
-//                continue;
-//            }
-//            if (poloMinAmount < MIN_AMOUNT) {
-//                System.out.println("Polo minAmount below min amount: " + poloMinAmount);
-//                continue;
-//            }
-//
-//            double gdaxPostFeeMin = gdaxMinAmount * (1 - gdaxTakerFee);
-//            double poloPostFeeMin = poloMinAmount * (1 - poloTakerFee);
-////                double minAmount = Math.min(gdaxMinAmount, poloMinAmount);
-//
-//            double gdaxAmount;
-//            double poloAmount;
-//            if (gdaxPostFeeMin > poloPostFeeMin) {
-//                gdaxAmount = poloPostFeeMin / (1 - gdaxTakerFee);
-//                poloAmount = poloMinAmount;
-//            } else {
-//                gdaxAmount = gdaxMinAmount;
-//                poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
-//            }
-//            gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
-//            poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : Math.round((poloAmount * 100000000.0) - 1) / 100000000.0;
-//            System.out.println("Polo Amount: " + poloAmount);
-//            System.out.println("Gdax Amount: " + gdaxAmount);
-//
-//            if (!DRY_RUN) {
-//                // TODO(stfinancial): Immediate or cancel, test what the resposne looks like.
-//                poloTradeRequest = new TradeRequest(new Trade(poloAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 1);
-//                poloTradeRequest.setIsPostOnly(false);
-//                poloTradeRequest.setIsMarket(false);
-//                response = polo.processMarketRequest(poloTradeRequest);
-//                if (!response.isSuccess()) {
-//                    System.out.println("Failure: " + response.getJsonResponse());
-//                    return;
-//                }
-//                String poloTradeId = ((TradeResponse) response).getOrderNumber();
-//                // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
-//                gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 1);
-//                gdaxTradeRequest.setIsPostOnly(false);
-//                gdaxTradeRequest.setIsMarket(false);
-//                response = gdax.processMarketRequest(gdaxTradeRequest);
-//                if (!response.isSuccess()) {
-//                    System.out.println("Failure: " + response.getJsonResponse());
-//                    polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-//                    return;
-//                }
-//                String gdaxTradeId = ((TradeResponse) response).getOrderNumber();
-//                // Poloniex has higher volume so we make the trade there first.
-//                // Wait to see if they get filled if they weren't...
-//                // TODO(stfinancial): Check if they actually weren't filled before sleeping.
-//                sleep(60000);
-//                gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-//                polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-//            }
-//        }
-//        // Test sell on poloniex and buy on GDAX
-//        if (isArbitrage(poloBids.get(0), poloTakerFee, gdaxAsks.get(0), gdaxTakerFee)) {
-//            Trade lowestAsk = gdaxAsks.get(0);
-//            Trade highestBid = poloBids.get(0);
-//            System.out.println("Arbitrage found!!!");
-//            System.out.println("Gdax (Buy): " + lowestAsk.getRate() + " - " + lowestAsk.getAmount());
-//            System.out.println("Polo (Sell): " + highestBid.getRate() + " - " + highestBid.getAmount());
-//
-//            double gdaxMinAmount = Math.min(MAX_AMOUNT, Math.min(lowestAsk.getAmount(), gdaxQuoteBalance / lowestAsk.getRate()));
-//            double poloMinAmount = Math.min(MAX_AMOUNT, Math.min(highestBid.getAmount(), poloBaseBalance));
-//
-//            if (gdaxMinAmount < MIN_AMOUNT) {
-//                System.out.println("Gdax minAmount below min amount: " + gdaxMinAmount);
-//                continue;
-//            }
-//            if (poloMinAmount < MIN_AMOUNT) {
-//                System.out.println("Polo minAmount below min amount: " + poloMinAmount);
-//                continue;
-//            }
-//            double gdaxPostFeeMin = gdaxMinAmount * (1 - gdaxTakerFee);
-//            double poloPostFeeMin = poloMinAmount * (1 - poloTakerFee);
-//
-//            double gdaxAmount;
-//            double poloAmount;
-//            if (gdaxPostFeeMin > poloPostFeeMin) {
-//                gdaxAmount = poloPostFeeMin / (1 - gdaxTakerFee);
-//                poloAmount = poloMinAmount;
-//            } else {
-//                gdaxAmount = gdaxMinAmount;
-//                poloAmount = gdaxPostFeeMin / (1 - poloTakerFee);
-//            }
-//            gdaxAmount = gdaxAmount == MIN_AMOUNT ? gdaxAmount : Math.round((gdaxAmount * 100000000.0) - 1) / 100000000.0;
-//            poloAmount = poloAmount == MIN_AMOUNT ? poloAmount : Math.round((poloAmount * 100000000.0) - 1) / 100000000.0;
-//            System.out.println("Polo Amount: " + poloAmount);
-//            System.out.println("Gdax Amount: " + gdaxAmount);
-//            if (!DRY_RUN) {
-//                poloTradeRequest = new TradeRequest(new Trade(poloAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 1);
-//                poloTradeRequest.setIsPostOnly(false);
-//                poloTradeRequest.setIsMarket(false);
-//                response = polo.processMarketRequest(poloTradeRequest);
-//                if (!response.isSuccess()) {
-//                    System.out.println("Failure: " + response.getJsonResponse());
-//                    continue;
-//                }
-//                String poloTradeId = ((TradeResponse) response).getOrderNumber();
-//                // TODO(stfinancial): Once we use immediate or cancel, modify the amount of the second request accordingly.
-//                gdaxTradeRequest = new TradeRequest(new Trade(gdaxAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 1);
-//                gdaxTradeRequest.setIsPostOnly(false);
-//                gdaxTradeRequest.setIsMarket(false);
-//                response = gdax.processMarketRequest(gdaxTradeRequest);
-//                if (!response.isSuccess()) {
-//                    System.out.println("Failure: " + response.getJsonResponse());
-//                    polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-//                    continue;
-//                }
-//                String gdaxTradeId = ((TradeResponse) response).getOrderNumber();
-//                // Poloniex has higher volume so we make the trade there first.
-//                // Wait to see if they get filled if they weren't...
-//                // TODO(stfinancial): Check if they actually weren't filled before sleeping.
-//                sleep(60000);
-//                gdax.processMarketRequest(new CancelRequest(gdaxTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-//                polo.processMarketRequest(new CancelRequest(poloTradeId, CancelRequest.CancelType.TRADE, 5, 5));
-//            }
-//
-//        }
-//    }
-//
 
     // TODO(stfinancial): We can probably precompute the fee coefficient and stuff.
     private double getArbitrageRatio(Trade bid, double buyFee, Trade ask, double sellFee) {

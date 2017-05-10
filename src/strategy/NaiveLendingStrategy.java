@@ -33,7 +33,9 @@ public final class NaiveLendingStrategy extends Strategy {
     private static final double EXCHANGE_TRANSFER_FRACTION = 0.35;
     private static final double MARGIN_TRANSFER_FRACTION = 0.05;
 
-    private static final Set<Currency> BLACKLIST = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(Currency.ETH)));
+    private static final Set<Currency> BLACKLIST = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
+            Currency.LTC
+    )));
 
     private Poloniex polo;
     // TODO(stfinancial): Figure a way to stop using these defined constants.

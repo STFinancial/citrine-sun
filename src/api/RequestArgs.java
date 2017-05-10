@@ -43,10 +43,10 @@ public final class RequestArgs {
     private final boolean isPrivate;
     private List<String> resources;
     private List<RequestParam> params;
-    private boolean hasQueryParams;
 
     private final String resourcePath;
-    private String url;
+    private final String queryString;
+    private final String url;
     private JsonNode json;
     private List<NameValuePair> nameValuePairs;
 
@@ -59,10 +59,30 @@ public final class RequestArgs {
         this.isPrivate = builder.isPrivate;
         this.resources = builder.resources;
         this.params = builder.params;
-        this.hasQueryParams = builder.hasQueryParams;
+
         StringBuilder sb = new StringBuilder();
-        resources.forEach(resource -> sb.append(SLASH).append(resource));
+        for (String resource : resources) { sb.append(SLASH).append(resource); }
         resourcePath = sb.toString();
+
+        sb = new StringBuilder();
+        boolean first = true;
+        for (RequestParam param : params) {
+            if (!param.isQueryParam) {
+                continue;
+            }
+            if (first) {
+                first = false;
+            } else {
+                sb.append(AND);
+            }
+            sb.append(param.name).append(EQUALS).append(param.value);
+        }
+        queryString = sb.toString();
+        if (queryString.isEmpty()) {
+            url = uri + resourcePath;
+        } else {
+            url = uri + resourcePath + QUESTION_MARK + queryString;
+        }
     }
 
     public static RequestArgs unsupported() {
@@ -90,55 +110,16 @@ public final class RequestArgs {
         }
         List<NameValuePair> pairs = new ArrayList<>();
         params.forEach((param)->pairs.add(new BasicNameValuePair(param.name, param.value)));
-        return pairs;
+        nameValuePairs = pairs;
+        return Collections.unmodifiableList(nameValuePairs);
     }
 
-    public String getResourcePath() {
-        return resourcePath;
-    }
+    public String getResourcePath() { return resourcePath; }
 
-    public String getQueryString() {
-        // TODO(stfinancial): Do what we did with resourcePath.
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (RequestParam param : params) {
-            if (first) {
-                first = false;
-            } else {
-                sb.append(AND);
-            }
-            sb.append(param.name).append(EQUALS).append(param.value);
-        }
-        return sb.toString();
-    }
+    public String getQueryString() { return queryString; }
 
     // TODO(stfinancial): asUrl?
-    public String getUrl() {
-        if (url != null && !url.isEmpty()) {
-            return url;
-        }
-        StringBuilder sb = new StringBuilder(uri);
-        sb.append(resourcePath);
-        if (hasQueryParams) {
-            // Since hasQueryParams is true, we know that there will be params.
-            sb.append(QUESTION_MARK);
-            boolean first = true;
-            // TODO(stfinancial): This code is duplicated with getQueryString
-            for (RequestParam param : params) {
-                if (!param.isQueryParam) {
-                    continue;
-                }
-                if (first) {
-                    first = false;
-                } else {
-                    sb.append(AND);
-                }
-                sb.append(param.name).append(EQUALS).append(param.value);
-            }
-        }
-        url = sb.toString();
-        return url;
-    }
+    public String getUrl() { return url; }
 
     public JsonNode asJson() {
         if (json != null && !json.isNull()) {
@@ -154,7 +135,6 @@ public final class RequestArgs {
             if (param.valueWithQuotes) {
                 output.append(QUOTE).append(param.name).append(QUOTE).append(COLON).append(QUOTE).append(param.value).append(QUOTE).append(COMMA_NEWLINE);
             } else {
-                // TODO(stfinancial): Test that we actually need these extra quotes here.
                 output.append(QUOTE).append(param.name).append(QUOTE).append(COLON).append(param.value).append(COMMA_NEWLINE);
             }
         });
@@ -162,7 +142,8 @@ public final class RequestArgs {
         output.deleteCharAt(output.length() - 2);
         output.append(RIGHT_BRACE);
         try {
-            return mapper.readTree(output.toString());
+            json = mapper.readTree(output.toString());
+            return json;
         } catch (IOException e) {
             System.out.println(e.getMessage());
             e.printStackTrace();
@@ -179,7 +160,6 @@ public final class RequestArgs {
         // TODO(stfinancial): Make type and isPrivate part of the constructor?
         private HttpRequestType type = HttpRequestType.GET; // TODO(stfinancial): Could this be a part of the market request?
         private boolean isPrivate = false;
-        private boolean hasQueryParams = false;
 
         public Builder(String uri) {
             this.uri = uri;
@@ -226,9 +206,6 @@ public final class RequestArgs {
             param.name = name;
             param.value = value;
             param.isQueryParam = isQueryParam;
-            if (isQueryParam) {
-                hasQueryParams = true;
-            }
             param.valueWithQuotes = valueWithQuotes;
             params.add(param);
             return this;

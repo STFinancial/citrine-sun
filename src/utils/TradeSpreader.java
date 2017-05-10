@@ -38,15 +38,15 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 125770;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-//    private static final double PRICE = 0.01625;
-//    private static final double RANGE = 0.00055;
-//    private static final double AMOUNT = 355;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+    private static final double PRICE = 0.0221;
+    private static final double RANGE = 0.001;
+    private static final double AMOUNT = 484;
+    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-    private static final double PRICE = 0.0502;
-    private static final double RANGE = 0.0016;
-    private static final double AMOUNT = 150;
-    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+//    private static final double PRICE = 0.0502;
+//    private static final double RANGE = 0.0016;
+//    private static final double AMOUNT = 150;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
@@ -78,7 +78,7 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 369000;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final int BUCKETS = 161;
+    private static final int BUCKETS = 101;
     private static final TradeType TYPE = TradeType.SELL;
     private static final boolean IS_MARGIN = true;
 
@@ -124,19 +124,20 @@ public class TradeSpreader {
                 return;
             }
         }
-        getTrades().forEach((req)->{
+        MarketResponse r;
+        for (TradeRequest req : getTrades()) {
             // TODO(stfinancial): Do something if it fails?
-            while (!polo.processMarketRequest(req).isSuccess()) {
+            while (!(r = polo.processMarketRequest(req)).isSuccess()) {
                 try {
                     // TODO(stfinancial): Need to make sure that if this fails with jsonMappingException that the trade didn't go through and the error wasn't somewhere else.
-                    System.out.println("Failed request, sleeping...");
+                    System.out.println("Failed request, sleeping... : " + r.getJsonResponse());
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {}
             }
             try {
                 Thread.sleep(300);
             } catch (InterruptedException e) {}
-        });
+        }
     }
 
     private List<TradeRequest> getTrades() {
