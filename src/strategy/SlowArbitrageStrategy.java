@@ -14,6 +14,10 @@ import java.util.*;
  * Created by Timothy on 4/23/17.
  */
 public class SlowArbitrageStrategy extends Strategy {
+    // TODO(stfinancial): ******** FAILED WITH INSUFFICIENT FUNDS ******** MUST FIX BEFORE RUNNING AGAIN... LOOK AT BONUS AND SEE WHAT HAPPENED. LIKELY NEED TO TAKE MIN AFTER CHECKED HOW MUCH WAS SOLD ON POLO.
+
+
+
     // TODO(stfinancial): Choice whether we increase base or quote holdings.
 
     // TODO(stfinancial): Multiple accounts to circumvent withdrawal limits.

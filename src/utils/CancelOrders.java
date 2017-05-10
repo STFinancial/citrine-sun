@@ -19,9 +19,9 @@ import static api.Currency.*;
  * Created by Timothy on 3/31/17.
  */
 class CancelOrders {
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
+//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
     public static void main(String[] args) {
         CancelOrders o = new CancelOrders();

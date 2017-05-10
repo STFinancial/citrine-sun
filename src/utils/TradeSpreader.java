@@ -38,30 +38,40 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 125770;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-    private static final double PRICE = 0.01799;
-    private static final double RANGE = 0.0004;
-    private static final double AMOUNT = 515;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+//    private static final double PRICE = 0.01625;
+//    private static final double RANGE = 0.00055;
+//    private static final double AMOUNT = 355;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.0546;
-//    private static final double RANGE = 0.0046;
-//    private static final double AMOUNT = 256;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+    private static final double PRICE = 0.0502;
+    private static final double RANGE = 0.0016;
+    private static final double AMOUNT = 150;
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+
+//    private static final double PRICE = 0.0026;
+//    private static final double RANGE = 0.0002;
+//    private static final double AMOUNT = 1239;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(CLAM, BTC);
 
 //    private static final double PRICE = 0.00425;
 //    private static final double RANGE = 0.0004;
 //    private static final double AMOUNT = 1228;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(FCT, BTC);
 
-//    private static final double PRICE = 0.000208;
-//    private static final double RANGE = 0.000008;
-//    private static final double AMOUNT = 20000;
+//    private static final double PRICE = 0.000164;
+//    private static final double RANGE = 0.000007;
+//    private static final double AMOUNT = 12900;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 
-//    private static final double PRICE = 0.01585;
-//    private static final double RANGE = 0.0002;
-//    private static final double AMOUNT = 30;
+//    private static final double PRICE = 0.01327;
+//    private static final double RANGE = 0.001;
+//    private static final double AMOUNT = 250;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
+
+//    private static final double PRICE = 0.00000067;
+//    private static final double RANGE = 0.00000008;
+//    private static final double AMOUNT = 2450000;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
 //    private static final double PRICE = 0.00001525;
 //    private static final double RANGE = 0.00000125;
@@ -69,7 +79,7 @@ public class TradeSpreader {
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
     private static final int BUCKETS = 161;
-    private static final TradeType TYPE = TradeType.BUY;
+    private static final TradeType TYPE = TradeType.SELL;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
@@ -118,6 +128,7 @@ public class TradeSpreader {
             // TODO(stfinancial): Do something if it fails?
             while (!polo.processMarketRequest(req).isSuccess()) {
                 try {
+                    // TODO(stfinancial): Need to make sure that if this fails with jsonMappingException that the trade didn't go through and the error wasn't somewhere else.
                     System.out.println("Failed request, sleeping...");
                     Thread.sleep(1000);
                 } catch (InterruptedException e) {}
