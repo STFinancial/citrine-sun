@@ -177,6 +177,7 @@ public class SlowArbitrageStrategy extends Strategy {
                     poloTradeRequest = new TradeRequest(new Trade(poloAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 1);
                     poloTradeRequest.setIsPostOnly(false);
                     poloTradeRequest.setIsMarket(false);
+                    poloTradeRequest.setIsImmediateOrCancel(true);
                     response = polo.processMarketRequest(poloTradeRequest);
                     if (!response.isSuccess()) {
                         System.out.println("Failure: " + response.getJsonResponse());
