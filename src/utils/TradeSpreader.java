@@ -25,8 +25,8 @@ public class TradeSpreader {
     // Setting this to false is a safeguard against mispricings.
     private static final boolean ALLOW_MARKET_TAKES = true;
     private static final double RANDOMIZER_RATE = 0.02;
-//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -38,14 +38,14 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 125770;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-    private static final double PRICE = 0.0221;
-    private static final double RANGE = 0.001;
-    private static final double AMOUNT = 484;
+    private static final double PRICE = 0.0163;
+    private static final double RANGE = 0.0004;
+    private static final double AMOUNT = 377;
     private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.0502;
-//    private static final double RANGE = 0.0016;
-//    private static final double AMOUNT = 150;
+//    private static final double PRICE = 0.043;
+//    private static final double RANGE = 0.004;
+//    private static final double AMOUNT = 265;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
@@ -79,7 +79,7 @@ public class TradeSpreader {
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
     private static final int BUCKETS = 101;
-    private static final TradeType TYPE = TradeType.SELL;
+    private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.

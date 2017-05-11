@@ -16,7 +16,7 @@ import java.util.*;
 public class SlowArbitrageStrategy extends Strategy {
 
     // TODO(stfinancial): ******** FAILED WITH INSUFFICIENT FUNDS ******** MUST FIX BEFORE RUNNING AGAIN... LOOK AT BONUS AND SEE WHAT HAPPENED. LIKELY NEED TO TAKE MIN AFTER CHECKED HOW MUCH WAS SOLD ON POLO.
-
+    // TODO(stfinancial): *** FAILED WITH TOO SMALL AMOUNT *** SOMETIMES ONLY A SMALL AMOUNT GETS FILLED ON POLO, JUST UNDER THE MIN AMOUNT... FIX THIS.
 
 
     // TODO(stfinancial): Choice whether we increase base or quote holdings.
@@ -26,11 +26,11 @@ public class SlowArbitrageStrategy extends Strategy {
     // TODO(stfinancial): Withdrawal support.
     // TODO(stfinancial): Market should return futures to be able to process in parallel. Can have multiple threads to simulate for now.
 
-//    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+    private static final String POLONIEX_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
-    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+//    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     private static final double CURRENT_POLO_FEE = 0.0022;
     private static final double CURRENT_GDAX_FEE = 0.003;

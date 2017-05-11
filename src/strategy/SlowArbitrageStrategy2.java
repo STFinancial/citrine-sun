@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 
 public class SlowArbitrageStrategy2 extends Strategy {
+    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+
     private static final double STANDARD_AMOUNT = 0.23;
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
@@ -31,6 +34,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
     private double getScaledAmount(MarketInfo bidSide, MarketInfo askSide, double arbitrageRatio) {
 //        double amount = STANDARD_AMOUNT;
         double arbitrageMultiplier = Math.pow((arbitrageRatio - 0.995) * 100, 2);
+        logAtLevel("ArbitrageMultiplier: " + arbitrageMultiplier, 1);
 
         double bidBase = bidSide.baseBalance * bidSide.bids.get(0).getRate();
         double bidQuote = bidSide.quoteBalance;
@@ -42,6 +46,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
         if (askBase == 0) { return MAX_ACCOUNT_ADJUSTMENT_RATIO; }
         double askRatio = askQuote / askBase;
         double rebalanceMultiplier = Math.max(MAX_ACCOUNT_ADJUSTMENT_RATIO, Math.sqrt(askRatio * bidRatio));
+        logAtLevel("RebalanceMultiplier: " + rebalanceMultiplier, 1);
         return STANDARD_AMOUNT * arbitrageMultiplier * rebalanceMultiplier;
     }
 
