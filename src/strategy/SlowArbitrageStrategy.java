@@ -32,7 +32,7 @@ public class SlowArbitrageStrategy extends Strategy {
 //    private static final String POLONIEX_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
 //    private static final String GDAX_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
-    private static final double CURRENT_POLO_FEE = 0.0022;
+    private static final double CURRENT_POLO_FEE = 0.0020;
     private static final double CURRENT_GDAX_FEE = 0.003;
 
     // TODO(stfinancial): Eventually we will scale with the size of the arbitrage
