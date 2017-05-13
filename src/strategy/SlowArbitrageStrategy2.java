@@ -6,6 +6,7 @@ import api.gdax.Gdax;
 import api.poloniex.Poloniex;
 import api.request.*;
 import api.tmp_trade.Trade;
+import api.tmp_trade.TradeType;
 import util.MovingAverage;
 
 import java.util.Arrays;
@@ -129,9 +130,43 @@ public class SlowArbitrageStrategy2 extends Strategy {
                     continue;
                 }
 
+                logAtLevel(askSide.market.getName() + " Amount: " + askAmount, 2);
+                logAtLevel(bidSide.market.getName() + " Amount: " + bidAmount, 2);
+
+                /* Make the trades */
+                tradeRequest = askSide.priority > bidSide.priority ? new TradeRequest(new Trade(askAmount, lowestAsk.getRate(), PAIR, TradeType.BUY), 5, 5) : new TradeRequest(new Trade(bidAmount, highestBid.getRate(), PAIR, TradeType.SELL), 5, 5);
 
             }
         }
+    }
+
+    private void placeTrades(MarketInfo priority, Trade priorityTrade, MarketInfo secondary, Trade secondaryTrade) {
+        MarketResponse response;
+        TradeResponse tradeResponse;
+
+        TradeRequest request = new TradeRequest(priorityTrade, 5, 5);
+        request.setIsMarket(false);
+        request.setIsPostOnly(false);
+        request.setIsImmediateOrCancel(true);
+        response = priority.market.processMarketRequest(request);
+        if (!response.isSuccess()) {
+            logAtLevel("Failure placing trade on " + priority.market.getName() + ": " + response.getJsonResponse(), 1);
+            return;
+        }
+        tradeResponse = (TradeResponse) response;
+        logAtLevel("Amount filled on " + priority.market.getName() + ": " + tradeResponse.getQuoteAmountFilled(), 2);
+        double secondaryAmount = (tradeResponse.getQuoteAmountFilled() * priority.takerFee / secondary.takerFee);
+        // A few cases here:
+            // We fill an amount smaller than MIN_AMOUNT
+                // One solution for this is check whether its closer to 0 or MIN_AMOUNT (slightly adjusted by arb ratio) and do whatever is closer.
+            // We fill an amount smaller than the balance in secondaryTrade
+                // Should use the balance we have left.
+            // We fill exactly the right amount
+                // Check that the secondary amount is the same as the amount available in the trade.
+                // Round up or down by one satoshi if needed (checking it does not put us below min amount or above account balance).
+
+//        priority.market.
+
     }
 
     private double getScaledAmount(MarketInfo bidSide, MarketInfo askSide, double arbitrageRatio) {

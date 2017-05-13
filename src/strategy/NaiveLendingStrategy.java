@@ -20,8 +20,8 @@ import java.util.*;
 public final class NaiveLendingStrategy extends Strategy {
     // TODO(stfinancial): Move 25% of gains to margin account, 25% to exchange to move to wallets.
 
-//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
 
     // Instead of undercutting, we place the loan at this fraction of total daily trade volume deep into the order book.
     private static final double VOLUME_FRACTION = 0.00076;
