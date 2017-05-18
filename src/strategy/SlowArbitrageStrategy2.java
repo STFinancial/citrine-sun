@@ -10,23 +10,24 @@ import api.tmp_trade.TradeType;
 import util.MovingAverage;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): IOC both trades and have a "holdover" potentially...
     // TODO(stfinancial): Estimate account balances.
+    // TODO(stfinancial): See if we can fix 0.01 gdax issue.
+    // TODO(stfinancial): Consider setting secondary rate to the lowest possible arbitrage rate. Better avoids orders that don't fill.
 
     private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
-    private static final double STANDARD_AMOUNT = 0.35;
+    private static final double STANDARD_AMOUNT = 0.502;
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
-    private static final int DEBUG = 4;
+    private static final int DEBUG = 3;
 
     private static final OrderBookRequest ORDER_BOOK_REQUEST = new OrderBookRequest(PAIR, 20, 2, 1);
     private static final FeeRequest FEE_REQUEST = new FeeRequest(PAIR, 1, 1);
@@ -206,7 +207,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
             return false;
         } else if (filledAmount + SATOSHI < priorityTrade.getAmount()) {
             logAtLevel("Alternate amount was filled: " + filledAmount + "  Constructing new trade.", 2);
-            secondaryAmount = filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee);
+            secondaryAmount = Math.floor((filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee)) * HUNDRED_MILLION) / HUNDRED_MILLION;
             Trade revisedTrade = new Trade(secondaryAmount, secondaryTrade.getRate(), secondaryTrade.getPair(), secondaryTrade.getType());
             request = new TradeRequest(revisedTrade, 5, 5);
             request.setIsMarket(false);
