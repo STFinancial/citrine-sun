@@ -27,6 +27,8 @@ public final class CompletedTrade {
     // I believe this is used to get all trades for a given order number.
     private final int orderNumber; // Not sure if this is the same as the orderNumber in TradeOrder or not.
 
+    // TODO(stfinancial): Add base amount and quote amount to remove ambiguity.
+
     private CompletedTrade(Builder builder) {
         this.trade = builder.trade;
         this.tradeId = builder.tradeId;

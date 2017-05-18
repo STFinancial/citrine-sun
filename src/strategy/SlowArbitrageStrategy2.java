@@ -16,26 +16,33 @@ import java.util.Map;
 
 public class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): IOC both trades and have a "holdover" potentially...
+    // TODO(stfinancial): Estimate account balances.
 
     private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 
-    private static final double STANDARD_AMOUNT = 0.23;
+    // TODO(stfinancial): Replace this with an amount based on account balance.
+    private static final double STANDARD_AMOUNT = 0.35;
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
-    private static final int DEBUG = 3;
+    private static final int DEBUG = 4;
 
     private static final OrderBookRequest ORDER_BOOK_REQUEST = new OrderBookRequest(PAIR, 20, 2, 1);
     private static final FeeRequest FEE_REQUEST = new FeeRequest(PAIR, 1, 1);
     private static final AccountBalanceRequest ACCOUNT_BALANCE_REQUEST = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
 
-    private static final int FEE_AND_BALANCE_INTERVAL = 500;
-    private int feeAndBalanceCount = 0;
+    private static final int FEE_AND_BALANCE_INTERVAL = 10;
+    private int feeAndBalanceCount = 500;
     private MovingAverage arbRatioMA500 = new MovingAverage(FEE_AND_BALANCE_INTERVAL);
 
     private static final double HUNDRED_MILLION = 100000000;
     private static final double SATOSHI = 0.00000001;
+
+    public static void main(String[] args) {
+        SlowArbitrageStrategy2 strat = new SlowArbitrageStrategy2();
+        strat.run();
+    }
 
     @Override
     public void run() {
@@ -48,12 +55,9 @@ public class SlowArbitrageStrategy2 extends Strategy {
         doArbitrage(Arrays.asList(polo, gdax));
     }
 
-    // TODO(stfinancial): Eventually remove the priority
     public void doArbitrage(List<MarketInfo> markets) {
-        TradeRequest tradeRequest;
         MarketResponse response;
         OrderBookResponse orderBookResponse;
-        TradeResponse tradeResponse;
         // TODO(stfinancial): Right now we will hardcode that we are using 2 exchanges.
         MarketInfo market1 = markets.get(0);
         MarketInfo market2 = markets.get(1);
@@ -61,7 +65,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
         MarketInfo bidSide;
         while (true) {
             sleep(400);
-            maybeUpdateFeesAndBalances(markets);
+            if (!maybeUpdateFeesAndBalances(markets)) { continue; }
 
             /* Get new order books */
             for (MarketInfo market : markets) {
@@ -89,27 +93,27 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 askSide = market1;
             }
             arbRatioMA500.add(arbitrageRatio);
-
+            logAtLevel(String.valueOf(arbRatioMA500.getMovingAverage()), 4);
             /* There is an arbitrage */
             if (arbitrageRatio > 1) {
                 Trade lowestAsk = askSide.asks.get(0);
                 Trade highestBid = bidSide.bids.get(0);
                 logAtLevel("Arbitrage Found with Ratio: " + arbitrageRatio, 2);
                 logAtLevel("Buy (" + askSide.market.getName() + ") - " + lowestAsk.getAmount() + " - " + lowestAsk.getRate(), 2);
-                logAtLevel("Sell (" + askSide.market.getName() + ") - " + highestBid.getAmount() + " - " + highestBid.getRate(), 2);
+                logAtLevel("Sell (" + bidSide.market.getName() + ") - " + highestBid.getAmount() + " - " + highestBid.getRate(), 2);
 
-                double scaledAmount = getScaledAmount(bidSide, askSide, arbitrageRatio);
+                double scaledAmount = Math.floor(getScaledAmount(bidSide, askSide, arbitrageRatio) * HUNDRED_MILLION) / HUNDRED_MILLION;
 
                 double askSideTradeAmount = lowestAsk.getAmount();
                 // TODO(stfinancial): Make sure this is updated when we search more than 1 order deep.
                 double askSideBalanceAmount = Math.floor((askSide.quoteBalance / lowestAsk.getRate()) * HUNDRED_MILLION) / HUNDRED_MILLION; // Round the decimal down.
-                double askSideMinAmount = Math.min(askSideBalanceAmount, askSideTradeAmount);
+                double askSideMinAmount = Math.min(scaledAmount, Math.min(askSideBalanceAmount, askSideTradeAmount));
                 double askSidePostFeeMinAmount = askSideMinAmount * (1 - askSide.takerFee);
 
 
                 double bidSideTradeAmount = highestBid.getAmount();
                 double bidSideBalanceAmount = Math.floor(bidSide.baseBalance * HUNDRED_MILLION) / HUNDRED_MILLION; // Round the decimal down.
-                double bidSideMinAmount = Math.min(bidSideTradeAmount, bidSideBalanceAmount);
+                double bidSideMinAmount = Math.min(scaledAmount, Math.min(bidSideTradeAmount, bidSideBalanceAmount));
                 double bidSidePostFeeMinAmount = bidSideMinAmount * (1 - bidSide.takerFee);
 
 
@@ -124,12 +128,13 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 }
 
                 if (askAmount < MIN_AMOUNT) {
-                    logAtLevel("Ask Side (" + askSide.market.getName() + ") amount lower than global min: " + askSideMinAmount, 2);
+                    // TODO(stfinancial): This log doesn't make much sense.
+                    logAtLevel("Ask Side (" + askSide.market.getName() + ") amount " + askAmount + " is lower than global min: " + askSideMinAmount, 2);
                     continue;
                 }
 
                 if (bidAmount < MIN_AMOUNT) {
-                    logAtLevel("Bid Side (" + bidSide.market.getName() + ") amount lower than global min: " + bidSideMinAmount, 2);
+                    logAtLevel("Bid Side (" + bidSide.market.getName() + ") amount " + bidAmount + " is lower than global min: " + bidSideMinAmount, 2);
                     continue;
                 }
 
@@ -167,8 +172,15 @@ public class SlowArbitrageStrategy2 extends Strategy {
             return true;
         }
         tradeResponse = (TradeResponse) response;
-        logAtLevel("Amount filled on " + priority.market.getName() + ": " + tradeResponse.getQuoteAmountFilled(), 2);
-        double filledAmount = tradeResponse.getQuoteAmountFilled();
+//        if (priorityTrade.getType() == TradeType.BUY) {
+//            priority.baseBalance += tradeResponse.getBaseAmountFilled();
+//            priority.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+//        } else {
+//            priority.baseBalance -= tradeResponse.getBaseAmountFilled();
+//            priority.quoteBalance += tradeResponse.getQuoteAmountFilled();
+//        }
+        logAtLevel("Amount filled on " + priority.market.getName() + ": " + tradeResponse.getBaseAmountFilled(), 2);
+        double filledAmount = tradeResponse.getBaseAmountFilled();
         double secondaryAmount;
         if (filledAmount == priorityTrade.getAmount() || filledAmount + SATOSHI == priorityTrade.getAmount()) {
             // The right amount was filled.
@@ -184,15 +196,22 @@ public class SlowArbitrageStrategy2 extends Strategy {
             // TODO(stfinancial): Check that we filled the right amount?
             return true;
         }
+        if (filledAmount == 0.0) {
+            logAtLevel("No trades filled, so none required.", 2);
+            return true;
+        }
         if (filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee) < MIN_AMOUNT) {
+            // TODO(stfinancial): See if it is closer to 0 or min amount after accounting for arb ratio. Place trade accordingly.
             logAtLevel("Priority filled amount " + filledAmount + " leads to fee adjusted secondary amount " + filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee) + " below minimum amount.", 1);
             return false;
         } else if (filledAmount + SATOSHI < priorityTrade.getAmount()) {
+            logAtLevel("Alternate amount was filled: " + filledAmount + "  Constructing new trade.", 2);
             secondaryAmount = filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee);
             Trade revisedTrade = new Trade(secondaryAmount, secondaryTrade.getRate(), secondaryTrade.getPair(), secondaryTrade.getType());
             request = new TradeRequest(revisedTrade, 5, 5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
+            logAtLevel("Placing alternate amount: " + filledAmount, 2);
             response = secondary.market.processMarketRequest(request);
             if (!response.isSuccess()) {
                 logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
@@ -215,20 +234,26 @@ public class SlowArbitrageStrategy2 extends Strategy {
 
     private double getScaledAmount(MarketInfo bidSide, MarketInfo askSide, double arbitrageRatio) {
 //        double amount = STANDARD_AMOUNT;
-        double arbitrageMultiplier = Math.pow((arbitrageRatio - 0.995) * 100, 2);
+        double arbitrageMultiplier = Math.pow((arbitrageRatio - ((1 - bidSide.takerFee) * (1 - askSide.takerFee))) * 100, 2);
         logAtLevel("ArbitrageMultiplier: " + arbitrageMultiplier, 3);
 
         double bidBase = bidSide.baseBalance * bidSide.bids.get(0).getRate();
         double bidQuote = bidSide.quoteBalance;
-        if (bidQuote == 0) { return MAX_ACCOUNT_ADJUSTMENT_RATIO; }
+        if (bidQuote == 0) {
+            logAtLevel("Bid Side Quote Balance is 0. Setting max adjustment ratio.", 3);
+            return MAX_ACCOUNT_ADJUSTMENT_RATIO;
+        }
         double bidRatio = bidBase / bidQuote;
 
-        double askBase = askSide.baseBalance * askSide.bids.get(0).getRate();
+        double askBase = askSide.baseBalance * askSide.asks.get(0).getRate();
         double askQuote = askSide.quoteBalance;
-        if (askBase == 0) { return MAX_ACCOUNT_ADJUSTMENT_RATIO; }
+        if (askBase == 0) {
+            logAtLevel("Ask Side Base Balance is 0. Setting max adjustment ratio.", 3);
+            return MAX_ACCOUNT_ADJUSTMENT_RATIO;
+        }
         double askRatio = askQuote / askBase;
         // TODO(stfinancial): This should be weighted by total magnitude of funds.
-        double rebalanceMultiplier = Math.max(MAX_ACCOUNT_ADJUSTMENT_RATIO, Math.sqrt(askRatio * bidRatio));
+        double rebalanceMultiplier = Math.min(MAX_ACCOUNT_ADJUSTMENT_RATIO, Math.sqrt(askRatio * bidRatio));
         logAtLevel("RebalanceMultiplier: " + rebalanceMultiplier, 3);
         return STANDARD_AMOUNT * arbitrageMultiplier * rebalanceMultiplier;
     }
@@ -244,13 +269,14 @@ public class SlowArbitrageStrategy2 extends Strategy {
     /** @return false on request or response failure */
     private boolean maybeUpdateFeesAndBalances(List<MarketInfo> markets) {
         if (feeAndBalanceCount < FEE_AND_BALANCE_INTERVAL) {
+            logAtLevel("FeeAndBalanceCount: " + feeAndBalanceCount, 4);
             ++feeAndBalanceCount;
             return true;
-        } else if (arbRatioMA500.getMovingAverage() > 0.9965) {
-            return true;
+            // TODO(stfinancial): Uncomment once we have naive balance approximations. Raise interval as well.
+//        } else if (arbRatioMA500.getMovingAverage() > 0.9965) {
+//            return true;
         }
         logAtLevel("Updating fees and balances.", 3);
-        AccountBalanceResponse accountBalanceResponse;
         MarketResponse response;
         for (MarketInfo m : markets) {
             response = m.market.processMarketRequest(FEE_REQUEST);
@@ -265,9 +291,11 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 return false;
             }
             Map<Currency, Double> balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
+//            System.out.println(response.getJsonResponse());
             m.quoteBalance = balances.containsKey(PAIR.getQuote()) ? balances.get(PAIR.getQuote()) : 0;
             m.baseBalance = balances.containsKey(PAIR.getBase()) ? balances.get(PAIR.getBase()) : 0;
         }
+        feeAndBalanceCount = 0;
         return true;
     }
 

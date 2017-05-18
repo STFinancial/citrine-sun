@@ -171,7 +171,7 @@ public final class Poloniex extends Market { //implements Tradable {
             responseString = EntityUtils.toString(entity);
             EntityUtils.consume(entity);
         } catch (IOException e) {
-            System.out.println("IOException occurred while executing HTTP request.");
+            System.out.println("IOException occurred while executing HTTP request: " + httpRequest.toString());
             e.printStackTrace();
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.CONNECTION_ERROR, e, "Request failed"));
         }

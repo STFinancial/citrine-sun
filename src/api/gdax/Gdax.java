@@ -179,6 +179,7 @@ public class Gdax extends Market {
         // TODO(stfinancial): Post-processing and add/convert timestamp.
         // TODO(stfinancial): More sophisticated handling of errors codes...
         boolean isError = statusCode != HttpStatus.SC_OK;
+//        System.out.println(statusCode);
         return GdaxResponseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
     }
 

@@ -22,6 +22,7 @@ public class TradeResponse extends MarketResponse {
     // TODO(stfinancial): Perhaps try a bit less information.
     private List<CompletedTrade> resultingTrades;
     private double quoteAmountFilled = 0;
+    private double baseAmountFilled = 0;
 
     // TODO(stfinancial): Figure out how to add support for all of the GDAX stuff.
 
@@ -31,11 +32,14 @@ public class TradeResponse extends MarketResponse {
         this.orderNumber = orderNumber;
 //        this.order = order;
         this.resultingTrades = resultingTrades;
-        double amount = 0;
+        double quoteAmount = 0;
+        double baseAmount = 0;
         for (CompletedTrade trade : resultingTrades) {
-            amount += trade.getTrade().getAmount();
+            baseAmount += trade.getTrade().getAmount();
+            quoteAmount += trade.getTrade().getAmount() * trade.getTrade().getRate();
         }
-        this.quoteAmountFilled = amount;
+        this.quoteAmountFilled = quoteAmount;
+        this.baseAmountFilled = baseAmount;
     }
 
     public TradeResponse(String orderNumber, double quoteAmountFilled, JsonNode jsonResponse, TradeRequest request, long timestamp, RequestStatus status) {
@@ -49,6 +53,7 @@ public class TradeResponse extends MarketResponse {
         this.orderNumber = orderNumber;
     }
 
+    public double getBaseAmountFilled() { return baseAmountFilled; }
     public double getQuoteAmountFilled() { return quoteAmountFilled; }
     public String getOrderNumber() { return orderNumber; }
     public List<CompletedTrade> getResultingTrades() { return Collections.unmodifiableList(resultingTrades); }
