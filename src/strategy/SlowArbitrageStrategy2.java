@@ -26,6 +26,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final double STANDARD_AMOUNT = 0.502;
+    // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
@@ -205,6 +206,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
         }
         if (filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee) < MIN_AMOUNT) {
             // TODO(stfinancial): See if it is closer to 0 or min amount after accounting for arb ratio. Place trade accordingly.
+            // TODO(stfinancial): Other option is to hold amount over until next trade and just include it in that.
             logAtLevel("Priority filled amount " + filledAmount + " leads to fee adjusted secondary amount " + filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee) + " below minimum amount.", 1);
             return false;
         } else if (filledAmount + SATOSHI < priorityTrade.getAmount()) {
@@ -230,6 +232,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
             // We fill exactly the right amount
                 // Check that the secondary amount is the same as the amount available in the trade.
                 // Round up or down by one satoshi if needed (check
+        // TODO(stfinancial): This can occur if there are multiple "fills" due to rounding error.
         logAtLevel("AmountFilled: " + filledAmount + " is greater than expected amount: " + priorityTrade.getAmount(), 1);
         return false;
 

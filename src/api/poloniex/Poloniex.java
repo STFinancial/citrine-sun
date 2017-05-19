@@ -26,6 +26,8 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
