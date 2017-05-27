@@ -1,11 +1,9 @@
 package api.poloniex;
 
 import api.request.MarketRequest;
+import api.request.MarketResponse;
 
-import java.util.concurrent.ExecutorCompletionService;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.PriorityBlockingQueue;
+import java.util.concurrent.*;
 
 /**
  * Created by Timothy on 11/27/16.
@@ -25,6 +23,10 @@ class PoloniexQueue { //implements Runnable {
         requestQueue = new PriorityBlockingQueue<>();
 //        workers = Executors.newFixedThreadPool((int) (REQUESTS_PER_SECOND / (timeout / 1000)));
     }
+
+//    Future<? extends MarketResponse> process(MarketRequest request) {
+//        workers.submit()
+//    }
 
     void setStrategy(QueueStrategy strategy) {
         this.strategy = strategy;

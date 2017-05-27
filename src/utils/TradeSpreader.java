@@ -38,15 +38,15 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 21340;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-    private static final double PRICE = 0.0158;
-    private static final double RANGE = 0.001;
-    private static final double AMOUNT = 698;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+//    private static final double PRICE = 0.0158;
+//    private static final double RANGE = 0.001;
+//    private static final double AMOUNT = 698;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.0502;
-//    private static final double RANGE = 0.0002;
-//    private static final double AMOUNT = 150;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+    private static final double PRICE = 0.077;
+    private static final double RANGE = 0.0017;
+    private static final double AMOUNT = 148;
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
@@ -79,7 +79,7 @@ public class TradeSpreader {
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
     private static final int BUCKETS = 101;
-    private static final TradeType TYPE = TradeType.BUY;
+    private static final TradeType TYPE = TradeType.SELL;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.

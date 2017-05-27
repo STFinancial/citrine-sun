@@ -19,13 +19,13 @@ public class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): See if we can fix 0.01 gdax issue.
     // TODO(stfinancial): Consider setting secondary rate to the lowest possible arbitrage rate. Better avoids orders that don't fill.
 
-//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+//    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
-    private static final double STANDARD_AMOUNT = 0.502;
+    private static final double STANDARD_AMOUNT = 0.53;
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
@@ -53,9 +53,11 @@ public class SlowArbitrageStrategy2 extends Strategy {
         MarketInfo polo = new MarketInfo();
         polo.market = new Poloniex(Credentials.fromFileString(POLO_KEY));
         polo.priority = 5;
+        polo.minAmount = 0.005;
         MarketInfo gdax = new MarketInfo();
         gdax.market = new Gdax(Credentials.fromFileString(GDAX_KEY));
         gdax.priority = 1;
+        gdax.minAmount = 0.01;
         doArbitrage(Arrays.asList(polo, gdax));
     }
 
@@ -131,13 +133,13 @@ public class SlowArbitrageStrategy2 extends Strategy {
                     askAmount = Math.floor((bidSidePostFeeMinAmount / (1 - askSide.takerFee)) * HUNDRED_MILLION) / HUNDRED_MILLION;
                 }
 
-                if (askAmount < MIN_AMOUNT) {
+                if (askAmount < askSide.minAmount) {
                     // TODO(stfinancial): This log doesn't make much sense.
                     logAtLevel("Ask Side (" + askSide.market.getName() + ") amount " + askAmount + " is lower than global min: " + askSideMinAmount, 2);
                     continue;
                 }
 
-                if (bidAmount < MIN_AMOUNT) {
+                if (bidAmount < bidSide.minAmount) {
                     logAtLevel("Bid Side (" + bidSide.market.getName() + ") amount " + bidAmount + " is lower than global min: " + bidSideMinAmount, 2);
                     continue;
                 }
@@ -176,15 +178,16 @@ public class SlowArbitrageStrategy2 extends Strategy {
             return true;
         }
         tradeResponse = (TradeResponse) response;
-//        if (priorityTrade.getType() == TradeType.BUY) {
-//            priority.baseBalance += tradeResponse.getBaseAmountFilled();
-//            priority.quoteBalance -= tradeResponse.getQuoteAmountFilled();
-//        } else {
-//            priority.baseBalance -= tradeResponse.getBaseAmountFilled();
-//            priority.quoteBalance += tradeResponse.getQuoteAmountFilled();
-//        }
-        logAtLevel("Amount filled on " + priority.market.getName() + ": " + tradeResponse.getBaseAmountFilled(), 2);
+        if (priorityTrade.getType() == TradeType.BUY) {
+            priority.baseBalance += tradeResponse.getBaseAmountFilled();
+            priority.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+        } else {
+            priority.baseBalance -= tradeResponse.getBaseAmountFilled();
+            priority.quoteBalance += tradeResponse.getQuoteAmountFilled();
+        }
         double filledAmount = tradeResponse.getBaseAmountFilled();
+        logAtLevel("Amount filled on " + priority.market.getName() + ": " + filledAmount, 2);
+
         double secondaryAmount;
         if (filledAmount == priorityTrade.getAmount() || filledAmount + SATOSHI == priorityTrade.getAmount()) {
             // The right amount was filled.
@@ -197,6 +200,14 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
                 return false;
             }
+            tradeResponse = (TradeResponse) response;
+            if (secondaryTrade.getType() == TradeType.BUY) {
+                secondary.baseBalance += tradeResponse.getBaseAmountFilled();
+                secondary.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+            } else {
+                secondary.baseBalance -= tradeResponse.getBaseAmountFilled();
+                secondary.quoteBalance += tradeResponse.getQuoteAmountFilled();
+            }
             // TODO(stfinancial): Check that we filled the right amount?
             return true;
         }
@@ -208,7 +219,8 @@ public class SlowArbitrageStrategy2 extends Strategy {
             // TODO(stfinancial): See if it is closer to 0 or min amount after accounting for arb ratio. Place trade accordingly.
             // TODO(stfinancial): Other option is to hold amount over until next trade and just include it in that.
             logAtLevel("Priority filled amount " + filledAmount + " leads to fee adjusted secondary amount " + filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee) + " below minimum amount.", 1);
-            return false;
+            // TODO(stfinancial): Ignore this for now.
+            return true;
         } else if (filledAmount + SATOSHI < priorityTrade.getAmount()) {
             logAtLevel("Alternate amount was filled: " + filledAmount + "  Constructing new trade.", 2);
             secondaryAmount = Math.floor((filledAmount * (1 - priority.takerFee) / (1 - secondary.takerFee)) * HUNDRED_MILLION) / HUNDRED_MILLION;
@@ -222,6 +234,14 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
                 return false;
             }
+            tradeResponse = (TradeResponse) response;
+            if (secondaryTrade.getType() == TradeType.BUY) {
+                secondary.baseBalance += tradeResponse.getBaseAmountFilled();
+                secondary.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+            } else {
+                secondary.baseBalance -= tradeResponse.getBaseAmountFilled();
+                secondary.quoteBalance += tradeResponse.getQuoteAmountFilled();
+            }
             return true;
         }
         // A few cases here:
@@ -232,7 +252,30 @@ public class SlowArbitrageStrategy2 extends Strategy {
             // We fill exactly the right amount
                 // Check that the secondary amount is the same as the amount available in the trade.
                 // Round up or down by one satoshi if needed (check
-        // TODO(stfinancial): This can occur if there are multiple "fills" due to rounding error.
+        // TODO(stfinancial): This can occur if there are multiple "fills" due to rounding error. Alternatively can check amountUnfilled.
+        filledAmount = Math.floor(filledAmount * HUNDRED_MILLION) / HUNDRED_MILLION;
+        if (filledAmount <= priorityTrade.getAmount()) {
+            // The right amount was filled.
+            logAtLevel("Correct (rounded) amount filled, placing amount on secondary: " + secondaryTrade.getAmount(), 2);
+            request = new TradeRequest(secondaryTrade, 5, 5);
+            request.setIsMarket(false);
+            request.setIsPostOnly(false);
+            response = secondary.market.processMarketRequest(request);
+            if (!response.isSuccess()) {
+                logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
+                return false;
+            }
+            tradeResponse = (TradeResponse) response;
+            if (secondaryTrade.getType() == TradeType.BUY) {
+                secondary.baseBalance += tradeResponse.getBaseAmountFilled();
+                secondary.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+            } else {
+                secondary.baseBalance -= tradeResponse.getBaseAmountFilled();
+                secondary.quoteBalance += tradeResponse.getQuoteAmountFilled();
+            }
+            // TODO(stfinancial): Check that we filled the right amount?
+            return true;
+        }
         logAtLevel("AmountFilled: " + filledAmount + " is greater than expected amount: " + priorityTrade.getAmount(), 1);
         return false;
 
@@ -325,6 +368,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
         double takerFee;
         double quoteBalance;
         double baseBalance;
+        double minAmount;
         List<Trade> asks;
         List<Trade> bids;
         int priority;
