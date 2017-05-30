@@ -14,10 +14,13 @@ import java.util.List;
 import java.util.Map;
 
 public class SlowArbitrageStrategy2 extends Strategy {
-    // TODO(stfinancial): IOC both trades and have a "holdover" potentially...
+    // TODO(stfinancial): IOC both trades and have a "holdover" potentially... HIGH PRIORITY!!!!.
     // TODO(stfinancial): Estimate account balances.
     // TODO(stfinancial): See if we can fix 0.01 gdax issue.
     // TODO(stfinancial): Consider setting secondary rate to the lowest possible arbitrage rate. Better avoids orders that don't fill.
+    // TODO(stfinancial): "Volume" bonus. To help reduce fees, increase magnitude on low volume days.
+    // TODO(stfinancial): Priority "direction" allowing us to prefer buying or selling first.
+    // TODO(stfinancial): Min arbitrage ratio.
 
     private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
@@ -25,11 +28,13 @@ public class SlowArbitrageStrategy2 extends Strategy {
 //    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
-    private static final double STANDARD_AMOUNT = 0.53;
+    private static final double STANDARD_AMOUNT = 0.531;
+    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
+//    private static final double STANDARD_AMOUNT = 0.2;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.ETH, Currency.BTC);
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
-    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
     private static final int DEBUG = 3;
 
     private static final OrderBookRequest ORDER_BOOK_REQUEST = new OrderBookRequest(PAIR, 20, 2, 1);
@@ -170,7 +175,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
         TradeRequest request = new TradeRequest(priorityTrade, 5, 5);
         request.setIsMarket(false);
         request.setIsPostOnly(false);
-        request.setIsImmediateOrCancel(true);
+        request.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
         response = priority.market.processMarketRequest(request);
         if (!response.isSuccess()) {
             logAtLevel("Failure placing primary trade on " + priority.market.getName() + ": " + response.getJsonResponse(), 1);
@@ -200,13 +205,12 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
                 return false;
             }
-            tradeResponse = (TradeResponse) response;
             if (secondaryTrade.getType() == TradeType.BUY) {
-                secondary.baseBalance += tradeResponse.getBaseAmountFilled();
-                secondary.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+                secondary.baseBalance += secondaryTrade.getAmount();
+                secondary.quoteBalance -= secondaryTrade.getAmount() * secondaryTrade.getRate();
             } else {
-                secondary.baseBalance -= tradeResponse.getBaseAmountFilled();
-                secondary.quoteBalance += tradeResponse.getQuoteAmountFilled();
+                secondary.baseBalance -= secondaryTrade.getAmount();
+                secondary.quoteBalance += secondaryTrade.getAmount() * secondaryTrade.getRate();
             }
             // TODO(stfinancial): Check that we filled the right amount?
             return true;
@@ -234,13 +238,12 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
                 return false;
             }
-            tradeResponse = (TradeResponse) response;
             if (secondaryTrade.getType() == TradeType.BUY) {
-                secondary.baseBalance += tradeResponse.getBaseAmountFilled();
-                secondary.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+                secondary.baseBalance += revisedTrade.getAmount();
+                secondary.quoteBalance -= revisedTrade.getAmount() * revisedTrade.getRate();
             } else {
-                secondary.baseBalance -= tradeResponse.getBaseAmountFilled();
-                secondary.quoteBalance += tradeResponse.getQuoteAmountFilled();
+                secondary.baseBalance -= revisedTrade.getAmount();
+                secondary.quoteBalance += revisedTrade.getAmount() * revisedTrade.getRate();
             }
             return true;
         }
@@ -265,13 +268,12 @@ public class SlowArbitrageStrategy2 extends Strategy {
                 logAtLevel("Failure placing secondary trade on " + secondary.market.getName() + ": " + response.getJsonResponse(), 1);
                 return false;
             }
-            tradeResponse = (TradeResponse) response;
             if (secondaryTrade.getType() == TradeType.BUY) {
-                secondary.baseBalance += tradeResponse.getBaseAmountFilled();
-                secondary.quoteBalance -= tradeResponse.getQuoteAmountFilled();
+                secondary.baseBalance += secondaryTrade.getAmount();
+                secondary.quoteBalance -= secondaryTrade.getAmount() * secondaryTrade.getRate();
             } else {
-                secondary.baseBalance -= tradeResponse.getBaseAmountFilled();
-                secondary.quoteBalance += tradeResponse.getQuoteAmountFilled();
+                secondary.baseBalance -= secondaryTrade.getAmount();
+                secondary.quoteBalance += secondaryTrade.getAmount() * secondaryTrade.getRate();
             }
             // TODO(stfinancial): Check that we filled the right amount?
             return true;

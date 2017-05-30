@@ -277,8 +277,23 @@ final class PoloniexRequestRewriter {
         builder.withParam("amount", String.valueOf(request.getAmount()), true, true);
         builder.withParam("rate", String.valueOf(request.getRate()), true, true);
         builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getPair()), true, true);
-        builder.withParam("fillOrKill", request.isFillOrKill() ? "1" : "0", true, true);
-        builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0", true, true);
+        switch (request.getTimeInForce()) {
+            case GOOD_TIL_CANCELLED:
+                // This is the default, do nothing.
+                break;
+            case IMMEDIATE_OR_CANCEL:
+                builder.withParam("immediateOrCancel", "1", true, true);
+                break;
+            case FILL_OR_KILL:
+                builder.withParam("fillOrKill", "1", true, true);
+                break;
+            default:
+                // TODO(stfinancial): Use market name here.
+                System.out.println("Unsupported TimeInForce on Poloniex: " + request.getTimeInForce().toString());
+                return RequestArgs.unsupported();
+        }
+//        builder.withParam("fillOrKill", request.isFillOrKill() ? "1" : "0", true, true);
+//        builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0", true, true);
         builder.withParam("postOnly", request.isPostOnly() ? "1" : "0", true, true);
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);

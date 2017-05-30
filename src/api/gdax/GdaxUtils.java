@@ -12,6 +12,10 @@ final class GdaxUtils {
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
 
+    private static final String GTC = "GTC";
+    private static final String IOC = "IOC";
+    private static final String FOK = "FOK";
+
     // TODO(stfinancial): Need a method to parse timestamps from GDAX... form of YYYY-mm-DDTHH:MM:SS.MSMSMSZ
 
     static double getTakerFeeFromVolumeFraction(double fraction) {
@@ -41,6 +45,7 @@ final class GdaxUtils {
                 result = SELL_STRING;
                 break;
             default:
+                // TODO(stfinancial): Is this the best way to return invalid? We won't be able to return unsupported RequestArgs without checking this string.
                 result = "INVALID";
                 break;
         }

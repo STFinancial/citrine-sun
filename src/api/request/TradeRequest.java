@@ -8,6 +8,12 @@ import api.tmp_trade.TradeType;
  * A request to place a {@link Trade} for a given {@link api.Market Market}.
  */
 public final class TradeRequest extends MarketRequest {
+    public enum TimeInForce {
+        GOOD_TIL_CANCELLED,
+        IMMEDIATE_OR_CANCEL,
+        FILL_OR_KILL;
+        // TODO(stfinancial): Good til time.
+    }
     // TODO(stfinancial): Is there a way to do interest rate for margin?
     // TODO(stfinancial): Builder pattern?
 
@@ -16,8 +22,7 @@ public final class TradeRequest extends MarketRequest {
     private Trade trade;
     // TODO(stfinancial): Should we just make these public?
     private boolean isMargin = false;
-    private boolean isFillOrKill = false;
-    private boolean isImmediateOrCancel = false;
+    private TimeInForce timeInForce = TimeInForce.GOOD_TIL_CANCELLED;
     private boolean isPostOnly = false;
     private boolean isMarket = false;
 
@@ -34,8 +39,7 @@ public final class TradeRequest extends MarketRequest {
 
     public Trade getTrade() { return trade; }
     public boolean isMargin() { return isMargin; }
-    public boolean isFillOrKill() { return isFillOrKill; }
-    public boolean isImmediateOrCancel() { return isImmediateOrCancel; }
+    public TimeInForce getTimeInForce() { return timeInForce; }
     public boolean isPostOnly() { return isPostOnly; }
     public boolean isMarket() { return isMarket; }
     public boolean isStopLimit() { return isStopLimit; }
@@ -48,8 +52,7 @@ public final class TradeRequest extends MarketRequest {
     public TradeType getType() { return trade.getType(); }
 
     public void setIsMargin(boolean isMargin) { this.isMargin = isMargin; }
-    public void setIsFillOrKill(boolean isFillOrKill) { this.isFillOrKill = isFillOrKill; }
-    public void setIsImmediateOrCancel(boolean isImmediateOrCancel) { this.isImmediateOrCancel = isImmediateOrCancel; }
+    public void setTimeInForce(TimeInForce timeInForce) { this.timeInForce = timeInForce; }
     public void setIsPostOnly(boolean isPostOnly) { this.isPostOnly = isPostOnly; }
     public void setIsMarket(boolean isMarket) { this.isMarket = isMarket; }
     public void setIsStopLimit(boolean isStopLimit) { this.isStopLimit = isStopLimit; }
@@ -60,10 +63,9 @@ public final class TradeRequest extends MarketRequest {
         StringBuilder sb = new StringBuilder("{\n");
         sb.append("\ttrade " + trade.toString().replace("\n","\n\t")).append("\n");
         sb.append("\tisMargin: " + (isMargin ? "true" : "false")).append("\n");
-        sb.append("\tisFillOrKill: " + (isFillOrKill ? "true" : "false")).append("\n");
-        sb.append("\tisImmediateOrCancel: " + (isImmediateOrCancel ? "true" : "false")).append("\n");
         sb.append("\tisPostOnly: " + (isPostOnly ? "true" : "false")).append("\n");
         sb.append("\tisMarket: " + (isMarket ? "true" : "false")).append("\n");
+        sb.append("\ttimeInForce: " + timeInForce.toString()).append("\n");
         sb.append("}");
         return sb.toString();
     }

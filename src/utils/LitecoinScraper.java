@@ -136,7 +136,7 @@ public final class LitecoinScraper {
                             }
                             TradeRequest req = new TradeRequest(new Trade(1 / price, price + 0.001, PAIR, TradeType.BUY), 2, 2);
                             req.setIsMargin(true);
-                            req.setIsImmediateOrCancel(true);
+                            req.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
                             int success_count = 0;
                             int tries_remaining = 20;
                             while (success_count < 6 && tries_remaining-- > 0) {

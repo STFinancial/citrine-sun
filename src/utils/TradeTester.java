@@ -17,7 +17,7 @@ public class TradeTester {
     private static final double AMOUNT = 1;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = false;
-    private static final boolean IS_IMMEDIATE_OR_CANCEL = true;
+    private static final TradeRequest.TimeInForce TIME_IN_FORCE = TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL;
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 
     public static void main(String[] args) {
@@ -31,7 +31,7 @@ public class TradeTester {
         Trade t = new Trade(AMOUNT, PRICE, PAIR, TYPE);
         TradeRequest req = new TradeRequest(t, 1, System.currentTimeMillis());
         req.setIsMargin(IS_MARGIN);
-        req.setIsImmediateOrCancel(IS_IMMEDIATE_OR_CANCEL);
+        req.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
         MarketResponse resp = polo.processMarketRequest(req);
         System.out.println(resp.getJsonResponse().toString());
         if (!resp.isSuccess()) {

@@ -92,6 +92,21 @@ final class GdaxRequestRewriter {
         builder.withParam("side", GdaxUtils.getCommandForTradeType(request.getType()));
         builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()));
         builder.withParam("post_only", request.isPostOnly() ? "true" : "false", false, false);
+        switch (request.getTimeInForce()) {
+            // TODO(stfinancial): Move this into the utils class?
+            case GOOD_TIL_CANCELLED:
+                builder.withParam("time_in_force", "GTC");
+                break;
+            case IMMEDIATE_OR_CANCEL:
+                builder.withParam("time_in_force", "IOC");
+                break;
+            case FILL_OR_KILL:
+                builder.withParam("time_in_force", "FOK");
+                break;
+            default:
+                System.out.println("Unsupported TimeInForce on GDAX: " + request.getTimeInForce());
+                return RequestArgs.unsupported();
+        }
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.isPrivate(true);
         return builder.build();
