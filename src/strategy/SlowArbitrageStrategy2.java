@@ -21,6 +21,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): "Volume" bonus. To help reduce fees, increase magnitude on low volume days.
     // TODO(stfinancial): Priority "direction" allowing us to prefer buying or selling first.
     // TODO(stfinancial): Min arbitrage ratio.
+    // TODO(stfinancial): Instead of setting limit at exact price, set it at lowest arbitrage price, that will allow fewer unfilled orders.
 
     private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
@@ -32,6 +33,7 @@ public class SlowArbitrageStrategy2 extends Strategy {
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 //    private static final double STANDARD_AMOUNT = 0.2;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.ETH, Currency.BTC);
+//    private static final Map<CurrencyPair, Double> PAIRS;
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
