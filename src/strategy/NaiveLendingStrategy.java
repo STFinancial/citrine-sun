@@ -20,21 +20,21 @@ import java.util.*;
 public final class NaiveLendingStrategy extends Strategy {
     // TODO(stfinancial): Move 25% of gains to margin account, 25% to exchange to move to wallets.
 
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
 
     // Instead of undercutting, we place the loan at this fraction of total daily trade volume deep into the order book.
-    private static final double VOLUME_FRACTION = 0.00076;
+    private static final double VOLUME_FRACTION = 0.00066;
     // The number of seconds to wait before changing the order. This should be related to the VOLUME_FRACTION.
     private static final double ORDER_DURATION = 300;
     private static final double TOLERABLE_LENDING_MULTIPLIER = 50;
 
     private static final double MIN_TRANSFER_AMOUNT = 0.00001;
-    private static final double EXCHANGE_TRANSFER_FRACTION = 0.35;
-    private static final double MARGIN_TRANSFER_FRACTION = 0.05;
+    private static final double EXCHANGE_TRANSFER_FRACTION = 0.0;
+    private static final double MARGIN_TRANSFER_FRACTION = 0.00;
 
     private static final Set<Currency> BLACKLIST = Collections.unmodifiableSet(new HashSet<>(Arrays.asList(
-            Currency.LTC
+//            Currency.LTC
     )));
 
     private Poloniex polo;
@@ -197,7 +197,7 @@ public final class NaiveLendingStrategy extends Strategy {
                     int duration = constants.getMinLendingDuration();
                     if (rate < constants.getMinLendingRate() * TOLERABLE_LENDING_MULTIPLIER) {
                         rate = constants.getMinLendingRate() * TOLERABLE_LENDING_MULTIPLIER;
-                    } else if (rate > 0.00049) {
+                    } else if (rate > 0.005) {
                         duration = constants.getMaxLendingDuration();
                     }
                     loan = new Loan(balances.get(c), rate, c, LoanType.OFFER);
