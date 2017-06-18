@@ -28,11 +28,12 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): Priority "direction" allowing us to prefer buying or selling first.
     // TODO(stfinancial): Min arbitrage ratio.
     // TODO(stfinancial): Instead of setting limit at exact price, set it at lowest arbitrage price, that will allow fewer unfilled orders.
+    // TODO(stfinancial): Priority currencypair/market if one arbitrage is really high or the others are non-existent.
 
-    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-//    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
 //    private static final double STANDARD_AMOUNT = 0.531;
@@ -40,7 +41,7 @@ class SlowArbitrageStrategy2 extends Strategy {
 //    private static final double STANDARD_AMOUNT = 0.2;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.ETH, Currency.BTC);
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
-        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 0.531);
+        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 1.5);
         put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.2);
     }});
     // TODO(stfinancial): Make this per-exchange?
@@ -50,7 +51,7 @@ class SlowArbitrageStrategy2 extends Strategy {
     private static final FeeRequest FEE_REQUEST = new FeeRequest(1, 1);
     private static final AccountBalanceRequest ACCOUNT_BALANCE_REQUEST = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
 
-    private static final int FEE_AND_BALANCE_INTERVAL = 25;
+    private static final int FEE_AND_BALANCE_INTERVAL = 50;
     private int feeAndBalanceCount = 500;
     private MovingAverage arbRatioMA500 = new MovingAverage(FEE_AND_BALANCE_INTERVAL);
 

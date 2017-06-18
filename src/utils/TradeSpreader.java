@@ -4,7 +4,9 @@ import static api.Currency.*;
 
 import api.Credentials;
 import api.CurrencyPair;
+import api.Market;
 import api.Ticker;
+import api.gdax.Gdax;
 import api.request.MarketResponse;
 import api.request.TickerRequest;
 import api.request.TickerResponse;
@@ -20,23 +22,48 @@ public class TradeSpreader {
     private static final Random random = new Random();
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
-    private static final double PRIMARY_LIMIT = 15;
+    private static final double PRIMARY_LIMIT = 100;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
-    private static final boolean ALLOW_MARKET_TAKES = true;
+    private static final boolean ALLOW_MARKET_TAKES = false;
     private static final double RANDOMIZER_RATE = 0.02;
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String EXCHANGE = "Poloniex";
 //    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final int ROUND_DECIMALS = 8;
+    private static final String EXCHANGE = "Gdax";
+    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final int ROUND_DECIMALS = 2;
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
 //    private static final double AMOUNT = 13.65;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
 
-    private static final double PRICE = 0.000095;
-    private static final double RANGE = 0.000003;
-    private static final double AMOUNT = 73800;
-    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
+//    private static final double PRICE = 2180;
+//    private static final double RANGE = 200;
+//    private static final double AMOUNT = 5.6;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(BTC, USDT);
+
+//    private static final double PRICE = 2300;
+//    private static final double RANGE = 300;
+//    private static final double AMOUNT = 10.75;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(BTC, USD);
+
+    private static final double PRICE = 25.4;
+    private static final double RANGE = 3;
+    private static final double AMOUNT = 1175;
+    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, USD);
+
+//    private static final double PRICE = 250;
+//    private static final double RANGE = 85;
+//    private static final double AMOUNT = 311.2;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
+
+//    private static final double PRICE = 0.000095;
+//    private static final double RANGE = 0.000003;
+//    private static final double AMOUNT = 73800;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
 //    private static final double PRICE = 0.0158;
 //    private static final double RANGE = 0.001;
@@ -78,9 +105,9 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 179300;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final int BUCKETS = 101;
+    private static final int BUCKETS = 601;
     private static final TradeType TYPE = TradeType.BUY;
-    private static final boolean IS_MARGIN = true;
+    private static final boolean IS_MARGIN = false;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
 
@@ -103,10 +130,20 @@ public class TradeSpreader {
             System.out.println("Negative range not allowed");
             return;
         }
-        Credentials c = Credentials.fromFileString(API_KEYS);
-        Poloniex polo = new Poloniex(c);
+        Market market;
+        switch (EXCHANGE) {
+            case "Gdax":
+                market = new Gdax(Credentials.fromFileString(API_KEYS));
+                break;
+            case "Poloniex":
+                market = new Poloniex(Credentials.fromFileString(API_KEYS));
+                break;
+            default:
+                System.out.println("Invalid exchange name: " + EXCHANGE);
+                return;
+        }
         if (!ALLOW_MARKET_TAKES) {
-            MarketResponse r = polo.processMarketRequest(new TickerRequest(1, 1));
+            MarketResponse r = market.processMarketRequest(new TickerRequest(Arrays.asList(PAIR), 1, 1));
             if (!r.isSuccess()) {
                 System.out.println("Failed to obtain ticker data.");
                 System.out.println(r.getJsonResponse().toString());
@@ -127,7 +164,7 @@ public class TradeSpreader {
         MarketResponse r;
         for (TradeRequest req : getTrades()) {
             // TODO(stfinancial): Do something if it fails?
-            while (!(r = polo.processMarketRequest(req)).isSuccess()) {
+            while (!(r = market.processMarketRequest(req)).isSuccess()) {
                 try {
                     // TODO(stfinancial): Need to make sure that if this fails with jsonMappingException that the trade didn't go through and the error wasn't somewhere else.
                     System.out.println("Failed request, sleeping... : " + r.getJsonResponse());
@@ -152,7 +189,8 @@ public class TradeSpreader {
         if (BUCKETS == 1) {
             priceIncrement = 0;
         } else {
-            priceIncrement = (endPrice - startPrice) / (BUCKETS - 1);
+            priceIncrement = ((int) (((endPrice - startPrice) / (BUCKETS - 1)) * 100000000)) / 100000000.0;
+            System.out.println("Price increment: " + priceIncrement);
         }
         LinkedList<TradeRequest> requests = new LinkedList<>();
         Trade t;
@@ -163,8 +201,13 @@ public class TradeSpreader {
             System.out.println(randomizationRates.get(bucket));
 
             // TODO(stfinancial): Switch to BigDecimalStringConverter.
-            t = new Trade(amountPerBucket + (randomizationRates.get(bucket) * randAmount),
-                          startPrice + (bucket * priceIncrement),
+            double amount = ((long) ((amountPerBucket + (randomizationRates.get(bucket) * randAmount)) * 100000000)) / 100000000.0;
+            double unroundedPrice = startPrice + (bucket * priceIncrement);
+            System.out.println("Unrounded: " + unroundedPrice);
+            double roundedPrice = ((long) (unroundedPrice * ((long) Math.pow(10, ROUND_DECIMALS)))) / Math.pow(10, ROUND_DECIMALS);
+            System.out.println("Rounded: " + roundedPrice);
+            t = new Trade(amount,
+                          roundedPrice,
                           PAIR,
                           TYPE);
             r = new TradeRequest(t, 1, System.currentTimeMillis());
