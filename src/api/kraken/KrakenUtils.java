@@ -39,7 +39,7 @@ final class KrakenUtils {
      * between the two (i.e. XBT and XMR -> "BTCXMR").
      */
     static String formatCurrencyPair(CurrencyPair pair) {
-        return String.format("%s%s", pair.getBase(), pair.getQuote());
+        return String.format("%s%s", getCurrencyString(pair.getBase()), getCurrencyString(pair.getQuote()));
     }
 
     // TODO(stfinancial): Could make this an abstract method for Market.
