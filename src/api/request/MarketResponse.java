@@ -14,7 +14,6 @@ public class MarketResponse {
 
 
     // TODO(stfinancial): Use a promise instead of success/error?
-
     protected final JsonNode jsonResponse;
     protected final MarketRequest request;
     protected final long timestamp; // TODO(stfinancial): Potentially rename this to responseTimestamp to be more clear.
@@ -23,6 +22,7 @@ public class MarketResponse {
 
     // TODO(stfinancial): Consider consolidating these into a single method.
     // TODO(stfinancial): Need a way to determine if something is an error.
+    // TODO(stfinancial): Builder to remove a lot of the bulk from these constructors?
     public MarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus error) {
         this.jsonResponse = jsonResponse;
 //        this.payload = payload;

@@ -11,26 +11,27 @@ import java.util.Map;
  * An instance of {@code MarketResponse} returning the {@link FeeInfo} for a given {@link api.CurrencyPair} or an entire {@link api.Market}.
  */
 public final class FeeResponse extends MarketResponse {
-    private final FeeInfo feeInfo;
+    private final Map<CurrencyPair, FeeInfo> feeInfo;
 
-    public FeeResponse(FeeInfo feeInfo, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus status) {
+    public FeeResponse(Map<CurrencyPair, FeeInfo> feeInfo, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus status) {
         super(jsonResponse, request, timestamp, status);
         this.feeInfo = feeInfo;
     }
 
-    public FeeInfo getFeeInfo() {
-        return feeInfo;
+//    // TODO(stfinancial): Need a better way to do this. Another option is forcing
+//    /** ONLY USE IF THIS FEE APPLIES TO ENTIRE MARKET */
+//    public FeeResponse(FeeInfo marketWideFeeInfo, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus status) {
+//
+//    }
+//
+//    // TODO(stfinancial): Come up with a better way.
+
+    public Map<CurrencyPair, FeeInfo> getFeeInfo() {
+        // TODO(stfinancial): Make it an unmodifiable map in the constructor? And elsewhere..
+        return Collections.unmodifiableMap(feeInfo);
     }
 
-//    private final Map<CurrencyPair, FeeInfo> feeInfo;
-//
-//    public FeeResponse(Map<CurrencyPair, FeeInfo> feeInfo, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus error) {
-//        super(jsonResponse, request, timestamp, error);
-//        this.feeInfo = feeInfo;
-//    }
-
-//    public Map<CurrencyPair, FeeInfo> getFeeInfo() {
-//        // TODO(stfinancial): All these unmodifiable map things should probably be done at creation time.
-//        return Collections.unmodifiableMap(feeInfo);
-//    }
+    public FeeInfo getFeeInfo(CurrencyPair pair) {
+        return feeInfo.get(pair);
+    }
 }

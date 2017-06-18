@@ -331,8 +331,8 @@ final class PoloniexResponseParser {
 
             // TODO(stfinancial): NEED TO CHECK WE ARE NOT DOUBLE COUNTING CURRENCY PAIRS HERE.
 
-            currencyVolumes.put(pair.getBase(), baseVolume + currencyVolumes.getOrDefault(pair.getBase(), Double.valueOf(0)));
-            currencyVolumes.put(pair.getQuote(), quoteVolume + currencyVolumes.getOrDefault(pair.getQuote(), Double.valueOf(0)));
+            currencyVolumes.put(pair.getBase(), baseVolume + currencyVolumes.getOrDefault(pair.getBase(), 0.0));
+            currencyVolumes.put(pair.getQuote(), quoteVolume + currencyVolumes.getOrDefault(pair.getQuote(), 0.0));
         });
         return new VolumeResponse(baseVolumes, quoteVolumes, currencyVolumes, jsonResponse, request, timestamp, RequestStatus.success());
     }
@@ -351,6 +351,12 @@ final class PoloniexResponseParser {
 
     private static FeeResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         FeeInfo info = new FeeInfo(jsonResponse.get("makerFee").asDouble(), jsonResponse.get("takerFee").asDouble(), jsonResponse.get("thirtyDayVolume").asDouble());
-        return new FeeResponse(info, jsonResponse, request, timestamp, RequestStatus.success());
+        Map<CurrencyPair, FeeInfo> infos = new HashMap<>();
+        if (request.getCurrencyPair().isPresent()) {
+            infos.put(request.getCurrencyPair().get(), info);
+        } else {
+            CurrencyPair.getCurrencyPairSet().forEach(pair -> infos.put(pair, info));
+        }
+        return new FeeResponse(infos, jsonResponse, request, timestamp, RequestStatus.success());
     }
 }

@@ -1,5 +1,10 @@
 package api;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+
 /**
  * A {@code CurrencyPair} has a base and quote {@link Currency}. The price of an asset for a given currency pair
  * is always represented in terms of its quote currency. That is, the number of units of the quote currency to make a
@@ -7,6 +12,7 @@ package api;
  */
 public final class CurrencyPair {
     private static final CurrencyPair[][] pairs;
+    private static List<CurrencyPair> pairList;
 
     static {
         // Techincally it can be [len][len - 1] since we don't need CP(BTC, BTC) e.g. Kind of a hassle to access though.
@@ -43,6 +49,18 @@ public final class CurrencyPair {
 
     public Currency getBase() { return base; }
     public Currency getQuote() { return quote; }
+
+    public static List<CurrencyPair> getCurrencyPairSet() {
+        // TODO(stfinancial): Other option is to let markets obtain these themselves by looking it up, e.g. returnCurrencies
+        if (pairList == null) {
+            ArrayList<CurrencyPair> l = new ArrayList<>();
+            for (CurrencyPair[] c : pairs) {
+                l.addAll(Arrays.asList(c));
+            }
+            pairList = Collections.unmodifiableList(l);
+        }
+        return pairList;
+    }
 
 //    /**
 //     * Constructs a string representation of this

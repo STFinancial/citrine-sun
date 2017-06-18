@@ -136,10 +136,6 @@ final class GdaxRequestRewriter {
     private static RequestArgs rewriteFeeRequest(FeeRequest request) {
         // TODO(stfinancial): Apparently this is a cached value that is calculated every night at midnight.
         // TODO(stfinancial): Does this mean that if we go over the next fee tier, it will have to wait?
-        if (!request.getCurrencyPair().isPresent()) {
-            // TODO(stfinancial): This is actually supported... implement this.
-            return RequestArgs.unsupported();
-        }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("users");
         builder.withResource("self");
