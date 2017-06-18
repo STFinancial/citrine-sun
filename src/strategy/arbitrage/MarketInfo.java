@@ -1,5 +1,6 @@
 package strategy.arbitrage;
 
+import api.Currency;
 import api.CurrencyPair;
 import api.Market;
 
@@ -11,6 +12,8 @@ import java.util.Map;
  */
 class MarketInfo {
     Market market;
-    Map<CurrencyPair, CurrencyInfo> currencyInfos = new HashMap<>();
+    Map<CurrencyPair, CurrencyPairInfo> currencyPairInfos = new HashMap<>();
+    Map<Currency, Double> balances = new HashMap<>();
     int priority;
+    CurrencyPair focusPair; // Set to whatever we've recently been arbitraging on. Checking other order books less frequently.
 }

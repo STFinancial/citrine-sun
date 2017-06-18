@@ -7,11 +7,9 @@ import java.util.List;
 /**
  * Created by Timothy on 5/31/17.
  */
-class CurrencyInfo {
+class CurrencyPairInfo {
     List<Trade> asks;
     List<Trade> bids;
-    double minAmount;
-    double quoteBalance;
-    double baseBalance;
+    double minAmount; // What are the units of this?
     double takerFee;
 }

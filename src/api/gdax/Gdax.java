@@ -57,7 +57,7 @@ public class Gdax extends Market {
         this.apiKey = credentials.getApiKey();
         this.passphrase = credentials.getPassphrase();
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
-        httpClient = HttpClients.createDefault();
+        this.httpClient = HttpClients.createDefault();
 //        try {
 //            WampClientBuilder builder = new WampClientBuilder();
 //            IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
@@ -105,7 +105,7 @@ public class Gdax extends Market {
 //                System.out.println(args.getUrl());
                 httpRequest = new HttpDelete(args.getUrl());
             } else {
-                System.out.println("Invalid HttpRequestType: " + args.getHttpRequestType());
+                System.out.println("(" + NAME + ")" + "Invalid HttpRequestType: " + args.getHttpRequestType());
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST,"Invalid HttpRequestType: " + args.getHttpRequestType()));
             }
             // TODO(stfinancial): Will change these names after getting a working implementation.

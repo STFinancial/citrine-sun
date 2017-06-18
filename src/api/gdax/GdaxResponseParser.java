@@ -118,14 +118,24 @@ final class GdaxResponseParser {
 
     private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
+
 //        System.out.println(jsonResponse);
-        FeeResponse feeResponse;
-        for (JsonNode feeSet : jsonResponse) {
-            if (GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()) != request.getCurrencyPair().get()) {
-                continue;
+        Map<CurrencyPair, FeeInfo> fees = new HashMap<>();
+        if (request.getCurrencyPair().isPresent()) {
+            for (JsonNode feeSet : jsonResponse) {
+                if (GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()) != request.getCurrencyPair().get()) {
+                    continue;
+                }
+                fees.put(request.getCurrencyPair().get(), new FeeInfo(0, GdaxUtils.getTakerFeeFromVolumeFraction(feeSet.get("volume").asDouble() / feeSet.get("exchange_volume").asDouble()), feeSet.get("volume").asDouble()));
+                return new FeeResponse(fees, jsonResponse, request, timestamp, RequestStatus.success());
             }
-            return new FeeResponse(new FeeInfo(0, GdaxUtils.getTakerFeeFromVolumeFraction(feeSet.get("volume").asDouble() / feeSet.get("exchange_volume").asDouble()), feeSet.get("volume").asDouble()), jsonResponse, request, timestamp, RequestStatus.success());
+        } else {
+            for (JsonNode feeSet : jsonResponse) {
+                fees.put(GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()), new FeeInfo(0, GdaxUtils.getTakerFeeFromVolumeFraction(feeSet.get("volume").asDouble() / feeSet.get("exchange_volume").asDouble()), feeSet.get("volume").asDouble()));
+            }
+            return new FeeResponse(fees, jsonResponse, request, timestamp, RequestStatus.success());
         }
+
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR));
     }
 

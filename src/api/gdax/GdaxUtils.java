@@ -89,11 +89,21 @@ final class GdaxUtils {
     /**
      * Converts a canonical {@code CurrencyPair} into a {@code String} representation for use by the Gdax API.
      * @param pair {@code CurrencyPair} to convert to {@code String} format.
-     * @return Poloniex's {@code String} representation of a {@code CurrencyPair}. Returns the Gdax-specific
+     * @return Gdax's {@code String} representation of a {@code CurrencyPair}. Returns the Gdax-specific
      * representation of the {@code CurrencyPair}'s base and quote {@link Currency}, respectively, with a hyphen
      * between the two (i.e. XBT and XMR -> "BTC-XMR").
      */
     static String formatCurrencyPair(CurrencyPair pair) {
-        return String.format("%s-%s", pair.getBase(), pair.getQuote());
+        // TODO(stfinancial): Need to get the "translated" version.
+        return String.format("%s-%s", getCurrencyString(pair.getBase()), getCurrencyString(pair.getQuote()));
+    }
+
+    // TODO(stfinancial): Could make this an abstract method for Market.
+    static String getCurrencyString(Currency currency) {
+        // TODO(stfinancial): There has to be a more elegant solution than a giant switch statement. Maybe an enummap or something.
+        switch (currency) {
+            default:
+                return currency.toString();
+        }
     }
 }
