@@ -27,6 +27,8 @@ import java.security.NoSuchAlgorithmException;
  * Created by Timothy on 3/7/17.
  */
 public class Kraken extends Market {
+    // TODO(stfinancial): Kraken has a nonce window depending on the api key.
+
     private static final String NAME = "Kraken";
     private static final String ENCODING = "UTF-8";
 
@@ -77,6 +79,7 @@ public class Kraken extends Market {
                 System.out.println("(" + NAME + ")" + "Invalid HttpRequestType: " + args.getHttpRequestType());
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST, "Invalid HttpRequestType: " + args.getHttpRequestType()));
         }
+        System.out.println(args.getUrl());
         if (args.isPrivate()) {
             // TODO(stfinancial): Implement this.
             // TODO(stfinancial): Change names once we have confirmed it is working.

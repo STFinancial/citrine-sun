@@ -30,6 +30,7 @@ final class GdaxRequestRewriter {
     }
 
     private static RequestArgs rewriteTickerRequest(TickerRequest request) {
+        // TODO(stfinancial): Does gdax really not support getting all the tickers?
         if (!request.getPairs().isPresent() || request.getPairs().get().size() != 1) {
             // TODO(stfinancial): Probably need to throw something here.
             return RequestArgs.unsupported();

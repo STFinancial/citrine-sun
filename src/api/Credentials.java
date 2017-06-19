@@ -11,6 +11,7 @@ import java.io.IOException;
  * Created by Timothy on 2/7/17.
  */
 public class Credentials {
+    // TODO(stfinancial): Static factory method for empty credentials to have a public version of a market. Or maybe jsut have a no arg market.
     // TODO(stfinancial): Support for separate market credentials (maybe)... this may clash with having multiple accounts per exchange.
 
     // TODO(stfinancial): Likely move this into a separate package with the signer interface (?) at which point we can perhaps better encapsulate.
