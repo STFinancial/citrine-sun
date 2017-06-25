@@ -14,6 +14,8 @@ public final class TradeRequest extends MarketRequest {
         FILL_OR_KILL;
         // TODO(stfinancial): Good til time.
     }
+    // TODO(stfinancial): Don't require rate for market orders.
+
     // TODO(stfinancial): Is there a way to do interest rate for margin?
     // TODO(stfinancial): Builder pattern?
 

@@ -77,4 +77,9 @@ final class KrakenResponseParser {
         System.out.println(jsonResponse);
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
+
+    private static MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
+        System.out.println(jsonResponse);
+        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
+    }
 }

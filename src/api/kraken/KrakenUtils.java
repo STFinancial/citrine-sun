@@ -2,6 +2,7 @@ package api.kraken;
 
 import api.Currency;
 import api.CurrencyPair;
+import api.tmp_trade.TradeType;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -13,11 +14,25 @@ import static api.Currency.*;
  * Created by Timothy on 6/3/17.
  */
 final class KrakenUtils {
+    private static final String BUY_STRING = "buy";
+    private static final String SELL_STRING = "sell";
+    private static final String INVALID_STRING = "invalid";
+
     // TODO(stfinancial): There has to be a better way, perhaps
     private static final Map<String, CurrencyPair> pairs = Collections.unmodifiableMap(new HashMap<String, CurrencyPair>(){{
         put("DASHXBT", CurrencyPair.of(DASH, BTC));
     }});
 
+    static String getCommandForTradeType(TradeType type) {
+        switch (type) {
+            case BUY:
+                return BUY_STRING;
+            case SELL:
+                return SELL_STRING;
+            default:
+                return INVALID_STRING;
+        }
+    }
 
     static CurrencyPair parseCurrencyPair(String pair) {
         // TODO(stfinancial): THIS IS NOT RIGHT.
