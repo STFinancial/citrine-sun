@@ -368,6 +368,7 @@ class SlowArbitrageStrategy2 extends Strategy {
             }
             FeeResponse feeResponse = (FeeResponse) response;
             for (CurrencyPair pair : PAIRS.keySet()) {
+                // TODO(stfinancial): Instability at this line, need to figure out why or use optional.
                 m.currencyPairInfos.get(pair).takerFee = feeResponse.getFeeInfo(pair).getTakerFee();
             }
             ArbitrageUtils.sleep(250);
@@ -378,6 +379,14 @@ class SlowArbitrageStrategy2 extends Strategy {
             }
             Map<Currency, Double> balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
             m.balances = balances;
+            for (CurrencyPair pair : PAIRS.keySet()) {
+                if (!m.balances.containsKey(pair.getBase())) {
+                    m.balances.put(pair.getBase(), 0.0);
+                }
+                if (!m.balances.containsKey(pair.getQuote())) {
+                    m.balances.put(pair.getQuote(), 0.0);
+                }
+            }
         }
         feeAndBalanceCount = 0;
         return true;
