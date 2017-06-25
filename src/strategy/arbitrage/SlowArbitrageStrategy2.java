@@ -29,11 +29,12 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): Min arbitrage ratio.
     // TODO(stfinancial): Instead of setting limit at exact price, set it at lowest arbitrage price, that will allow fewer unfilled orders.
     // TODO(stfinancial): Priority currencypair/market if one arbitrage is really high or the others are non-existent.
+    // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
-//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+//    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
 //    private static final double STANDARD_AMOUNT = 0.531;
@@ -41,7 +42,7 @@ class SlowArbitrageStrategy2 extends Strategy {
 //    private static final double STANDARD_AMOUNT = 0.2;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.ETH, Currency.BTC);
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
-        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 1.5);
+        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.5);
         put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.2);
     }});
     // TODO(stfinancial): Make this per-exchange?

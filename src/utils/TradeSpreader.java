@@ -22,18 +22,18 @@ public class TradeSpreader {
     private static final Random random = new Random();
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
-    private static final double PRIMARY_LIMIT = 100;
+    private static final double PRIMARY_LIMIT = 31;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
-    private static final boolean ALLOW_MARKET_TAKES = false;
+    private static final boolean ALLOW_MARKET_TAKES = true;
     private static final double RANDOMIZER_RATE = 0.02;
-//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String EXCHANGE = "Poloniex";
+    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String EXCHANGE = "Poloniex";
 //    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
 //    private static final int ROUND_DECIMALS = 8;
-    private static final String EXCHANGE = "Gdax";
-    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
-    private static final int ROUND_DECIMALS = 2;
+//    private static final String EXCHANGE = "Gdax";
+//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final int ROUND_DECIMALS = 8;
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -50,14 +50,14 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 10.75;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTC, USD);
 
-    private static final double PRICE = 25.4;
-    private static final double RANGE = 3;
-    private static final double AMOUNT = 1175;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, USD);
+//    private static final double PRICE = 25.4;
+//    private static final double RANGE = 3;
+//    private static final double AMOUNT = 1175;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, USD);
 
 //    private static final double PRICE = 250;
 //    private static final double RANGE = 85;
-//    private static final double AMOUNT = 311.2;
+//    private static final double AMOUNT = 240;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
 
 //    private static final double PRICE = 0.000095;
@@ -70,10 +70,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 698;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.077;
-//    private static final double RANGE = 0.0017;
-//    private static final double AMOUNT = 148;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+    private static final double PRICE = 0.1263;
+    private static final double RANGE = 0.003;
+    private static final double AMOUNT = 242;
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
@@ -105,9 +105,9 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 179300;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final int BUCKETS = 601;
-    private static final TradeType TYPE = TradeType.BUY;
-    private static final boolean IS_MARGIN = false;
+    private static final int BUCKETS = 121;
+    private static final TradeType TYPE = TradeType.SELL;
+    private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
 
@@ -155,6 +155,7 @@ public class TradeSpreader {
                 System.out.println("Highest buy higher than lowest sell.");
                 return;
             }
+            // TODO(stfinancial): Fix null ptr exception here.
             // If the lowest sell is lower than the highest buy, then we are going to be a taker.
             if (TYPE == TradeType.SELL && t.getHighestBid() >= PRICE - RANGE) {
                 System.out.println("Lowest sell lower than highest buy.");
