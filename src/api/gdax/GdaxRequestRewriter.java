@@ -1,6 +1,7 @@
 package api.gdax;
 
 import api.AccountType;
+import api.CurrencyPair;
 import api.RequestArgs;
 import api.request.*;
 
@@ -31,14 +32,14 @@ final class GdaxRequestRewriter {
 
     private static RequestArgs rewriteTickerRequest(TickerRequest request) {
         // TODO(stfinancial): Does gdax really not support getting all the tickers?
-        if (!request.getPairs().isPresent() || request.getPairs().get().size() != 1) {
+        if (request.getPairs().size() != 1) {
             // TODO(stfinancial): Probably need to throw something here.
+            System.out.println("Gdax does not support multiple ticker pair requests.");
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("products");
-        // TODO(stfinancial): Awful...
-        builder.withResource(GdaxUtils.formatCurrencyPair(request.getPairs().get().get(0)));
+        builder.withResource(GdaxUtils.formatCurrencyPair(request.getPairs().get(0)));
         builder.withResource("ticker");
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         builder.isPrivate(false);
