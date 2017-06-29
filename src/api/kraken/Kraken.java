@@ -65,11 +65,12 @@ public class Kraken extends Market {
     }
 
     private MarketResponse sendRequest(MarketRequest request) {
+        // TODO(stfinancial): Cleanup
         HttpUriRequest httpRequest;
         long timestamp = System.currentTimeMillis();
         String responseString;
         JsonNode jsonResponse;
-        int statusCode = -1;
+        int statusCode = -1; // TODO(stfinancial): Think about how to properly use this error code.
 
         final RequestArgs args = KrakenRequestRewriter.rewriteRequest(request);
         if (args.isUnsupported()) {
