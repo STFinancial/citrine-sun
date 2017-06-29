@@ -32,10 +32,10 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
-    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-//    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{

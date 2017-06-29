@@ -17,7 +17,9 @@ import java.util.List;
  * Created by Timothy on 6/17/17.
  */
 public class KrakenTest {
-    private static final String KRAKEN_KEYS = "/Users/Timothy/Documents/Keys/kraken_key.txt";
+//    private static final String KRAKEN_KEYS = "/Users/Timothy/Documents/Keys/kraken_key.txt";
+    // TODO(stfinancial): There are no actual keys in this file. Fix this.
+    private static final String KRAKEN_KEYS = "F:\\\\Users\\\\Zarathustra\\\\Documents\\\\main_key.txt";
 
     public static void main(String[] args) {
         KrakenTest t = new KrakenTest();
@@ -27,12 +29,12 @@ public class KrakenTest {
     public void test() {
         Credentials c = Credentials.fromFileString(KRAKEN_KEYS);
         Kraken k = new Kraken(c);
-        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
+//        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
 //        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.DASH, Currency.BTC), 5, 1, 1);
-//        List<CurrencyPair> pairs = new ArrayList<>();
-//        pairs.add(CurrencyPair.of(Currency.DASH, Currency.BTC));
-//        pairs.add(CurrencyPair.of(Currency.BTC, Currency.USD));
-//        TickerRequest r = new TickerRequest(pairs, 1, 1);
+        List<CurrencyPair> pairs = new ArrayList<>();
+        pairs.add(CurrencyPair.of(Currency.DASH, Currency.BTC));
+        pairs.add(CurrencyPair.of(Currency.BTC, Currency.USD));
+        TickerRequest r = new TickerRequest(pairs, 1, 1);
         MarketResponse resp = k.processMarketRequest(r);
         System.out.println(resp.getJsonResponse());
     }

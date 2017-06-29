@@ -26,7 +26,7 @@ public class TradeSpreader {
     private static final double PRIMARY_LIMIT = 31;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
-    private static final boolean ALLOW_MARKET_TAKES = true;
+    private static final boolean ALLOW_MARKET_TAKES = false;
     private static final double RANDOMIZER_RATE = 0.02;
 
 //    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
@@ -37,10 +37,10 @@ public class TradeSpreader {
 //    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 //    private static final int ROUND_DECIMALS = 2;
 
-    private static final double PRICE = 0.00000086;
-    private static final double RANGE = 0.00000014;
-    private static final double AMOUNT = 15900000;
-    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
+//    private static final double PRICE = 0.00000086;
+//    private static final double RANGE = 0.00000014;
+//    private static final double AMOUNT = 100000;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -103,11 +103,16 @@ public class TradeSpreader {
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
 
 //    private static final double PRICE = 0.00001;
-//    private static final double RANGE = 0.00000350;
-//    private static final double AMOUNT = 1362287;
+//    private static final double RANGE = 0.00000235;
+//    private static final double AMOUNT = 777328;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final int BUCKETS = 29;
+    private static final double PRICE = 0.00008000;
+    private static final double RANGE = 0.00001350;
+    private static final double AMOUNT = 64500;
+    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
+
+    private static final int BUCKETS = 109;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 

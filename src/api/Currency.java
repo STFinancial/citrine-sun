@@ -20,6 +20,7 @@ public enum Currency {
     BELA(Arrays.asList("BELA"), "X"),
     BITS(Arrays.asList("BITS"), "X"),
     BLK(Arrays.asList("BLK"), "X"),
+    BNT(Arrays.asList("BNT"), "X"), // Bancor Network Token
     BTC(Arrays.asList("BTC","XBT"), "X"),
     BTCD(Arrays.asList("BTCD"), "X"),
     BTS(Arrays.asList("BTS"), "X"), // Bitshares
@@ -64,10 +65,11 @@ public enum Currency {
     NXC(Arrays.asList("NXC"), "X"),
     NXT(Arrays.asList("NXT"), "X"),
     OMNI(Arrays.asList("OMNI"), "X"),
-    PASC(Arrays.asList("PASC"), "X"),
+    PASC(Arrays.asList("PASC"), "X"), // Pascal
     PINK(Arrays.asList("PINK"), "X"),
     POT(Arrays.asList("POT"), "X"), // Potcoin
     PPC(Arrays.asList("PPC"), "X"),
+    PTOY(Arrays.asList("PTOY"), "X"), // Patientory
     QBK(Arrays.asList("QBK"), "X"),
     QORA(Arrays.asList("QORA"), "X"),
     QTL(Arrays.asList("QTL"), "X"),
@@ -79,6 +81,7 @@ public enum Currency {
     SC(Arrays.asList("SC"), "X"), // Siacoin
     SDC(Arrays.asList("SDC"), "X"),
     SJCX(Arrays.asList("SJCX"), "X"), // Storjcoin
+    SNT(Arrays.asList("SNT"), "X"), // Status Network Token
     STEEM(Arrays.asList("STEEM"), "X"), // Steem
     STR(Arrays.asList("STR","XLM"), "X"), // Stellar Lumens
     STRAT(Arrays.asList("STRAT"), "X"),
