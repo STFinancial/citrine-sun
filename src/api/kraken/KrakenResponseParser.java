@@ -41,7 +41,7 @@ final class KrakenResponseParser {
         System.out.println(jsonResponse);
         // TODO(stfinancial): We check that there is a currency pair in the request, does it make sense to be defensive and check here as well?
         Map<CurrencyPair, Ticker> tickers = new HashMap<>();
-        request.getPairs().get().forEach((pair) -> {
+        request.getPairs().forEach((pair) -> {
             JsonNode j = jsonResponse.get("result").get(KrakenUtils.formatCurrencyPair(pair));
             Ticker.Builder b = new Ticker.Builder(pair, j.get("c").get(0).asDouble(), j.get("a").get(0).asDouble(), j.get("b").get(0).asDouble());
             b.percentChange(PriceUtil.getPercentChange(j.get("o").asDouble(), j.get("c").get(0).asDouble()));

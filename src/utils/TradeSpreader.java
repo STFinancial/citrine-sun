@@ -20,20 +20,27 @@ import java.util.*;
 
 public class TradeSpreader {
     private static final Random random = new Random();
+    // TODO(stfinancial): This needs to be looked at. It doesn't seem to be working correctly.
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
     private static final double PRIMARY_LIMIT = 31;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
-    private static final boolean ALLOW_MARKET_TAKES = true;
+    private static final boolean ALLOW_MARKET_TAKES = false;
     private static final double RANDOMIZER_RATE = 0.02;
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+
+//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String EXCHANGE = "Poloniex";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-//    private static final int ROUND_DECIMALS = 8;
+    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final int ROUND_DECIMALS = 8;
 //    private static final String EXCHANGE = "Gdax";
 //    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
-    private static final int ROUND_DECIMALS = 8;
+//    private static final int ROUND_DECIMALS = 2;
+
+//    private static final double PRICE = 0.00000086;
+//    private static final double RANGE = 0.00000014;
+//    private static final double AMOUNT = 100000;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -70,10 +77,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 698;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-    private static final double PRICE = 0.1263;
-    private static final double RANGE = 0.003;
-    private static final double AMOUNT = 242;
-    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+//    private static final double PRICE = 0.104;
+//    private static final double RANGE = 0.004;
+//    private static final double AMOUNT = 150;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
@@ -95,18 +102,18 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 250;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
 
-//    private static final double PRICE = 0.00000067;
-//    private static final double RANGE = 0.00000008;
-//    private static final double AMOUNT = 2450000;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
-
-//    private static final double PRICE = 0.00001950;
-//    private static final double RANGE = 0.000001;
-//    private static final double AMOUNT = 179300;
+//    private static final double PRICE = 0.00001;
+//    private static final double RANGE = 0.00000235;
+//    private static final double AMOUNT = 777328;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final int BUCKETS = 121;
-    private static final TradeType TYPE = TradeType.SELL;
+    private static final double PRICE = 0.00008000;
+    private static final double RANGE = 0.00001350;
+    private static final double AMOUNT = 64500;
+    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
+
+    private static final int BUCKETS = 109;
+    private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
@@ -149,6 +156,7 @@ public class TradeSpreader {
                 System.out.println(r.getJsonResponse().toString());
                 return;
             }
+            System.out.println(r.getJsonResponse());
             Ticker t = ((TickerResponse) r).getTickers().get(PAIR);
             // If the highest buy is higher than the lowest sell, then we are going to be a taker.
             if (TYPE == TradeType.BUY && t.getLowestAsk() <= PRICE + RANGE) {
@@ -165,6 +173,7 @@ public class TradeSpreader {
         MarketResponse r;
         for (TradeRequest req : getTrades()) {
             // TODO(stfinancial): Do something if it fails?
+            System.out.println(req.toString());
             while (!(r = market.processMarketRequest(req)).isSuccess()) {
                 try {
                     // TODO(stfinancial): Need to make sure that if this fails with jsonMappingException that the trade didn't go through and the error wasn't somewhere else.
@@ -190,7 +199,15 @@ public class TradeSpreader {
         if (BUCKETS == 1) {
             priceIncrement = 0;
         } else {
-            priceIncrement = ((int) (((endPrice - startPrice) / (BUCKETS - 1)) * 100000000)) / 100000000.0;
+            System.out.println("Start price: " + startPrice);
+            System.out.println("End price: " + endPrice);
+            double num = (endPrice - startPrice);
+            System.out.println("Price difference: " + num);
+            num = (long) Math.round(num * Math.pow(10, ROUND_DECIMALS));
+            System.out.println("Multiplied & Rounded price difference: " + num);
+//            System.out.println("Num per bucket: " + num);
+            priceIncrement = (num / (BUCKETS - 1)) / (double) Math.pow(10, ROUND_DECIMALS);
+//            priceIncrement = ((long) ((Math.round(endPrice - startPrice) / ((double) BUCKETS - 1)) * 100000000)) / 100000000.0;
             System.out.println("Price increment: " + priceIncrement);
         }
         LinkedList<TradeRequest> requests = new LinkedList<>();

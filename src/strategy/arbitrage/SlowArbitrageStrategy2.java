@@ -21,7 +21,6 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): Use moving averages to determine how often to get the order books.
 
     // TODO(stfinancial): IOC both trades and have a "holdover" potentially... HIGH PRIORITY!!!!.
-    // TODO(stfinancial): Estimate account balances.
     // TODO(stfinancial): See if we can fix 0.01 gdax issue.
     // TODO(stfinancial): Consider setting secondary rate to the lowest possible arbitrage rate. Better avoids orders that don't fill.
     // TODO(stfinancial): "Volume" bonus. To help reduce fees, increase magnitude on low volume days.
@@ -29,25 +28,23 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): Min arbitrage ratio.
     // TODO(stfinancial): Instead of setting limit at exact price, set it at lowest arbitrage price, that will allow fewer unfilled orders.
     // TODO(stfinancial): Priority currencypair/market if one arbitrage is really high or the others are non-existent.
+    // TODO(stfinancial): If scaled amount is less than min amount, use min amount (before accounting for balances).
+
     // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
-    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-//    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
-//    private static final double STANDARD_AMOUNT = 0.531;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
-//    private static final double STANDARD_AMOUNT = 0.2;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.ETH, Currency.BTC);
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
-        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.5);
-        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.2);
+        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.6);
+        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.15);
     }});
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
-    private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 100;
+    private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 25;
 
     private static final FeeRequest FEE_REQUEST = new FeeRequest(1, 1);
     private static final AccountBalanceRequest ACCOUNT_BALANCE_REQUEST = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
@@ -140,7 +137,7 @@ class SlowArbitrageStrategy2 extends Strategy {
             ArbitrageUtils.logAtLevel("Buy (" + askSide.market.getName() + ") - " + lowestAsk.getAmount() + " - " + lowestAsk.getRate(), 2);
             ArbitrageUtils.logAtLevel("Sell (" + bidSide.market.getName() + ") - " + highestBid.getAmount() + " - " + highestBid.getRate(), 2);
 
-            double scaledAmount = Math.floor(PAIRS.get(pair) * getMultiplier(bidSide, askSide, pair, arbitrageRatio) * HUNDRED_MILLION) / HUNDRED_MILLION;
+            double scaledAmount = Math.max(askSidePairInfo.minAmount, Math.max(bidSidePairInfo.minAmount, Math.floor(PAIRS.get(pair) * getMultiplier(bidSide, askSide, pair, arbitrageRatio) * HUNDRED_MILLION) / HUNDRED_MILLION));
 
             double askSideTradeAmount = lowestAsk.getAmount();
             // TODO(stfinancial): Make sure this is updated when we search more than 1 order deep.
@@ -316,6 +313,7 @@ class SlowArbitrageStrategy2 extends Strategy {
         CurrencyPairInfo askPairInfo = askSide.currencyPairInfos.get(pair);
         CurrencyPairInfo bidPairInfo = bidSide.currencyPairInfos.get(pair);
 //        double amount = STANDARD_AMOUNT;
+        // TODO(stfinancial): Not sure it makes a lot of sense to use fees here. This ratio increases as fees are lower, which we don't necessarily want.
         double arbitrageMultiplier = Math.pow((arbitrageRatio - ((1 - bidPairInfo.takerFee) * (1 - askPairInfo.takerFee))) * 100, 2);
         ArbitrageUtils.logAtLevel("ArbitrageMultiplier: " + arbitrageMultiplier, 3);
 
@@ -368,8 +366,14 @@ class SlowArbitrageStrategy2 extends Strategy {
             }
             FeeResponse feeResponse = (FeeResponse) response;
             for (CurrencyPair pair : PAIRS.keySet()) {
+                System.out.println(feeResponse.getJsonResponse());
                 // TODO(stfinancial): Instability at this line, need to figure out why or use optional.
-                m.currencyPairInfos.get(pair).takerFee = feeResponse.getFeeInfo(pair).getTakerFee();
+                try {
+                    m.currencyPairInfos.get(pair).takerFee = feeResponse.getFeeInfo(pair).getTakerFee();
+                } catch (NullPointerException e) {
+                    m.currencyPairInfos.get(pair).takerFee = 0.003;
+                }
+
             }
             ArbitrageUtils.sleep(250);
             response = m.market.processMarketRequest(ACCOUNT_BALANCE_REQUEST);

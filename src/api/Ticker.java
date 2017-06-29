@@ -31,8 +31,10 @@ public class Ticker {
     public double getLast() { return last; }
     public double getLowestAsk() { return lowestAsk; }
     public double getHighestBid() { return highestBid; }
+    // TODO(stfinancial): HIGH PRIORITY - Should this be 6% = 6 or 6% = 0.06?
     public double getPercentChange() { return percentChange; }
     public double getBaseVolume() { return baseVolume; }
+    // TODO(stfinancial): HIGH PRIORITY - Differentiate between price weighted quote volume and quote volume.
     public double getQuoteVolume() { return quoteVolume; }
 
 

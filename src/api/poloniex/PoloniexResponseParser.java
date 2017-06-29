@@ -287,13 +287,13 @@ final class PoloniexResponseParser {
 
     private static TickerResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
         Map<CurrencyPair, Ticker> tickers = new HashMap<>();
-        jsonResponse.fields().forEachRemaining((entry)->{
-            tickers.put(PoloniexUtils.parseCurrencyPair(entry.getKey()), new Ticker.Builder(PoloniexUtils.parseCurrencyPair(entry.getKey()), entry.getValue().get("last").asDouble(),
-                    entry.getValue().get("lowestAsk").asDouble(), entry.getValue().get("highestBid").asDouble()).baseVolume(entry.getValue().get("baseVolume").asDouble()).percentChange(entry.getValue().get("percentChange").asDouble()).quoteVolume(entry.getValue().get("quoteVolume").asDouble()).build());
-        });
-        // Only return those tickers which were specified.
-        request.getPairs().ifPresent((pairs) -> {
-            pairs.forEach((pair) -> tickers.remove(pair));
+        request.getPairs().forEach((pair)->{
+            JsonNode j = jsonResponse.get(PoloniexUtils.formatCurrencyPair(pair));
+            Ticker.Builder b = new Ticker.Builder(pair, j.get("last").asDouble(), j.get("lowestAsk").asDouble(), j.get("highestBid").asDouble());
+            b.baseVolume(j.get("baseVolume").asDouble());
+            b.quoteVolume(j.get("quoteVolume").asDouble());
+            b.percentChange(j.get("percentChange").asDouble());
+            tickers.put(pair, b.build());
         });
         return new TickerResponse(tickers, jsonResponse, request, timestamp, RequestStatus.success());
     }

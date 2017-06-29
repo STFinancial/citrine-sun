@@ -25,13 +25,14 @@ final class KrakenRequestRewriter {
     }
 
     private static RequestArgs rewriteTickerRequest(TickerRequest request) {
-        if (!request.getPairs().isPresent()) {
+        if (request.getPairs().isEmpty()) {
+            System.out.println("Kraken requires that ticker pairs be specified.");
             // TODO(stfinancial): Probably need to throw something here.
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         StringBuilder pairs = new StringBuilder();
-        for (CurrencyPair pair : request.getPairs().get()) {
+        for (CurrencyPair pair : request.getPairs()) {
             pairs.append(KrakenUtils.formatCurrencyPair(pair)).append(",");
         }
         // TODO(stfinancial): Gross, find another way.

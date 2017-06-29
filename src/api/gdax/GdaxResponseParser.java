@@ -90,11 +90,11 @@ final class GdaxResponseParser {
     }
 
     private static MarketResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
-        Ticker.Builder ticker = new Ticker.Builder(request.getPairs().get().get(0), jsonResponse.get("price").asDouble(), jsonResponse.get("ask").asDouble(), jsonResponse.get("bid").asDouble());
+        Ticker.Builder ticker = new Ticker.Builder(request.getPairs().get(0), jsonResponse.get("price").asDouble(), jsonResponse.get("ask").asDouble(), jsonResponse.get("bid").asDouble());
         ticker.baseVolume(jsonResponse.get("volume").asDouble());
         // TODO(stfinancial): Look at all the problems this stupid optional list is causing.
         Map<CurrencyPair, Ticker> tickers = new HashMap<>();
-        tickers.put(request.getPairs().get().get(0), ticker.build());
+        tickers.put(request.getPairs().get(0), ticker.build());
         return new TickerResponse(tickers, jsonResponse, request, timestamp, RequestStatus.success());
     }
 

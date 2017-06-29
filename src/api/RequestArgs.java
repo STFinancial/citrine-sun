@@ -50,7 +50,7 @@ public final class RequestArgs {
     private JsonNode json;
     private List<NameValuePair> nameValuePairs;
 
-    // TODO(stfinancial): Improve this... maybe allow a message or something. Throw an exception... idk.
+    // TODO(stfinancial): Improve this... maybe allow a message or something (maybe pair a message with this class). Throw an exception... idk.
     private static final RequestArgs UNSUPPORTED = new RequestArgs((new Builder("<<< *UNSUPPORTED* >>>")));
 
     private RequestArgs(Builder builder) {
