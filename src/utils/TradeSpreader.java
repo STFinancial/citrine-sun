@@ -23,11 +23,12 @@ public class TradeSpreader {
     // TODO(stfinancial): This needs to be looked at. It doesn't seem to be working correctly.
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
-    private static final double PRIMARY_LIMIT = 25;
+    private static final double PRIMARY_LIMIT = 31;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
-    private static final boolean ALLOW_MARKET_TAKES = false;
+    private static final boolean ALLOW_MARKET_TAKES = true;
     private static final double RANDOMIZER_RATE = 0.02;
+
 //    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String EXCHANGE = "Poloniex";
     private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
@@ -63,7 +64,7 @@ public class TradeSpreader {
 
 //    private static final double PRICE = 250;
 //    private static final double RANGE = 85;
-//    private static final double AMOUNT = 311.2;
+//    private static final double AMOUNT = 240;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
 
 //    private static final double PRICE = 0.000095;
@@ -75,7 +76,6 @@ public class TradeSpreader {
 //    private static final double RANGE = 0.001;
 //    private static final double AMOUNT = 698;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
-
 
 //    private static final double PRICE = 0.104;
 //    private static final double RANGE = 0.004;
@@ -145,7 +145,7 @@ public class TradeSpreader {
                 return;
         }
         if (!ALLOW_MARKET_TAKES) {
-            MarketResponse r = market.processMarketRequest(new TickerRequest(new HashSet<>(Arrays.asList(PAIR)), 1, 1));
+            MarketResponse r = market.processMarketRequest(new TickerRequest(Arrays.asList(PAIR), 1, 1));
             if (!r.isSuccess()) {
                 System.out.println("Failed to obtain ticker data.");
                 System.out.println(r.getJsonResponse().toString());
@@ -158,6 +158,7 @@ public class TradeSpreader {
                 System.out.println("Highest buy higher than lowest sell.");
                 return;
             }
+            // TODO(stfinancial): Fix null ptr exception here.
             // If the lowest sell is lower than the highest buy, then we are going to be a taker.
             if (TYPE == TradeType.SELL && t.getHighestBid() >= PRICE - RANGE) {
                 System.out.println("Lowest sell lower than highest buy.");

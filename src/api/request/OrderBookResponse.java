@@ -12,6 +12,7 @@ import java.util.Map;
  * Created by Timothy on 4/27/17.
  */
 public class OrderBookResponse extends MarketResponse {
+    // TODO(stfinancial): In what case do we have multiple currency pairs?
     // TODO(stfinancial): Sequence number?
 
     private final Map<CurrencyPair, List<Trade>> asks; // sells
@@ -27,6 +28,7 @@ public class OrderBookResponse extends MarketResponse {
 
     // *** NOTE *** NO GUARANTEES ABOUT THE GRANULARITY OF THE ORDER BOOK, WHETHER AGGREGATED OR NOT.
 
+    // TODO(stfinancial): Should these be made unmodifiable in the constructor?
     public Map<CurrencyPair, List<Trade>> getAsks() {
         return Collections.unmodifiableMap(asks);
     }
