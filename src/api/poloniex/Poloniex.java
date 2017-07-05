@@ -1,6 +1,7 @@
 package api.poloniex;
 
 import api.*;
+import api.QueueStrategy;
 import api.request.*;
 import api.wamp.WampClientWrapper;
 import api.wamp.WampSubscription;
@@ -26,8 +27,6 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -73,7 +72,7 @@ public final class Poloniex extends Market { //implements Tradable {
         this.httpClient = HttpClients.createDefault();
 //        this.trader = new PoloniexTrader(this);
         if (!accountQueues.containsKey(apiKey)) {
-            queue = new PoloniexQueue(QueueStrategy.CONSTANT, 10000);
+            queue = new PoloniexQueue(QueueStrategy.STRICT, 10000);
             accountQueues.put(apiKey, queue);
         } else {
             queue = accountQueues.get(apiKey);
@@ -133,7 +132,8 @@ public final class Poloniex extends Market { //implements Tradable {
         return tickerSubscription.registerCallback(callback);
     }
 
-    private MarketResponse sendRequest(MarketRequest request) {
+    @Override
+    protected MarketResponse sendRequest(MarketRequest request) {
         HttpUriRequest httpRequest;
         String responseString;
         JsonNode jsonResponse;
@@ -146,14 +146,15 @@ public final class Poloniex extends Market { //implements Tradable {
 
         if (!args.isPrivate()) {
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
-            httpRequest = new HttpGet(args.getUrl());
+            httpRequest = new HttpGet(args.asUrl(true));
+            System.out.println("URL: " + args.asUrl(true));
         } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
             String sign = signer.getHexDigest(args.getQueryString().getBytes());
 //            System.out.println(args.getUrl());
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
-            httpRequest = new HttpPost(PRIVATE_URI);
+            httpRequest = new HttpPost(args.getUri());
             httpRequest.addHeader("Key", apiKey);
             httpRequest.addHeader("Sign", sign);
             try {

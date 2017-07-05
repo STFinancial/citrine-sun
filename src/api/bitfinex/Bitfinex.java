@@ -44,4 +44,9 @@ public final class Bitfinex extends Market {
     public MarketConstants getConstants() {
         return null;
     }
+
+    @Override
+    protected MarketResponse sendRequest(MarketRequest request) {
+        return null;
+    }
 }

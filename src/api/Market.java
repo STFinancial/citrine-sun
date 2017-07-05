@@ -26,6 +26,8 @@ public abstract class Market {
 
     public abstract MarketConstants getConstants();
 
+    protected abstract MarketResponse sendRequest(MarketRequest request);
+
 //    public static Market getInstance();
 
     // TODO(stfinancial): Do we want a separate method for creating a price alert? Does this at all break anything else we're doing?

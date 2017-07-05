@@ -89,21 +89,21 @@ final class GdaxRequestRewriter {
         // TODO(stfinancial): Add support for this.
 //        builder.withParam("client_oid")
 //        builder.withParam("type", "limit");
-        builder.withParam("price", String.valueOf(request.getRate()));
-        builder.withParam("size", String.valueOf(request.getAmount()));
-        builder.withParam("side", GdaxUtils.getCommandForTradeType(request.getType()));
-        builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()));
+        builder.withParam("price", String.valueOf(request.getRate()), true, false);
+        builder.withParam("size", String.valueOf(request.getAmount()), true, false);
+        builder.withParam("side", GdaxUtils.getCommandForTradeType(request.getType()), true, false);
+        builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()), true, false);
         builder.withParam("post_only", request.isPostOnly() ? "true" : "false", false, false);
         switch (request.getTimeInForce()) {
             // TODO(stfinancial): Move this into the utils class?
             case GOOD_TIL_CANCELLED:
-                builder.withParam("time_in_force", "GTC");
+                builder.withParam("time_in_force", "GTC", true, false);
                 break;
             case IMMEDIATE_OR_CANCEL:
-                builder.withParam("time_in_force", "IOC");
+                builder.withParam("time_in_force", "IOC", true, false);
                 break;
             case FILL_OR_KILL:
-                builder.withParam("time_in_force", "FOK");
+                builder.withParam("time_in_force", "FOK", true, false);
                 break;
             default:
                 System.out.println("Unsupported TimeInForce on GDAX: " + request.getTimeInForce());
@@ -118,7 +118,7 @@ final class GdaxRequestRewriter {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("fills");
         // TODO(stfinancial): Support for product_id
-        builder.withParam("order_id", request.getId());
+        builder.withParam("order_id", request.getId(), true, false);
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         builder.isPrivate(true);
         return builder.build();

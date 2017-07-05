@@ -32,10 +32,10 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
-//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
+//    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
@@ -98,7 +98,7 @@ class SlowArbitrageStrategy2 extends Strategy {
                 ArbitrageUtils.logAtLevel("Pair: " + pair.toString(), 1);
                 for (MarketInfo market : markets) {
                     while (!(response = market.market.processMarketRequest(new OrderBookRequest(pair, 20, 2, 1))).isSuccess()) {
-                        ArbitrageUtils.logAtLevel("Failed Orderbook Request, Sleeping...: " + response.getJsonResponse(), 1);
+                        ArbitrageUtils.logAtLevel("(" + market.market.getName() + ") " + "Failed Orderbook Request, Sleeping...: " + response.getJsonResponse(), 1);
                         ArbitrageUtils.sleep(500);
                     }
                     orderBookResponse = (OrderBookResponse) response;

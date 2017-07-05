@@ -34,6 +34,7 @@ public enum Currency {
     DGB(Arrays.asList("DGB"), "X"), // Digibyte
     DOGE(Arrays.asList("DOGE","XDG"), "X"), // Dogecoin
     EMC2(Arrays.asList("EMC2"), "X"),
+    EOS(Arrays.asList("EOS"), "X"),
     ETC(Arrays.asList("ETC"), "X"), // Ethereum Classic
     ETH(Arrays.asList("ETH"), "X"), // Ethereum
     EUR(Arrays.asList("EUR"), "Z"), // Euro
@@ -73,6 +74,7 @@ public enum Currency {
     QBK(Arrays.asList("QBK"), "X"),
     QORA(Arrays.asList("QORA"), "X"),
     QTL(Arrays.asList("QTL"), "X"),
+    PIVX(Arrays.asList("PIVX"), "X"), // Pivx
     RADS(Arrays.asList("RADS"), "X"),
     RBY(Arrays.asList("RBY"), "X"),
     REP(Arrays.asList("REP"), "X"), // Augur
@@ -93,6 +95,7 @@ public enum Currency {
     VOX(Arrays.asList("VOX"), "X"), // Voxels
     VRC(Arrays.asList("VRC"), "X"),
     VTC(Arrays.asList("VTC"), "X"),
+    WAVES(Arrays.asList("WAVES"), "X"), // Waves
     XBC(Arrays.asList("XBC"), "X"),
     XCP(Arrays.asList("XCP"), "X"), // Counterparty
     XEM(Arrays.asList("XEM"), "X"),

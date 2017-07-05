@@ -46,7 +46,6 @@ public final class RequestArgs {
 
     private final String resourcePath;
     private final String queryString;
-    private final String url;
     private JsonNode json;
     private List<NameValuePair> nameValuePairs;
 
@@ -78,11 +77,6 @@ public final class RequestArgs {
             sb.append(param.name).append(EQUALS).append(param.value);
         }
         queryString = sb.toString();
-        if (queryString.isEmpty()) {
-            url = uri + resourcePath;
-        } else {
-            url = uri + resourcePath + QUESTION_MARK + queryString;
-        }
     }
 
     public static RequestArgs unsupported() {
@@ -118,8 +112,19 @@ public final class RequestArgs {
 
     public String getQueryString() { return queryString; }
 
-    // TODO(stfinancial): asUrl?
-    public String getUrl() { return url; }
+    public String getUri() { return uri; }
+
+    public String asUrl(boolean withQueryParams) {
+        if (withQueryParams) {
+            if (queryString != null && !queryString.isEmpty()) {
+                return uri + resourcePath + QUESTION_MARK + queryString;
+            } else {
+                return uri + resourcePath;
+            }
+        } else {
+            return uri + resourcePath;
+        }
+    }
 
     public JsonNode asJson() {
         if (json != null && !json.isNull()) {
@@ -187,8 +192,26 @@ public final class RequestArgs {
             RequestParam param = new RequestParam();
             param.name = name;
             param.value = value;
-            param.isQueryParam = false;
+            param.isQueryParam = true;
             param.valueWithQuotes = true;
+            params.add(param);
+            return this;
+        }
+
+        // TODO(stfinancial): Is this one needed?
+        /**
+         * Adds a piece of http request body data.
+         * @param name Data field name.
+         * @param value Data field value.
+         * @param valueWithQuotes Whether the value parameter should be in quotes in the json of the request body. (e.g. {"isMargin":"1"} vs. {"isMargin":true}
+         * @return An updated Builder instance.
+         */
+        public Builder withParam(String name, String value, boolean valueWithQuotes) {
+            RequestParam param = new RequestParam();
+            param.name = name;
+            param.value = value;
+            param.isQueryParam = true;
+            param.valueWithQuotes = valueWithQuotes;
             params.add(param);
             return this;
         }
@@ -197,11 +220,12 @@ public final class RequestArgs {
          * Adds a piece of http request body data.
          * @param name Data field name.
          * @param value Data field value.
-         * @param isQueryParam Whether this parameter should be added as part of the URL query string (e.g. command=returnTicker in http://api.poloniex.com/public?command=returnTicker)
          * @param valueWithQuotes Whether the value parameter should be in quotes in the json of the request body. (e.g. {"isMargin":"1"} vs. {"isMargin":true}
+         * @param isQueryParam Whether this parameter should be added as part of the query parameters (e.g. command=returnTicker in http://api.poloniex.com/public?command=returnTicker)
          * @return An updated Builder instance.
          */
-        public Builder withParam(String name, String value, boolean isQueryParam, boolean valueWithQuotes) {
+
+        public Builder withParam(String name, String value, boolean valueWithQuotes, boolean isQueryParam) {
             RequestParam param = new RequestParam();
             param.name = name;
             param.value = value;

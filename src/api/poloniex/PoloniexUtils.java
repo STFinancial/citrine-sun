@@ -38,11 +38,6 @@ final class PoloniexUtils {
         return new Trade(json.get("amount").asDouble(), json.get("rate").asDouble(), pair, type);
     }
 
-//    // TODO(stfinancial): See if there are any cases where we need to take in a Currency.
-//    static Loan getLoanFromJson(JsonNode json) {
-//        Loan loan =
-//    }
-
     // TODO(stfinancial): This is a bit confusing... maybe just simplify this?
     static String getCommandForTradeType(TradeType type, boolean capitalize) {
         // TODO(stfinancial): Enum map may be faster, but not sure.

@@ -79,7 +79,8 @@ public class Gdax extends Market {
         return sendRequest(request);
     }
 
-    private MarketResponse sendRequest(MarketRequest request) {
+    @Override
+    protected MarketResponse sendRequest(MarketRequest request) {
         HttpUriRequest httpRequest;
         String responseString;
         JsonNode jsonResponse;
@@ -91,19 +92,20 @@ public class Gdax extends Market {
         }
 
         int statusCode = -1;
+        String url = args.asUrl(true);
         if (!args.isPrivate()) {
             // TODO(stfinancial): Should probably check the httprequesttype.
-            httpRequest = new HttpGet(args.getUrl());
+            httpRequest = new HttpGet(url);
         } else {
             if (args.getHttpRequestType() == RequestArgs.HttpRequestType.GET) {
-                httpRequest = new HttpGet(args.getUrl());
+                httpRequest = new HttpGet(url);
             } else if (args.getHttpRequestType() == RequestArgs.HttpRequestType.POST) {
 //                System.out.println(args.getUrl());
-                httpRequest = new HttpPost(args.getUrl());
+                httpRequest = new HttpPost(url);
                 ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
             } else if (args.getHttpRequestType() == RequestArgs.HttpRequestType.DELETE) {
 //                System.out.println(args.getUrl());
-                httpRequest = new HttpDelete(args.getUrl());
+                httpRequest = new HttpDelete(url);
             } else {
                 System.out.println("(" + NAME + ")" + "Invalid HttpRequestType: " + args.getHttpRequestType());
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST,"Invalid HttpRequestType: " + args.getHttpRequestType()));
@@ -116,7 +118,6 @@ public class Gdax extends Market {
             String CB_ACCESS_PASSPHRASE = passphrase;
 //            System.out.println("Passphrase: " + CB_ACCESS_PASSPHRASE);
             JsonNode json = args.asJson();
-//            System.out.println("Hello?");
             System.out.println(json);
             String what;
             if (json.isNull()) {

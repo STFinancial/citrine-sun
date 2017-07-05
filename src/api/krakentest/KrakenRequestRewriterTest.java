@@ -1,4 +1,4 @@
-package api.kraken;
+package api.krakentest;
 
 import api.CurrencyPair;
 import api.RequestArgs;
@@ -7,7 +7,7 @@ import api.request.*;
 /**
  * Created by Timothy on 3/7/17.
  */
-final class KrakenRequestRewriter {
+final class KrakenRequestRewriterTest {
     private static final String API_ENDPOINT = "https://api.kraken.com";
     // TODO(stfinancial): Should we have public and private endpoint? What are the implications for the api calls.
 
@@ -33,11 +33,11 @@ final class KrakenRequestRewriter {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         StringBuilder pairs = new StringBuilder();
         for (CurrencyPair pair : request.getPairs()) {
-            pairs.append(KrakenUtils.formatCurrencyPair(pair)).append(",");
+            pairs.append(KrakenUtilsTest.formatCurrencyPair(pair)).append(",");
         }
         // TODO(stfinancial): Gross, find another way.
         pairs.deleteCharAt(pairs.length() - 1);
-        builder.withParam("pair", pairs.toString());
+        builder.withParam("pair", pairs.toString(), true, true);
         builder.withResource("0");
         builder.withResource("public");
         builder.withResource("Ticker");
@@ -51,8 +51,8 @@ final class KrakenRequestRewriter {
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
-        builder.withParam("pair", KrakenUtils.formatCurrencyPair(request.getCurrencyPair().get()));
-        builder.withParam("count", String.valueOf(request.getDepth()));
+        builder.withParam("pair", KrakenUtilsTest.formatCurrencyPair(request.getCurrencyPair().get()), true, true);
+        builder.withParam("count", String.valueOf(request.getDepth()), true, true);
         builder.withResource("0");
         builder.withResource("public");
         builder.withResource("Depth");
@@ -80,11 +80,10 @@ final class KrakenRequestRewriter {
         if (request.isMarket() || request.isStopLimit() || request.isPostOnly() || request.isMargin()) {
             return RequestArgs.unsupported();
         }
-        builder.withParam("pair", KrakenUtils.formatCurrencyPair(request.getPair()));
-        builder.withParam("type", KrakenUtils.getCommandForTradeType(request.getType()));
-        builder.withParam("price", String.valueOf(request.getRate()));
-        builder.withParam("volume", String.valueOf(request.getAmount()));
-        builder.withParam("ordertype", "limit");
+        builder.withParam("pair", KrakenUtilsTest.formatCurrencyPair(request.getPair()), true, true);
+        builder.withParam("type", KrakenUtilsTest.getCommandForTradeType(request.getType()), true, true);
+        builder.withParam("price", String.valueOf(request.getRate()), true, true);
+        builder.withParam("volume", String.valueOf(request.getAmount()), true, true);
         builder.withResource("0");
         builder.withResource("private");
         builder.withResource("AddOrder");

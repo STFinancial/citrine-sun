@@ -1,4 +1,4 @@
-package api.kraken;
+package api.krakentest;
 
 import api.Currency;
 import api.CurrencyPair;
@@ -8,12 +8,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-import static api.Currency.*;
+import static api.Currency.BTC;
+import static api.Currency.DASH;
 
 /**
  * Created by Timothy on 6/3/17.
  */
-final class KrakenUtils {
+final class KrakenUtilsTest {
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
     private static final String INVALID_STRING = "invalid";
@@ -73,10 +74,6 @@ final class KrakenUtils {
             default:
                 return currency.toString();
         }
-    }
-
-    static Currency parseCurrencyString(String currency) {
-        return Currency.getCanonicalRepresentation(currency.substring(1));
     }
 
     // TODO(stfinancial): These should be created at compile time if possible.

@@ -1,7 +1,5 @@
-package api.kraken;
+package api.krakentest;
 
-import api.AccountType;
-import api.Currency;
 import api.CurrencyPair;
 import api.Ticker;
 import api.request.*;
@@ -18,7 +16,7 @@ import java.util.Map;
 /**
  * Created by Timothy on 6/3/17.
  */
-final class KrakenResponseParser {
+final class KrakenResponseParserTest {
 
     // TODO(stfinancial): Take in isError for now until we switch to using the http response.
     static MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
@@ -28,17 +26,12 @@ final class KrakenResponseParser {
         }
         // TODO(stfinancial): Get the request status here.
 
+        System.out.println(request.getTimestamp());
         if (isError) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
         }
-        if (request instanceof TradeRequest) {
-            return createTradeResponse(jsonResponse, (TradeRequest) request, timestamp);
-        } else if (request instanceof CancelRequest) {
-            return createCancelResponse(jsonResponse, (CancelRequest) request, timestamp);
-        } else if (request instanceof OrderBookRequest) {
+        if (request instanceof OrderBookRequest) {
             return createOrderBookResponse(jsonResponse, (OrderBookRequest) request, timestamp);
-        } else if (request instanceof AccountBalanceRequest) {
-            return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
         } else if (request instanceof TickerRequest) {
             return createTickerResponse(jsonResponse, (TickerRequest) request, timestamp);
         }
@@ -50,7 +43,7 @@ final class KrakenResponseParser {
         // TODO(stfinancial): We check that there is a currency pair in the request, does it make sense to be defensive and check here as well?
         Map<CurrencyPair, Ticker> tickers = new HashMap<>();
         request.getPairs().forEach((pair) -> {
-            JsonNode j = jsonResponse.get("result").get(KrakenUtils.formatCurrencyPair(pair));
+            JsonNode j = jsonResponse.get("result").get(KrakenUtilsTest.formatCurrencyPair(pair));
             Ticker.Builder b = new Ticker.Builder(pair, j.get("c").get(0).asDouble(), j.get("a").get(0).asDouble(), j.get("b").get(0).asDouble());
             b.percentChange(PriceUtil.getPercentChange(j.get("o").asDouble(), j.get("c").get(0).asDouble()));
             b.baseVolume(j.get("v").get(1).asDouble());
@@ -65,7 +58,7 @@ final class KrakenResponseParser {
         System.out.println(jsonResponse);
         CurrencyPair pair = request.getCurrencyPair().get();
         // TODO(stfinancial): We check that there is a currency pair in the request, does it make sense to be defensive and check here as well?
-        JsonNode j = jsonResponse.get("result").get(KrakenUtils.formatCurrencyPair(pair));
+        JsonNode j = jsonResponse.get("result").get(KrakenUtilsTest.formatCurrencyPair(pair));
         Map<CurrencyPair, List<Trade>> askMap = new HashMap<>();
         List<Trade> asks = new ArrayList<>();
         j.get("asks").elements().forEachRemaining((order) -> {
@@ -83,24 +76,11 @@ final class KrakenResponseParser {
 
     private static MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         System.out.println(jsonResponse);
-        Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
-        Map<Currency, Double> exchangeBalances = new HashMap<>();
-        jsonResponse.get("result").fields().forEachRemaining((balance) -> {
-            exchangeBalances.put(KrakenUtils.parseCurrencyString(balance.getKey()), balance.getValue().asDouble());
-        });
-        balances.put(AccountType.EXCHANGE, exchangeBalances);
-
-        return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
+        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 
     private static MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
         System.out.println(jsonResponse);
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
-    }
-
-    private static MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
-        System.out.println(jsonResponse);
-        // TODO(stfinancial): Count and pending.
-        return new MarketResponse(jsonResponse, request, timestamp, RequestStatus.success());
     }
 }
