@@ -8,6 +8,8 @@ import api.tmp_trade.TradeType;
  * A request to place a {@link Trade} for a given {@link api.Market Market}.
  */
 public final class TradeRequest extends MarketRequest {
+    // TODO(stfinancial): Dark order integration (.d assets on Kraken, also on Bitfinex)
+
     public enum TimeInForce {
         GOOD_TIL_CANCELLED,
         IMMEDIATE_OR_CANCEL,

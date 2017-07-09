@@ -27,6 +27,7 @@ public enum Currency {
     BTM(Arrays.asList("BTM"), "X"), // Bitmark
     BURST(Arrays.asList("BURST"), "X"), // Burstcoin
     C2(Arrays.asList("C2"), "X"),
+    CAD(Arrays.asList("CAD"), "Z"), // Canadian Dollar
     CLAM(Arrays.asList("CLAM"), "X"),
     CURE(Arrays.asList("CURE"), "X"),
     DASH(Arrays.asList("DASH"), "X"), // Dash
@@ -51,10 +52,12 @@ public enum Currency {
     HZ(Arrays.asList("HZ"), "X"),
     ICN(Arrays.asList("ICN"), "X"),
     IOC(Arrays.asList("IOC"), "X"),
+    JPY(Arrays.asList("JPY"), "X"), // Japanese Yen
     LBC(Arrays.asList("LBC"), "X"), // Library Credits
     LSK(Arrays.asList("LSK"), "X"), // Lisk
     LTC(Arrays.asList("LTC"), "X"), // Litecoin
     MAID(Arrays.asList("MAID"), "X"), // Maidsafe Coin
+    MLN(Arrays.asList("MLN"), "X"), // Melonport
     MYR(Arrays.asList("MYR"), "X"),
     NAUT(Arrays.asList("NAUT"), "X"),
     NAV(Arrays.asList("NAV"), "X"),

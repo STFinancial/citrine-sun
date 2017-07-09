@@ -1,6 +1,8 @@
 package api.kraken;
 
 import api.*;
+import api.kraken.request.AssetPairRequest;
+import api.kraken.request.AssetPairResponse;
 import api.request.MarketRequest;
 import api.request.MarketResponse;
 import api.request.RequestStatus;
@@ -24,10 +26,12 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.Collections;
 
 /**
  * Created by Timothy on 3/7/17.
@@ -47,6 +51,11 @@ public class Kraken extends Market {
     // TODO(stfinancial): Potentially move this into the superclass if we are going to do this for every market.
     private static final ObjectMapper mapper = new ObjectMapper();
 
+    // TODO(stfinancial): This needs to be unified across all markets.
+    private final KrakenResponseParser responseParser;
+    private final KrakenRequestRewriter requestRewriter;
+    private final KrakenData data;
+
     public Kraken(Credentials credentials) {
         this.apiKey = credentials.getApiKey();
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
@@ -55,6 +64,21 @@ public class Kraken extends Market {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+        }
+        requestRewriter = new KrakenRequestRewriter(this);
+        responseParser = new KrakenResponseParser(this);
+        AssetPairRequest apr = new AssetPairRequest(1, System.currentTimeMillis());
+        MarketResponse r = processMarketRequest(apr);
+        int retryCount = 5;
+        while (!r.isSuccess() && retryCount-- > 0) {
+            System.out.println("Could not get market data for " + NAME + ": " + r.getJsonResponse());
+            r = processMarketRequest(apr);
+        }
+        if (!r.isSuccess()) {
+            data = new KrakenData(Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+        } else {
+            System.out.println(r.getJsonResponse());
+            data = new KrakenData(((AssetPairResponse) r).getAssetPairs(), ((AssetPairResponse) r).getAssetPairNames(), ((AssetPairResponse) r).getAssetPairKeys());
         }
     }
 
@@ -72,7 +96,7 @@ public class Kraken extends Market {
         JsonNode jsonResponse;
         int statusCode = -1; // TODO(stfinancial): Think about how to properly use this error code.
 
-        final RequestArgs args = KrakenRequestRewriter.rewriteRequest(request);
+        final RequestArgs args = requestRewriter.rewriteRequest(request);
         System.out.println("Json: " + args.asJson().toString());
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
@@ -100,6 +124,8 @@ public class Kraken extends Market {
         if (args.isPrivate()) {
             String baseQueryString = args.getQueryString();
             System.out.println("Base QueryString: " + baseQueryString);
+//            try { baseQueryString = URLEncoder.encode(baseQueryString, ENCODING); } catch (Exception e) {}
+//            System.out.println("Base QueryString (UrlEncoder): " + baseQueryString);
             String path = args.getResourcePath();
             System.out.println("Resource Path: " + path);
 
@@ -134,6 +160,7 @@ public class Kraken extends Market {
                 ArrayList<NameValuePair> nvps = new ArrayList<>();
                 nvps.add(p);
                 nvps.addAll(args.asNameValuePairs());
+                nvps.forEach((nvp)->System.out.println(nvp));
                 ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(nvps, ENCODING));
             } catch (UnsupportedEncodingException e) {
                 System.out.println("Unsupported encoding: " + ENCODING);
@@ -182,7 +209,7 @@ public class Kraken extends Market {
         boolean isError = statusCode != HttpStatus.SC_OK;
 //        System.out.println(statusCode);
 //        System.out.println(jsonResponse);
-        return KrakenResponseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
+        return responseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
     }
 
     @Override
@@ -194,4 +221,6 @@ public class Kraken extends Market {
     public MarketConstants getConstants() {
         return null;
     }
+
+    protected KrakenData getData() { return data; }
 }

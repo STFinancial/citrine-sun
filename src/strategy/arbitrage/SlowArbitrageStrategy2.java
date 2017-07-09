@@ -39,8 +39,8 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
-        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.6);
-        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.15);
+        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.0);
+//        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.15);
     }});
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
@@ -87,7 +87,7 @@ class SlowArbitrageStrategy2 extends Strategy {
         MarketInfo askSide;
         MarketInfo bidSide;
         while (true) {
-            ArbitrageUtils.sleep(400);
+            ArbitrageUtils.sleep(250);
             if (!maybeUpdateFeesAndBalances(markets)) { continue; }
 
             /* Get new order books */

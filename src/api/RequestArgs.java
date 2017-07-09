@@ -103,7 +103,16 @@ public final class RequestArgs {
             return Collections.unmodifiableList(nameValuePairs);
         }
         List<NameValuePair> pairs = new ArrayList<>();
-        params.forEach((param)->pairs.add(new BasicNameValuePair(param.name, param.value)));
+        // TODO(stfinancial): Revert this comma splitting.
+        params.forEach((param)-> {
+            if (param.value.contains(",")) {
+                for (String v : param.value.split(",")) {
+                    pairs.add(new BasicNameValuePair(param.name, v));
+                }
+            } else {
+                pairs.add(new BasicNameValuePair(param.name, param.value));
+            }
+        });
         nameValuePairs = pairs;
         return Collections.unmodifiableList(nameValuePairs);
     }
@@ -216,6 +225,7 @@ public final class RequestArgs {
             return this;
         }
 
+        // TODO(stfinancial): IsQueryParam is super confusing imo.
         /**
          * Adds a piece of http request body data.
          * @param name Data field name.
@@ -224,7 +234,6 @@ public final class RequestArgs {
          * @param isQueryParam Whether this parameter should be added as part of the query parameters (e.g. command=returnTicker in http://api.poloniex.com/public?command=returnTicker)
          * @return An updated Builder instance.
          */
-
         public Builder withParam(String name, String value, boolean valueWithQuotes, boolean isQueryParam) {
             RequestParam param = new RequestParam();
             param.name = name;
