@@ -39,10 +39,10 @@ public class TradeSpreader {
 ////    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 //    private static final int ROUND_DECIMALS = 2;
 
-//    private static final double PRICE = 0.00000092;
-//    private static final double RANGE = 0.00000002;
-//    private static final double AMOUNT = 3639801;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
+    private static final double PRICE = 0.00000071;
+    private static final double RANGE = 0.00000002;
+    private static final double AMOUNT = 7202206;
+    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -69,9 +69,9 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 200;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
 
-//    private static final double PRICE = 0.000095;
-//    private static final double RANGE = 0.000003;
-//    private static final double AMOUNT = 73800;
+//    private static final double PRICE = 0.0000838;
+//    private static final double RANGE = 0.0000075;
+//    private static final double AMOUNT = 25000;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
 //    private static final double PRICE = 0.0158;
@@ -79,29 +79,29 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 698;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-    private static final double PRICE = 0.0993;
-    private static final double RANGE = 0.001;
-    private static final double AMOUNT = 164;
-    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+//    private static final double PRICE = 0.090;
+//    private static final double RANGE = 0.005;
+//    private static final double AMOUNT = 65;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
 //    private static final double AMOUNT = 1239;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(CLAM, BTC);
 
-//    private static final double PRICE = 0.00425;
-//    private static final double RANGE = 0.0004;
-//    private static final double AMOUNT = 1228;
+//    private static final double PRICE = 0.0074;
+//    private static final double RANGE = 0.0003;
+//    private static final double AMOUNT = 1871;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(FCT, BTC);
 
-//    private static final double PRICE = 0.000179;
-//    private static final double RANGE = 0.000004;
-//    private static final double AMOUNT = 84500;
+//    private static final double PRICE = 0.00015;
+//    private static final double RANGE = 0.00002;
+//    private static final double AMOUNT = 37000;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 
-//    private static final double PRICE = 0.01327;
-//    private static final double RANGE = 0.001;
-//    private static final double AMOUNT = 250;
+//    private static final double PRICE = 0.0164;
+//    private static final double RANGE = 0.0005;
+//    private static final double AMOUNT = 400;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
 
 //    private static final double PRICE = 0.0000098;
@@ -109,13 +109,13 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 1200000;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-//    private static final double PRICE = 0.00008000;
-//    private static final double RANGE = 0.00001350;
-//    private static final double AMOUNT = 64500;
+//    private static final double PRICE = 0.00006000;
+//    private static final double RANGE = 0.00000450;
+//    private static final double AMOUNT = 176282;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
 
-    private static final int BUCKETS = 81;
-    private static final TradeType TYPE = TradeType.SELL;
+    private static final int BUCKETS = 5;
+    private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
@@ -184,7 +184,7 @@ public class TradeSpreader {
                 } catch (InterruptedException e) {}
             }
             try {
-                Thread.sleep(300);
+                Thread.sleep(1000);
             } catch (InterruptedException e) {}
         }
     }

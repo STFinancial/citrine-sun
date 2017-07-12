@@ -10,14 +10,10 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.internal.Nullable;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.regex.PatternSyntaxException;
-
 
 final class PoloniexUtils {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.

@@ -30,10 +30,11 @@ public class KrakenTest {
     public void test() {
         Credentials c = Credentials.fromFileString(KRAKEN_KEYS);
         Kraken k = new Kraken(c);
-        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.DASH, Currency.BTC), CurrencyPair.of(Currency.ETH, Currency.USD)})), 1, 1);
+//        OpenOrderRequest r = new OpenOrderRequest(1, 1);
+//        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.DASH, Currency.BTC), CurrencyPair.of(Currency.EOS, Currency.ETH)})), 1, 1);
 //        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.USD)})), 1, 1);
 
-//        TradeRequest r = new TradeRequest(new Trade(0.01, 0.01, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY), 1, 1);
+        TradeRequest r = new TradeRequest(new Trade(0.01, 0.02, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY), 1, 1);
 //        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
 //        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.DASH, Currency.USD), 5, 1, 1);
 //        List<CurrencyPair> pairs = new ArrayList<>();

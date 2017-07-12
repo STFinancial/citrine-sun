@@ -13,8 +13,8 @@ import java.util.Iterator;
  * Created by Timothy on 12/27/16.
  */
 public class OrderSummer {
-//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.DOGE, Currency.BTC);
 
     public static void main(String[] args) {

@@ -1,6 +1,5 @@
 package api.request;
 
-import api.Currency;
 import api.CurrencyPair;
 import com.sun.istack.internal.Nullable;
 
@@ -14,8 +13,9 @@ public final class OpenOrderRequest extends MarketRequest {
         super(priority, timestamp);
     }
 
+    // TODO(stfinancial): How do we want to handle null values of currency pair?
     /**
-     * Returns all open {@link api.tmp_trade.TradeOrder}.
+     * Returns all open {@link api.tmp_trade.TradeOrder TradeOrders}.
      * @param priority The priority of this request. The higher the priority, the faster the request will get served.
      * @param timestamp The timestamp at which this request was created.
      * @param currencyPair The {@code CurrencyPair} for which to get the market data. If null, return all open orders.
@@ -25,7 +25,7 @@ public final class OpenOrderRequest extends MarketRequest {
         this.currencyPair = currencyPair;
     }
 
-    // TODO(stfinancial): Convert this to optional.
+    // TODO(stfinancial): Convert this to optional. Maybe...
     @Nullable
     public CurrencyPair getCurrencyPair() {
         return currencyPair;

@@ -8,14 +8,12 @@ import api.kraken.request.AssetPairRequest;
 import api.kraken.request.AssetPairResponse;
 import api.request.*;
 import api.tmp_trade.Trade;
+import api.tmp_trade.TradeOrder;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
 import util.PriceUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by Timothy on 6/3/17.
@@ -47,6 +45,8 @@ final class KrakenResponseParser {
             return createCancelResponse(jsonResponse, (CancelRequest) request, timestamp);
         } else if (request instanceof OrderBookRequest) {
             return createOrderBookResponse(jsonResponse, (OrderBookRequest) request, timestamp);
+        } else if (request instanceof OpenOrderRequest) {
+            return createOpenOrderResponse(jsonResponse, (OpenOrderRequest) request, timestamp);
         } else if (request instanceof AccountBalanceRequest) {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
         } else if (request instanceof TickerRequest) {
@@ -91,6 +91,22 @@ final class KrakenResponseParser {
         });
         bidMap.put(pair, bids);
         return new OrderBookResponse(askMap, bidMap, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private OpenOrderResponse createOpenOrderResponse(JsonNode jsonResponse, OpenOrderRequest request, long timestamp) {
+        System.out.println(jsonResponse);
+        return new OpenOrderResponse(Collections.emptyMap(), jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
+//        Map<CurrencyPair, List<TradeOrder>> orders = new HashMap<>();
+//        jsonResponse.get("result").fields().forEachRemaining((order) -> {
+//            CurrencyPair pair = kraken.getData().getAssetPairNames().get(order.getValue().get("descr").get("pair").asText());
+//            if (!orders.containsKey(pair)) {
+//                orders.put(pair, new ArrayList<>());
+//            }
+//            // TODO(stfinancial): Need to figure out how this works with volume and volume executed.
+//            orders.get(pair).add(new TradeOrder(new Trade(order.getValue().order.getValue().get("descr").get("price").asDouble(), pair, KrakenUtils.getTradeTypeFromString(order.getValue().get("descr").get("type").asText())), order.getKey(), order.getValue().get("opentm").asLong(), order.getValue().get("descr").get("leverage").asText("none").equals("none"))));
+//        });
+//        // TODO(stfinancial): All of the remainder of the fields.
+//        return new OpenOrderResponse(orders, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
     private AccountBalanceResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {

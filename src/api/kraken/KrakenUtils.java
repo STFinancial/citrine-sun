@@ -3,11 +3,13 @@ package api.kraken;
 import api.Currency;
 import api.CurrencyPair;
 import api.tmp_trade.TradeType;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Created by Timothy on 6/3/17.
  */
 final class KrakenUtils {
+//    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
     private static final String INVALID_STRING = "invalid";
@@ -40,6 +42,37 @@ final class KrakenUtils {
             return String.format("%s%s", getIsoCompliantCurrencyString(pair.getBase()), getIsoCompliantCurrencyString(pair.getQuote()));
         }
     }
+
+    // TODO(stfinancial): Perhaps optimize by using TradeType.valueOf ... or making TradeType.BUY the else...?
+    @Nullable
+    static TradeType getTradeTypeFromString(String type) {
+        if (type.equals(SELL_STRING)) {
+            return TradeType.SELL;
+        } else if (type.equals(BUY_STRING)) {
+            return TradeType.BUY;
+        } else {
+            return null;
+//            return TradeType.INVALID;
+        }
+    }
+
+//    static long getTimestampFromKrakenTimestamp(String poloTimestamp) {
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"));
+////        DateFormat format = new SimpleDateFormat(DATE_FORMAT);
+//        LocalDateTime d = LocalDateTime.from(formatter.parse(poloTimestamp));
+//        return d.atZone(ZoneOffset.UTC).toEpochSecond();
+////        System.out.println("Printing this ridiculous thing: " + d.toEpochSecond(ZoneOffset.UTC));
+////        System.out.println("Current time millis: \t\t\t" + System.currentTimeMillis());
+//
+//        // TODO(stfinancial): Go to DateTimeFormat if this becomes to cumbersome.
+////        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
+////        DateTime
+////        LocalDateTime date = LocalDateTime.parse(poloTimestamp, formatter);
+////        System.out.println(date.toString());
+////        return 0;
+//
+////        long timestamp = DateFormat.getDateTimeInstance();
+//    }
 
 //    static String formatCurrencyPairWithoutNamespace(CurrencyPair pair) {
 //        return String.format("%s%s", getCurrencyString(pair.getBase()), getCurrencyString(pair.getQuote()));

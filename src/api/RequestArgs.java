@@ -103,16 +103,24 @@ public final class RequestArgs {
             return Collections.unmodifiableList(nameValuePairs);
         }
         List<NameValuePair> pairs = new ArrayList<>();
-        // TODO(stfinancial): Revert this comma splitting.
-        params.forEach((param)-> {
-            if (param.value.contains(",")) {
-                for (String v : param.value.split(",")) {
-                    pairs.add(new BasicNameValuePair(param.name, v));
-                }
-            } else {
-                pairs.add(new BasicNameValuePair(param.name, param.value));
-            }
-        });
+        params.forEach((param)->pairs.add(new BasicNameValuePair(param.name, param.value)));
+//        // TODO(stfinancial): Revert this comma splitting.
+//        params.forEach((param)-> {
+//            if (param.value.contains(",")) {
+//                StringBuilder sb = new StringBuilder("[");
+//                for (String v : param.value.split(",")) {
+//                    sb.append("\"").append(v).append("\"");
+//                }
+////                pairs.add(new BasicNameValuePair(param.name, "[" + param.value + "]"));
+//                sb.append("]");
+//                pairs.add(new BasicNameValuePair(param.name, sb.toString()));
+////                for (String v : param.value.split(",")) {
+////                    pairs.add(new BasicNameValuePair(param.name, v));
+////                }
+//            } else {
+//                pairs.add(new BasicNameValuePair(param.name, param.value));
+//            }
+//        });
         nameValuePairs = pairs;
         return Collections.unmodifiableList(nameValuePairs);
     }

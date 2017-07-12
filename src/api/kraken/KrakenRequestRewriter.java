@@ -22,10 +22,14 @@ final class KrakenRequestRewriter {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof OrderBookRequest) {
             return rewriteOrderBookRequest((OrderBookRequest) request);
+        } else if (request instanceof OpenOrderRequest) {
+            return rewriteOpenOrderRequest((OpenOrderRequest) request);
         } else if (request instanceof TickerRequest) {
             return rewriteTickerRequest((TickerRequest) request);
         } else if (request instanceof AccountBalanceRequest) {
             return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
+        } else if (request instanceof OrderTradesRequest) {
+            return rewriteOrderTradesRequest((OrderTradesRequest) request);
         } else if (request instanceof FeeRequest) {
             return rewriteFeeRequest((FeeRequest) request);
         } else if (request instanceof AssetPairRequest) {
@@ -68,6 +72,30 @@ final class KrakenRequestRewriter {
         builder.withResource("Depth");
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         builder.isPrivate(false);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteOpenOrderRequest(OpenOrderRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        // TODO(stfinancial): trades and userref
+        builder.withResource("0");
+        builder.withResource("private");
+        builder.withResource("OpenOrders");
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
+        // TODO(stfinancial): trades and userref
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        builder.withResource("0");
+        builder.withResource("private");
+        builder.withResource("QueryOrders");
+        // TODO(stfinancial): Support for multiple requests.
+        builder.withParam("txid", request.getId());
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
         return builder.build();
     }
 

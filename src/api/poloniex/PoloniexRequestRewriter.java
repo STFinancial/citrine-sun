@@ -50,6 +50,8 @@ final class PoloniexRequestRewriter {
         } else if (request instanceof TickerRequest) {
             return rewriteTickerRequest((TickerRequest) request);
         } else if (request instanceof MoveOrderRequest) {
+            // TODO(stfinancial): Make sure to handle this differently because I don't think it counts towards the limit.
+            // TODO(stfinancial): Look into using this for the candle catcher/bounce bot, freeing up a lot of resources.
             return rewriteMoveOrderRequest((MoveOrderRequest) request);
         } else if (request instanceof MarginPositionRequest) {
             return rewriteMarginPositionRequest((MarginPositionRequest) request);
