@@ -34,7 +34,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 /**
- * Created by Timothy on 3/7/17.
+ * Class representing the Kraken {@code Market}.
  */
 public class Kraken extends Market {
     // TODO(stfinancial): Kraken has a nonce window depending on the api key.
@@ -46,18 +46,13 @@ public class Kraken extends Market {
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
     private MessageDigest digest;
 
-
-    // TODO(stfinancial): Review the thread safety of this object.
-    // TODO(stfinancial): Potentially move this into the superclass if we are going to do this for every market.
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     // TODO(stfinancial): This needs to be unified across all markets.
     private final KrakenResponseParser responseParser;
     private final KrakenRequestRewriter requestRewriter;
     private final KrakenData data;
 
     public Kraken(Credentials credentials) {
-        this.apiKey = credentials.getApiKey();
+        super(credentials);
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
         this.httpClient = HttpClients.createDefault();
         try {

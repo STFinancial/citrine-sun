@@ -39,10 +39,10 @@ public class TradeSpreader {
 ////    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 //    private static final int ROUND_DECIMALS = 2;
 
-    private static final double PRICE = 0.00000071;
-    private static final double RANGE = 0.00000002;
-    private static final double AMOUNT = 7202206;
-    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
+//    private static final double PRICE = 0.00000071;
+//    private static final double RANGE = 0.00000002;
+//    private static final double AMOUNT = 7202206;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
 //    private static final double PRICE = 0.0504;
 //    private static final double RANGE = 0.0045;
@@ -69,10 +69,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 200;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
 
-//    private static final double PRICE = 0.0000838;
-//    private static final double RANGE = 0.0000075;
-//    private static final double AMOUNT = 25000;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
+    private static final double PRICE = 0.0000715;
+    private static final double RANGE = 0.0000060;
+    private static final double AMOUNT = 155194;
+    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
 //    private static final double PRICE = 0.0158;
 //    private static final double RANGE = 0.001;
@@ -114,7 +114,7 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 176282;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
 
-    private static final int BUCKETS = 5;
+    private static final int BUCKETS = 76;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 

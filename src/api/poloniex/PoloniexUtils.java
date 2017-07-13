@@ -25,10 +25,9 @@ final class PoloniexUtils {
 
     private static final String SHORT_STRING = "short";
     private static final String LONG_STRING = "long";
-    // TODO(stfinancial): Eventually use this instead of reading the json directly.
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     static Trade getTradeFromJson(JsonNode json, CurrencyPair pair) {
+        // TODO(stfinancial): Unmarshall this directly to the object.
         // TODO(stfinancial): See if we can convert to using decimalValue in the future by searching for the proper decimal format.
         TradeType type = getTradeTypeFromString(json.get("type").asText());
         return new Trade(json.get("amount").asDouble(), json.get("rate").asDouble(), pair, type);

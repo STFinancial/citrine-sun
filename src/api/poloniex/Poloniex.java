@@ -35,15 +35,13 @@ import java.util.concurrent.TimeUnit;
 // TODO(stfinancial): Consider factory for this. Depedency injection etc. etc.
 
 /**
- * Class representing the Poloniex market.
+ * Class representing the Poloniex {@code Market}.
  */
 public final class Poloniex extends Market { //implements Tradable {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.
 
     private static final String MARKET_NAME = "Poloniex";
     private static final String ENCODING = "UTF-8";
-    private static final String PUBLIC_URI = "https://poloniex.com/public";
-    private static final String PRIVATE_URI = "https://poloniex.com/tradingApi";
     private static final String WAMP_ENDPOINT = "wss://api.poloniex.com";
     // TODO(stfinancial): What about stuff to https://poloniex.com/private?
 
@@ -67,7 +65,7 @@ public final class Poloniex extends Market { //implements Tradable {
     // TODO(stfinancial): Switch to static factory method to avoid multiple instances with the same API keys.
     // Need to avoid IP bans by ensuring that a single IP can have a single market instance.
     public Poloniex(Credentials credentials) {
-        this.apiKey = credentials.getApiKey();
+        super(credentials);
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), false);
         this.httpClient = HttpClients.createDefault();
 //        this.trader = new PoloniexTrader(this);
@@ -166,7 +164,6 @@ public final class Poloniex extends Market { //implements Tradable {
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
             }
         }
-//        System.out.println("About to try");
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
             timestamp = System.currentTimeMillis();

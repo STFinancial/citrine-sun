@@ -49,6 +49,8 @@ final class KrakenResponseParser {
             return createOpenOrderResponse(jsonResponse, (OpenOrderRequest) request, timestamp);
         } else if (request instanceof AccountBalanceRequest) {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
+        } else if (request instanceof OrderTradesRequest) {
+            return createOrderTradesResponse(jsonResponse, (OrderTradesRequest) request, timestamp);
         } else if (request instanceof TickerRequest) {
             return createTickerResponse(jsonResponse, (TickerRequest) request, timestamp);
         } else if (request instanceof AssetPairRequest) {
@@ -119,6 +121,11 @@ final class KrakenResponseParser {
         balances.put(AccountType.EXCHANGE, exchangeBalances);
 
         return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
+        // TODO(stfinancial): What should this actually contain?
+        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 
     private TradeResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {

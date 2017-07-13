@@ -10,6 +10,7 @@ import java.util.concurrent.*;
  * Created by Timothy on 7/9/17.
  */
 public class WorkQueue {
+    // TODO(stfinancial): ****** NOTE ****** This design is slightly wrong, we likely need to use the response timestamps, rather than the time we send them.
     private PriorityBlockingQueue<WorkItem> items;
     private ExecutorService queueWorkers;
     private RequestManager requestManager;
@@ -22,7 +23,8 @@ public class WorkQueue {
         this.market = market;
         requestManager = new RequestManager(items);
         // TODO(stfinancial): Do we need to call a join here at some point?
-        new Thread(requestManager);
+        (new Thread(requestManager)).start();
+
     }
 
 
@@ -67,6 +69,7 @@ public class WorkQueue {
         @Override
         public void run() {
             while (true) {
+//                System.out.println("In RequestManager loop.");
                 // TODO(stfinancial): Integrate QueueStrategy.
                 // TODO(stfinancial): Embed this all in try catch for Interrupted Exception?
                 // TODO(stfinancial): Need to think about whether this is safe. Can the workQueue/timestampQueue ever grow too large?
@@ -76,7 +79,16 @@ public class WorkQueue {
                         WorkItem item = workQueue.take();
                         System.out.println("Obtained work item.");
                         timestampQueue.add(System.currentTimeMillis());
-                        item.notify();
+                        // TODO(stfinancial): How big should this block be?
+                        System.out.println("Notifying work item.");
+                        synchronized (item) {
+                            item.rateBlocked = false;
+                            item.notify();
+                        }
+//                        synchronized(item) {
+//                            System.out.println("Notifying work item.");
+//                            item.notify();
+//                        }
 //                        // TODO(stfinancial): Does this actually need synchronized?
 //                        synchronized (this) {
 //                            // Getting the item, adding the timestamp, and notifying the work item must be atomic
@@ -99,12 +111,15 @@ public class WorkQueue {
                     }
                 }
                 if (!timestampQueue.isEmpty()) {
-                    try {
-                        System.out.println("Sleeping...");
-                        Thread.sleep(timestampQueue.peek() + 1000 - System.currentTimeMillis());
-                    } catch (InterruptedException e) {
-                        System.out.println("RequestManager interrupted 2.");
-                        continue;
+                    long sleepTime = timestampQueue.peek() + 1000 - System.currentTimeMillis();
+                    System.out.println("Sleep time: " + sleepTime);
+                    if (sleepTime > 0) {
+                        try {
+                            Thread.sleep(sleepTime);
+                        } catch (InterruptedException e) {
+                            System.out.println("RequestManager interrupted 2.");
+                            continue;
+                        }
                     }
                 }
             }
@@ -115,6 +130,7 @@ public class WorkQueue {
     private class WorkItem implements Callable<MarketResponse>, Comparable<WorkItem> {
         private final MarketRequest req;
         private final Market market;
+        private boolean rateBlocked = true;
 
         WorkItem(MarketRequest req, Market market) {
             this.req = req;
@@ -129,7 +145,14 @@ public class WorkQueue {
 
             System.out.println("Waiting...");
             // Wait until we are told to submit by the RequestManager
-            wait();
+            synchronized (this) {
+                while (rateBlocked) {
+                    wait();
+                }
+            }
+//            synchronized (this) {
+//                wait();
+//            }
             // TODO(stfinancial): Do we need to catch InterruptedException here?
             System.out.println("Processing work item.");
 

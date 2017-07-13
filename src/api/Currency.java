@@ -129,8 +129,7 @@ public enum Currency {
     }
 
     Currency(List<String> aliases, String isoNamespace) {
-        // TODO(stfinancial): Unmodifiable map.
-        this.aliases = aliases;
+        this.aliases = Collections.unmodifiableList(aliases);
         this.isoNamespace = isoNamespace;
     }
 
@@ -139,7 +138,6 @@ public enum Currency {
     }
 
     // TODO(stfinancial): Shorter name to improve readability of entire program. Maybe fromString?
-    @Nullable
     /**
      * A {@link Currency} may have different representations on different {@link Market Markets}. For example,
      * some sites use "XBT" for Bitcoin while others use "BTC". To maintain market agnostic currency representations,
@@ -147,6 +145,7 @@ public enum Currency {
      * @param alias The representation of the currency used on the specific Market.
      * @return The Currency enum corresponding to this alias name, null if the name does not correspond to a Currency.
      */
+    @Nullable
     public static Currency getCanonicalRepresentation(String alias) {
         // TODO(stfinancial): Does this make sense, or should this be moved to a Market level thing?
 //        System.out.println(alias);
