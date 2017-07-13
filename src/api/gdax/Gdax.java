@@ -8,7 +8,6 @@ import api.request.StatusType;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -30,10 +29,6 @@ public class Gdax extends Market {
     // TODO(stfinancial): Make this into a superclass field?
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA256;
     private final String passphrase;
-
-    // TODO(stfinancial): Review the thread safety of this object.
-    // TODO(stfinancial): Potentially move this into the superclass if we are going to do this for every market.
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     public Gdax(Credentials credentials) {
         super(credentials);

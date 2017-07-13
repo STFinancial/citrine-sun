@@ -2,7 +2,7 @@ package api.kraken;
 
 import api.CurrencyPair;
 import api.RequestArgs;
-import api.kraken.request.AssetPairRequest;
+import api.request.AssetPairRequest;
 import api.request.*;
 
 /**

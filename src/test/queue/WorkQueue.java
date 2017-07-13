@@ -24,9 +24,7 @@ public class WorkQueue {
         requestManager = new RequestManager(items);
         // TODO(stfinancial): Do we need to call a join here at some point?
         (new Thread(requestManager)).start();
-
     }
-
 
     // TODO(stfinancial): Should this be a callable?
     Future<MarketResponse> submitWork(MarketRequest req) {
@@ -34,10 +32,10 @@ public class WorkQueue {
 
         // Construct the work item, which adds itself to the work queue.
         WorkItem item = new WorkItem(req, market);
-        System.out.println("Constructed work item.");
+//        System.out.println("Constructed work item.");
         // Submit the item to the workers, the item will run when the request manager has said it can.
         Future<MarketResponse> response = queueWorkers.submit(item);
-        System.out.println("Submitted work item to workers.");
+//        System.out.println("Submitted work item to workers.");
         // The WorkItem is now fully constructed and waiting until it is notified, so we can add it to the work queue.
         items.add(item);
         // TODO(stfinancial): Consider using a lock to ensure that this is returned as soon as possible.
@@ -45,9 +43,7 @@ public class WorkQueue {
     }
 
     private class RequestManager implements Runnable {
-        // TODO(stfinancial): Should this take the form of a semaphore? That way we can notify the WorkItems that are waiting.
-        // TODO(stfinancial): This seems like the right strategy.
-        // TODO(stfinancial): Check the method acquire(int permits)... this will be perfect for kraken where the methods are worth a different amount.
+        // TODO(stfinancial): Look into turning this into a semaphore. Check the method acquire(int permits)... this will be perfect for kraken where the methods are worth a different amount.
 
         // What do we need to maintain here?
         // Need to maintain a queue of requests
@@ -61,11 +57,6 @@ public class WorkQueue {
             this.workQueue = workQueue;
         }
 
-//        void addElement(long timestamp) {
-//            // TODO(stfinancial): With BlockingQueue this should be atomic?
-//            timestampQueue.add(timestamp);
-//        }
-
         @Override
         public void run() {
             while (true) {
@@ -75,30 +66,16 @@ public class WorkQueue {
                 // TODO(stfinancial): Need to think about whether this is safe. Can the workQueue/timestampQueue ever grow too large?
                 if (timestampQueue.size() < 6) {
                     try {
-                        System.out.println("About to take work item.");
+//                        System.out.println("About to take work item.");
                         WorkItem item = workQueue.take();
-                        System.out.println("Obtained work item.");
+//                        System.out.println("Obtained work item.");
                         timestampQueue.add(System.currentTimeMillis());
                         // TODO(stfinancial): How big should this block be?
-                        System.out.println("Notifying work item.");
+//                        System.out.println("Notifying work item.");
                         synchronized (item) {
                             item.rateBlocked = false;
                             item.notify();
                         }
-//                        synchronized(item) {
-//                            System.out.println("Notifying work item.");
-//                            item.notify();
-//                        }
-//                        // TODO(stfinancial): Does this actually need synchronized?
-//                        synchronized (this) {
-//                            // Getting the item, adding the timestamp, and notifying the work item must be atomic
-//                            // TODO(stfinancial): Is this true?
-//                            WorkItem item = workQueue.take();
-//                            timestampQueue.add(System.currentTimeMillis());
-//                            item.notify();
-//                        }
-//                        // TODO(stfinancial): ***** MUST DO *****: Take, notify, and adding timestamp must be an atomic operation.
-//                        workQueue.take().notify();
                     } catch (InterruptedException e) {
                         System.out.println("RequestManager interrupted 1.");
                         continue;
@@ -140,8 +117,7 @@ public class WorkQueue {
 
         @Override
         public MarketResponse call() throws Exception {
-            // TODO(stfinancial): Should it add itself to the queue here?
-//            queue.add(this);
+            // TODO(stfinancial): Potentially should place the timestamp in the queue here. Either before or after response is complete. (After in case of high latency... maybe)
 
             System.out.println("Waiting...");
             // Wait until we are told to submit by the RequestManager
@@ -150,20 +126,9 @@ public class WorkQueue {
                     wait();
                 }
             }
-//            synchronized (this) {
-//                wait();
-//            }
-            // TODO(stfinancial): Do we need to catch InterruptedException here?
-            System.out.println("Processing work item.");
-
             // TODO(stfinancial): Need to make sure that all of the stuff we're using in market is thread safe and does not modify instance variables.
             return market.processMarketRequest(req);
-
-            // After we've been cleared to submit, we should give our timestamp to the request manager
-            // TODO(stfinancial): Make this more accurate by having the market do this at the moment of the request (probably doesn't matter).
-            // TODO(stfinancial): Is this thread safe?
-//            manager.addElement(System.currentTimeMillis());
-//            return new MarketResponse(NullNode.getInstance(), req, System.currentTimeMillis(), RequestStatus.success());
+            // TODO(stfinancial): Maybe add completion timestamp here.
         }
 
         @Override

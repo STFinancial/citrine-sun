@@ -8,7 +8,6 @@ import api.wamp.WampSubscription;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -46,9 +45,6 @@ public final class Poloniex extends Market { //implements Tradable {
     // TODO(stfinancial): What about stuff to https://poloniex.com/private?
 
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
-    // TODO(stfinancial): Review the thread safety of this object.
-    private static final ObjectMapper mapper = new ObjectMapper();
-
 
     // TODO(stfinancial): Initialize in static block?
     // TODO(stfinancial): We should only need one of these per Market. Make this static?

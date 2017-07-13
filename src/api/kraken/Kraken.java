@@ -1,8 +1,8 @@
 package api.kraken;
 
 import api.*;
-import api.kraken.request.AssetPairRequest;
-import api.kraken.request.AssetPairResponse;
+import api.request.AssetPairRequest;
+import api.request.AssetPairResponse;
 import api.request.MarketRequest;
 import api.request.MarketResponse;
 import api.request.RequestStatus;
@@ -10,7 +10,6 @@ import api.request.StatusType;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -26,7 +25,6 @@ import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -47,6 +45,7 @@ public class Kraken extends Market {
     private MessageDigest digest;
 
     // TODO(stfinancial): This needs to be unified across all markets.
+    // TODO(stfinancial): Does this really make sense? Do these objects ever hold state?
     private final KrakenResponseParser responseParser;
     private final KrakenRequestRewriter requestRewriter;
     private final KrakenData data;

@@ -39,6 +39,8 @@ final class GdaxResponseParser {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
         } else if (request instanceof FeeRequest) {
             return createFeeResponse(jsonResponse, (FeeRequest) request, timestamp);
+        } else if (request instanceof AssetPairRequest) {
+            return createAssetPairResponse(jsonResponse, (AssetPairRequest) request, timestamp);
         }
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
@@ -135,6 +137,14 @@ final class GdaxResponseParser {
             }
             return new FeeResponse(fees, jsonResponse, request, timestamp, RequestStatus.success());
         }
+    }
+
+    private static MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+        // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
+        // TODO(stfinancial): Create the map to market name.
+        List<CurrencyPair> assets = new ArrayList<>();
+        System.out.println(jsonResponse); // TODO(stfinancial): Implement this.
+        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 
 }

@@ -1,9 +1,6 @@
-package api.kraken.request;
+package api.request;
 
 import api.CurrencyPair;
-import api.request.MarketRequest;
-import api.request.MarketResponse;
-import api.request.RequestStatus;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Collections;
@@ -15,9 +12,17 @@ import java.util.Map;
  */
 // TODO(stfinancial): Rename to CurrencyPairResponse?
 public class AssetPairResponse extends MarketResponse {
-    final List<CurrencyPair> assetPairs;
-    final Map<String, CurrencyPair> assetPairNames;
-    final Map<CurrencyPair, String> assetPairKeys;
+    // TODO(stfinancial): Explain what these actually are in javadoc
+    final List<CurrencyPair> assetPairs; // List of tradable currency pairs
+    final Map<String, CurrencyPair> assetPairNames; // Map of the string used to identify a currency pair in the API, to the pair itself
+    final Map<CurrencyPair, String> assetPairKeys; // Map of the currencypair to the string used to identify it in the API.
+
+    public AssetPairResponse(List<CurrencyPair> assetPairs, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus error) {
+        super(jsonResponse, request, timestamp, error);
+        this.assetPairs = assetPairs;
+        this.assetPairNames = Collections.emptyMap();
+        this.assetPairKeys = Collections.emptyMap();
+    }
 
     // TODO(stfinancial): Should this constructor exist?
 //    public AssetPairResponse(List<CurrencyPair> assetPairs, Map<String, CurrencyPair> assetPairNames, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus error) {

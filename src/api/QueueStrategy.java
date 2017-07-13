@@ -4,8 +4,10 @@ package api;
  * Created by Timothy on 7/2/17.
  */
 public enum QueueStrategy {
-    // Submit work as soon as it is received until API rate limit is reached. At this point, there will be delays in
-    // returning futures as per the API rate limit. Strict always obeys priority.
+    /** Do not use a queue to resolve API rate limits. Allow the clients to resolve this issue themselves. */
+    DISABLED,
+    /** Submit work as soon as it is received until API rate limit is reached. At this point, there will be delays in
+     * returning futures as per the API rate limit. Strict always obeys priority. */
     STRICT,
 
 //    // Submit work as soon as it is received. Due to API rate limits, will be submitted with a constant delay as

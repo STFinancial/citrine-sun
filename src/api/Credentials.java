@@ -11,7 +11,8 @@ import java.io.IOException;
  * Created by Timothy on 2/7/17.
  */
 public class Credentials {
-    // TODO(stfinancial): Static factory method for empty credentials to have a public version of a market. Or maybe just have a no arg market.
+    // TODO(stfinancial): How is this actually going to be checked in the Market class?
+    private static final Credentials PUBLIC_ONLY = new Credentials("", "");
     // TODO(stfinancial): Support for separate market credentials (maybe)... this may clash with having multiple accounts per exchange.
 
     // TODO(stfinancial): Likely move this into a separate package with the signer interface (?) at which point we can perhaps better encapsulate.
@@ -21,7 +22,6 @@ public class Credentials {
     // TODO(stfinancial): Need to figure out how to actually handle this.
     private final String passphrase;
 
-    // TODO(stfinancial): Do we want a public constructor with api key and string
     private Credentials(String apiKey, String secretKey) {
         this.apiKey = apiKey;
         this.secretKey = secretKey;
@@ -36,6 +36,7 @@ public class Credentials {
 
     @Nullable
     // TODO(stfinancial): Potentially return Optional here.
+    // TODO(stfinancial): Specify the structure that this file should have.
     public static Credentials fromFileString(String fileString) {
         BufferedReader r;
         Credentials c;
@@ -61,6 +62,11 @@ public class Credentials {
         return c;
     }
 
+    // TODO(stfinancial): Does this make sense or just having an empty market?
+    public static Credentials publicOnly() {
+        return PUBLIC_ONLY;
+    }
+
 //     TODO(stfinancial): How does the signer get access to the secret key spec without recreating it every time?
     public byte[] signData(Signer signer, byte[] data) {
         return signer.sign(data);
@@ -70,9 +76,10 @@ public class Credentials {
         return signer.getHexDigest(data);
     }
 
-    // TODO(stfinancial): Remove these.
+    // TODO(stfinancial): Remove these, or significantly reduce access.
     public String getApiKey() { return apiKey; }
     public String getSecretKey() { return secretKey; }
     public String getPassphrase() { return passphrase; }
+    public boolean isPublicOnly() { return this == PUBLIC_ONLY; }
 
 }

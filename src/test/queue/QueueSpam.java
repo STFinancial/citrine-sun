@@ -35,7 +35,7 @@ public class QueueSpam {
         Future<MarketResponse> response;
         for (int i = 0; i < 100; ++i) {
             req = requests.get(r.nextInt(3));
-            System.out.println("Submitting request");
+//            System.out.println("Submitting request");
             response = q.submitWork(req);
             (new FutureCallback(response, ()->{})).run();
         }

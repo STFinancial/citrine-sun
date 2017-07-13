@@ -1,7 +1,6 @@
 package api.gdax;
 
 import api.AccountType;
-import api.CurrencyPair;
 import api.RequestArgs;
 import api.request.*;
 
@@ -26,6 +25,8 @@ final class GdaxRequestRewriter {
             return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
         } else if (request instanceof FeeRequest) {
             return rewriteFeeRequest((FeeRequest) request);
+        } else if (request instanceof AssetPairRequest) {
+            return rewriteAssetPairRequest((AssetPairRequest) request);
         }
         return RequestArgs.unsupported();
     }
@@ -144,6 +145,14 @@ final class GdaxRequestRewriter {
         builder.withResource("trailing-volume");
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private static RequestArgs rewriteAssetPairRequest(AssetPairRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        builder.withResource("products");
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(false);
         return builder.build();
     }
 
