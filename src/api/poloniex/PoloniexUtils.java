@@ -15,6 +15,9 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
+/**
+ * Useful helpful methods for {@link Poloniex}.
+ */
 final class PoloniexUtils {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";

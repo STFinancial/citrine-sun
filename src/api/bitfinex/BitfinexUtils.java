@@ -4,7 +4,7 @@ import api.Currency;
 import api.CurrencyPair;
 
 /**
- * Created by Timothy on 4/13/17.
+ * Useful helpful methods for {@link Bitfinex}.
  */
 final class BitfinexUtils {
 

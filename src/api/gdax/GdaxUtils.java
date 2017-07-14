@@ -11,18 +11,12 @@ import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 /**
- * Created by Timothy on 4/23/17.
+ * Useful helpful methods for {@link Gdax}.
  */
 final class GdaxUtils {
     private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX";
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
-
-    private static final String GTC = "GTC";
-    private static final String IOC = "IOC";
-    private static final String FOK = "FOK";
-
-    // TODO(stfinancial): Need a method to parse timestamps from GDAX... form of YYYY-mm-DDTHH:MM:SS.MSMSMSZ
 
     static double getTakerFeeFromVolumeFraction(double fraction) {
         if (fraction > 0.2) {

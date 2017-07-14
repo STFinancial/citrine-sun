@@ -6,7 +6,7 @@ import api.tmp_trade.TradeType;
 import com.sun.istack.internal.Nullable;
 
 /**
- * Created by Timothy on 6/3/17.
+ * Useful helpful methods for {@link Kraken}.
  */
 final class KrakenUtils {
 //    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
