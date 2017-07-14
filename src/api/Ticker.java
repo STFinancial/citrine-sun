@@ -1,7 +1,7 @@
 package api;
 
 /**
- * Created by Timothy on 2/13/17.
+ * Contains Ticker information for a {@link CurrencyPair}.
  */
 public class Ticker {
     private final CurrencyPair pair;
@@ -37,6 +37,20 @@ public class Ticker {
     // TODO(stfinancial): HIGH PRIORITY - Differentiate between price weighted quote volume and quote volume.
     public double getQuoteVolume() { return quoteVolume; }
 
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder("{\n");
+        sb.append("\tpair: ").append(pair.toString()).append("\n");
+        sb.append("\tlast: ").append(last).append("\n");
+        sb.append("\tlowestAsk: ").append(lowestAsk).append("\n");
+        sb.append("\thighestBid: ").append(highestBid).append("\n");
+        sb.append("\tpercentChange: ").append(percentChange).append("\n");
+        sb.append("\tbaseVolume: ").append(baseVolume).append("\n");
+        sb.append("\tquoteVolume: ").append(quoteVolume).append("\n");
+        sb.append("}\n");
+        return sb.toString();
+    }
+
 
     public static class Builder {
         private final CurrencyPair pair;
@@ -63,7 +77,5 @@ public class Ticker {
         public Ticker build() {
             return new Ticker(this);
         }
-
     }
-
 }
