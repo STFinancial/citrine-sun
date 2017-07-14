@@ -7,7 +7,6 @@ import api.MarginType;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.internal.Nullable;
 
 import java.time.LocalDateTime;
@@ -141,13 +140,15 @@ final class PoloniexUtils {
      * underscore between the two (i.e. XBT and XMR -> "XMR_BTC").
      */
     static String formatCurrencyPair(CurrencyPair pair) {
-        return String.format("%s_%s", getCurrencyString(pair.getQuote()), getCurrencyString(pair.getBase()));
+        return getCurrencyString(pair.getQuote()) + "_" + getCurrencyString(pair.getBase());
     }
 
-    // TODO(stfinancial): Could make this an abstract method for Market.
+    // TODO(stfinancial): Could make this an abstract method for Market. Seems like every market needs this, so it doesn't make a lot of sense to have the currency aliases
     static String getCurrencyString(Currency currency) {
         // TODO(stfinancial): There has to be a more elegant solution than a giant switch statement. Maybe an enummap or something.
         switch (currency) {
+            case XLM:
+                return "STR";
             default:
                 return currency.toString();
         }

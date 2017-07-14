@@ -20,7 +20,7 @@ import java.util.*;
 
 public class TradeSpreader {
     private static final Random random = new Random();
-    // TODO(stfinancial): This needs to be looked at. It doesn't seem to be working correctly. (Still not working quite right. STR 0.0000098 and 0.0000002)
+    // TODO(stfinancial): This needs to be looked at. It doesn't seem to be working correctly. (Still not working quite right. XLM 0.0000098 and 0.0000002)
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
 //    private static final double PRIMARY_LIMIT = 31;
@@ -107,7 +107,7 @@ public class TradeSpreader {
 //    private static final double PRICE = 0.0000098;
 //    private static final double RANGE = 0.0000002;
 //    private static final double AMOUNT = 1200000;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
+//    private static final CurrencyPair PAIR = CurrencyPair.of(XLM, BTC);
 
 //    private static final double PRICE = 0.00006000;
 //    private static final double RANGE = 0.00000450;

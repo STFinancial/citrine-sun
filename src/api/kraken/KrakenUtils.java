@@ -9,7 +9,6 @@ import com.sun.istack.internal.Nullable;
  * Useful helpful methods for {@link Kraken}.
  */
 final class KrakenUtils {
-//    private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
     private static final String INVALID_STRING = "invalid";
@@ -56,28 +55,6 @@ final class KrakenUtils {
         }
     }
 
-//    static long getTimestampFromKrakenTimestamp(String poloTimestamp) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"));
-////        DateFormat format = new SimpleDateFormat(DATE_FORMAT);
-//        LocalDateTime d = LocalDateTime.from(formatter.parse(poloTimestamp));
-//        return d.atZone(ZoneOffset.UTC).toEpochSecond();
-////        System.out.println("Printing this ridiculous thing: " + d.toEpochSecond(ZoneOffset.UTC));
-////        System.out.println("Current time millis: \t\t\t" + System.currentTimeMillis());
-//
-//        // TODO(stfinancial): Go to DateTimeFormat if this becomes to cumbersome.
-////        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-////        DateTime
-////        LocalDateTime date = LocalDateTime.parse(poloTimestamp, formatter);
-////        System.out.println(date.toString());
-////        return 0;
-//
-////        long timestamp = DateFormat.getDateTimeInstance();
-//    }
-
-//    static String formatCurrencyPairWithoutNamespace(CurrencyPair pair) {
-//        return String.format("%s%s", getCurrencyString(pair.getBase()), getCurrencyString(pair.getQuote()));
-//    }
-
     // TODO(stfinancial): Could make this an abstract method for Market.
     static String getCurrencyString(Currency currency) {
         // TODO(stfinancial): There has to be a more elegant solution than a giant switch statement. Maybe an enummap or something.
@@ -86,8 +63,6 @@ final class KrakenUtils {
                 return "XBT";
             case DOGE:
                 return "XDG";
-            case STR:
-                return "XLM";
             default:
                 return currency.toString();
         }

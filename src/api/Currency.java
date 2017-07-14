@@ -30,12 +30,12 @@ public enum Currency {
     CAD(Arrays.asList("CAD"), "Z"), // Canadian Dollar
     CLAM(Arrays.asList("CLAM"), "X"),
     CURE(Arrays.asList("CURE"), "X"),
-    DASH(Arrays.asList("DASH"), "X"), // Dash
+    DASH(Arrays.asList("DASH","DSH"), "X"), // Dash
     DCR(Arrays.asList("DCR"), "X"), // Decred
     DGB(Arrays.asList("DGB"), "X"), // Digibyte
     DOGE(Arrays.asList("DOGE","XDG"), "X"), // Dogecoin
     EMC2(Arrays.asList("EMC2"), "X"),
-    EOS(Arrays.asList("EOS"), "X"),
+    EOS(Arrays.asList("EOS"), "X"), // Eos
     ETC(Arrays.asList("ETC"), "X"), // Ethereum Classic
     ETH(Arrays.asList("ETH"), "X"), // Ethereum
     EUR(Arrays.asList("EUR"), "Z"), // Euro
@@ -52,6 +52,7 @@ public enum Currency {
     HZ(Arrays.asList("HZ"), "X"),
     ICN(Arrays.asList("ICN"), "X"),
     IOC(Arrays.asList("IOC"), "X"),
+    IOTA(Arrays.asList("IOTA","IOT"), "X"), // Iota
     JPY(Arrays.asList("JPY"), "X"), // Japanese Yen
     LBC(Arrays.asList("LBC"), "X"), // Library Credits
     LSK(Arrays.asList("LSK"), "X"), // Lisk
@@ -82,13 +83,13 @@ public enum Currency {
     RBY(Arrays.asList("RBY"), "X"),
     REP(Arrays.asList("REP"), "X"), // Augur
     RIC(Arrays.asList("RIC"), "X"),
+    RRT(Arrays.asList("RRT"), "X"),
     SBD(Arrays.asList("SBD"), "X"),
     SC(Arrays.asList("SC"), "X"), // Siacoin
     SDC(Arrays.asList("SDC"), "X"),
     SJCX(Arrays.asList("SJCX"), "X"), // Storjcoin
     SNT(Arrays.asList("SNT"), "X"), // Status Network Token
     STEEM(Arrays.asList("STEEM"), "X"), // Steem
-    STR(Arrays.asList("STR","XLM"), "X"), // Stellar Lumens
     STRAT(Arrays.asList("STRAT"), "X"),
     SYS(Arrays.asList("SYS"), "X"), // Syscoin
     UNITY(Arrays.asList("UNITY"), "X"),
@@ -102,6 +103,7 @@ public enum Currency {
     XBC(Arrays.asList("XBC"), "X"),
     XCP(Arrays.asList("XCP"), "X"), // Counterparty
     XEM(Arrays.asList("XEM"), "X"),
+    XLM(Arrays.asList("XLM","STR"), "X"), // Stellar Lumens // TODO(stfinancial): Rename this to XLM
     XMG(Arrays.asList("XMG"), "X"),
     XMR(Arrays.asList("XMR"), "X"), // Monero
     XPM(Arrays.asList("XPM"), "X"),
