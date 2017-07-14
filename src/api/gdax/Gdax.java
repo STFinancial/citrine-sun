@@ -14,7 +14,6 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
@@ -34,7 +33,6 @@ public class Gdax extends Market {
         super(credentials);
         this.passphrase = credentials.getPassphrase();
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
-        this.httpClient = HttpClients.createDefault();
     }
 
     @Override

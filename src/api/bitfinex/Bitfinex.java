@@ -3,7 +3,6 @@ package api.bitfinex;
 import api.*;
 import api.request.MarketRequest;
 import api.request.MarketResponse;
-import org.apache.http.impl.client.HttpClients;
 
 /**
  * Class representing the Bitfinex {@code Market}.
@@ -11,17 +10,21 @@ import org.apache.http.impl.client.HttpClients;
 public final class Bitfinex extends Market {
     // TODO(stfinancial): Handle decimal precision here (5 sigfigs) and other places (8 decimal places on Polo).
     private static final String MARKET_NAME = "Bitfinex";
-
     private static final HmacAlgorithm algorithm = HmacAlgorithm.HMACSHA384;
+
+    private final BitfinexRequestRewriter requestRewriter;
+    private final BitfinexResponseParser responseParser;
 
     public Bitfinex(Credentials credentials) {
         super(credentials);
-//        this.signer = new HmacSigner(algorithm, secretKey);
+        this.signer = new HmacSigner(algorithm, credentials.getSecretKey(), false);
+        this.requestRewriter = new BitfinexRequestRewriter();
+        this.responseParser = new BitfinexResponseParser();
     }
 
     @Override
     public MarketResponse processMarketRequest(MarketRequest request) {
-        BitfinexRequestRewriter.rewriteRequest(request);
+        requestRewriter.rewriteRequest(request);
         return null;
     }
 

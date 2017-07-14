@@ -104,7 +104,6 @@ final class GdaxResponseParser {
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
         Map<Currency, Double> exchangeBalances = new HashMap<>();
         Map<Currency, Double> marginBalances = new HashMap<>();
-//        System.out.println(jsonResponse);
         // TODO(stfinancial): Maybe make a Balance class that has available and total balances as well as other info.
         jsonResponse.forEach((balance) -> {
             if (balance.has("margin_enabled") && balance.get("margin_enabled").asBoolean()) {
@@ -120,8 +119,6 @@ final class GdaxResponseParser {
 
     private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
-
-//        System.out.println(jsonResponse);
         Map<CurrencyPair, FeeInfo> fees = new HashMap<>();
         if (!request.getPairs().isEmpty()) {
             for (JsonNode feeSet : jsonResponse) {
@@ -139,12 +136,14 @@ final class GdaxResponseParser {
         }
     }
 
-    private static MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+    private static AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
         // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
         // TODO(stfinancial): Create the map to market name.
         List<CurrencyPair> assets = new ArrayList<>();
-        System.out.println(jsonResponse); // TODO(stfinancial): Implement this.
-        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
+        jsonResponse.forEach((assetPair) -> {
+            assets.add(CurrencyPair.of(Currency.getCanonicalRepresentation(assetPair.get("base_currency").asText()), Currency.getCanonicalRepresentation(assetPair.get("quote_currency").asText())));
+        });
+        return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
 }

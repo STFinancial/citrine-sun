@@ -15,7 +15,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import rx.functions.Action1;
 import ws.wamp.jawampa.ApplicationError;
@@ -63,7 +62,6 @@ public final class Poloniex extends Market { //implements Tradable {
     public Poloniex(Credentials credentials) {
         super(credentials);
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), false);
-        this.httpClient = HttpClients.createDefault();
 //        this.trader = new PoloniexTrader(this);
         if (!accountQueues.containsKey(apiKey)) {
             queue = new PoloniexQueue(QueueStrategy.STRICT, 10000);

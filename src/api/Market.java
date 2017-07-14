@@ -36,6 +36,7 @@ public abstract class Market {
 
     public abstract MarketConstants getConstants();
 
+    // TODO(stfinancial): Does protected here make sense?
     protected abstract MarketResponse sendRequest(MarketRequest request);
 
 //    public static Market getInstance();

@@ -42,6 +42,7 @@ final class KrakenRequestRewriter {
         if (request.getPairs().isEmpty()) {
             System.out.println("Kraken requires that ticker pairs be specified.");
             // TODO(stfinancial): Probably need to throw something here.
+            // TODO(stfinancial): Maybe return all tickers?
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);

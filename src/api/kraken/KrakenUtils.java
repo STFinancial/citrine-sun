@@ -37,9 +37,9 @@ final class KrakenUtils {
      */
     static String formatCurrencyPair(CurrencyPair pair, boolean ignoreNamespace) {
         if (ignoreNamespace || pair.getBase().getIsoNamespace().equals(pair.getQuote().getIsoNamespace())) {
-            return String.format("%s%s", getCurrencyString(pair.getBase()), getCurrencyString(pair.getQuote()));
+            return getCurrencyString(pair.getBase()) + getCurrencyString(pair.getQuote());
         } else {
-            return String.format("%s%s", getIsoCompliantCurrencyString(pair.getBase()), getIsoCompliantCurrencyString(pair.getQuote()));
+            return getIsoCompliantCurrencyString(pair.getBase()) + getIsoCompliantCurrencyString(pair.getQuote());
         }
     }
 

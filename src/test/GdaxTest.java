@@ -25,26 +25,27 @@ public class GdaxTest {
     public void test() {
         Credentials c = Credentials.fromFileString(GDAX_KEY);
         Gdax gdax = new Gdax(c);
-        TradeRequest req = new TradeRequest(new Trade(1, 1500, CurrencyPair.of(Currency.BTC, Currency.USD), TradeType.BUY), 1, 1);
-        req.setIsPostOnly(false);
+//        TradeRequest req = new TradeRequest(new Trade(1, 1500, CurrencyPair.of(Currency.BTC, Currency.USD), TradeType.BUY), 1, 1);
+//        req.setIsPostOnly(false);
+        AssetPairRequest req = new AssetPairRequest(1, 1);
 //        TickerRequest req = new TickerRequest(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.BTC)}), 1, 1);
         MarketResponse resp = gdax.processMarketRequest(req);
         System.out.println(resp.getJsonResponse());
-        if (!resp.isSuccess()) {
-            System.out.println("Failure: " + resp.getJsonResponse().toString());
-            return;
-        }
-        try {
-            Thread.sleep(1000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
-
-        resp = gdax.processMarketRequest(new CancelRequest(((TradeResponse) resp).getOrderNumber(), CancelRequest.CancelType.TRADE, 1, 1));
-        System.out.println(resp.getJsonResponse().toString());
-
-        resp = gdax.processMarketRequest(new OrderBookRequest(CurrencyPair.of(Currency.LTC, Currency.BTC), 50, 1, 1));
-        System.out.println(resp.getJsonResponse().toString());
+//        if (!resp.isSuccess()) {
+//            System.out.println("Failure: " + resp.getJsonResponse().toString());
+//            return;
+//        }
+//        try {
+//            Thread.sleep(1000);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
+//
+//        resp = gdax.processMarketRequest(new CancelRequest(((TradeResponse) resp).getOrderNumber(), CancelRequest.CancelType.TRADE, 1, 1));
+//        System.out.println(resp.getJsonResponse().toString());
+//
+//        resp = gdax.processMarketRequest(new OrderBookRequest(CurrencyPair.of(Currency.LTC, Currency.BTC), 50, 1, 1));
+//        System.out.println(resp.getJsonResponse().toString());
     }
 
 }
