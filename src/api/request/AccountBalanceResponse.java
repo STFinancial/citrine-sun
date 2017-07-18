@@ -4,7 +4,6 @@ import api.AccountType;
 import api.Currency;
 import com.fasterxml.jackson.databind.JsonNode;
 
-import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.Map;
 
@@ -16,15 +15,16 @@ public class AccountBalanceResponse extends MarketResponse {
     // TODO(stfinancial): Potentially convert to 3 maps.
     // TODO(stfinancial): Still need to fill in 0 values.
     // TODO(stfinancial): What about available vs. total?
+    // TODO(stfinancial): Currently for bitfinex this is available balance.
     private final Map<AccountType, Map<Currency, Double>> balances;
 
     public AccountBalanceResponse(Map<AccountType, Map<Currency, Double>> balances, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus error) {
         super(jsonResponse, request, timestamp, error);
-        this.balances = balances;
+        this.balances = Collections.unmodifiableMap(balances);
     }
 
     public Map<AccountType, Map<Currency, Double>> getBalances() {
-        return Collections.unmodifiableMap(balances);
+        return balances;
     }
 
     // TODO(pallarino): Maybe allow specifying account type or account type/currency as getters.

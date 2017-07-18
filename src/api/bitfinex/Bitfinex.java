@@ -11,12 +11,20 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Class representing the Bitfinex {@code Market}.
@@ -71,7 +79,23 @@ public final class Bitfinex extends Market {
             }
             httpRequest = new HttpGet(args.asUrl(true));
         } else {
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
+            String url = args.asUrl(true);
+            System.out.println("Url: " + url);
+            httpRequest = new HttpPost(url);
+            httpRequest.addHeader("bfx-nonce", String.valueOf(timestamp));
+            System.out.println("Nonce: " + String.valueOf(timestamp));
+            httpRequest.addHeader("bfx-apikey", apiKey);
+            System.out.println("ApiKey: " + apiKey);
+            String stuff = "/api" + args.getResourcePath() + String.valueOf(timestamp) + args.getQueryString();
+//            String stuff = "/api/" + url + String.valueOf(timestamp) + args.getQueryString();
+            System.out.println("Body: " + stuff);
+            // TODO(stfinancial): Need to check that credentials aren't public only.
+//            String sign = signer.getHexDigest(stuff.getBytes());
+            String sign = signer.getHexDigest(stuff.getBytes(Charset.forName("UTF-8")));
+            httpRequest.addHeader("bfx-signature", sign);
+            ((HttpPost) httpRequest).setEntity(new StringEntity("{}", ContentType.APPLICATION_JSON));
+//            try { ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(Arrays.asList(new NameValuePair[]{new BasicNameValuePair("json", "{}")}), "UTF-8")); } catch (Exception e) {};
+//            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
         }
 
         // TODO(stfinancial): This logic is duplicated everywhere, maybe move this to market?
@@ -112,6 +136,7 @@ public final class Bitfinex extends Market {
         // TODO(stfinancial): More sophisticated handling of errors codes...
         boolean isError = statusCode != HttpStatus.SC_OK;
 //        System.out.println(statusCode);
+        System.out.println(jsonResponse);
         return responseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
     }
 }

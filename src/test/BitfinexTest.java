@@ -1,12 +1,11 @@
 package test;
 
+import api.AccountType;
 import api.Credentials;
 import api.Currency;
 import api.CurrencyPair;
 import api.bitfinex.Bitfinex;
-import api.request.MarketResponse;
-import api.request.TickerRequest;
-import api.request.TickerResponse;
+import api.request.*;
 
 import java.util.Arrays;
 
@@ -14,7 +13,7 @@ import java.util.Arrays;
  * Created by Timothy on 7/14/17.
  */
 public class BitfinexTest {
-    private static final String API_KEYS = "";
+    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/bitfinex_key.txt";
 
     public static void main(String[] args) {
         BitfinexTest b = new BitfinexTest();
@@ -22,13 +21,15 @@ public class BitfinexTest {
     }
 
     private void test() {
-        Bitfinex b = new Bitfinex(Credentials.publicOnly());
-        TickerRequest r = new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.BTC, Currency.USD), CurrencyPair.of(Currency.ETH, Currency.BTC)), 1, 1);
+        Bitfinex b = new Bitfinex(Credentials.fromFileString(API_KEYS));
+//        TickerRequest r = new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.BTC, Currency.USD), CurrencyPair.of(Currency.ETH, Currency.BTC)), 1, 1);
+//        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.ETH, Currency.BTC), 30, 2, 2);
+        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.ALL, 1, 1);
 
         MarketResponse resp = b.processMarketRequest(r);
         System.out.println(resp.getJsonResponse());
-        ((TickerResponse) resp).getTickers().forEach((pair, ticker)-> {
-            System.out.println(ticker.toString());
-        });
+//        ((TickerResponse) resp).getTickers().forEach((pair, ticker)-> {
+//            System.out.println(ticker.toString());
+//        });
     }
 }

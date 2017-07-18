@@ -1,12 +1,17 @@
 package api.bitfinex;
 
+import api.AccountType;
 import api.Currency;
 import api.CurrencyPair;
+import com.sun.istack.internal.Nullable;
 
 /**
  * Useful helpful methods for {@link Bitfinex}.
  */
 final class BitfinexUtils {
+    private static final String EXCHANGE_STRING = "exchange";
+    private static final String MARGIN_STRING = "margin";
+    private static final String LENDING_STRING = "funding";
 
     static CurrencyPair parseCurrencyPair(String pair) {
         // TODO(stfinancial): Ignore the 'f' for now.
@@ -30,6 +35,19 @@ final class BitfinexUtils {
                 return "IOT";
             default:
                 return c.toString();
+        }
+    }
+
+    @Nullable
+    static AccountType parseAccountType(String type) {
+        if (type.equals(EXCHANGE_STRING)) {
+            return AccountType.EXCHANGE;
+        } else if (type.equals(MARGIN_STRING)) {
+            return AccountType.MARGIN;
+        } else if (type.equals(LENDING_STRING)) {
+            return AccountType.LOAN;
+        } else {
+            return null;
         }
     }
 

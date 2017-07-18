@@ -20,6 +20,7 @@ public class randtest {
         List<Double> rands = getTradeRandomization(1000);
         int[] counts = new int[1000];
         for (double rand : rands) {
+            System.out.println(rand);
             counts[(int) rand]++;
         }
         for (int count : counts) {
