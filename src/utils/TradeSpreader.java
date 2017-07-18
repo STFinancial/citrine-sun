@@ -28,7 +28,7 @@ public class TradeSpreader {
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
     private static final boolean ALLOW_MARKET_TAKES = true;
-    private static final double RANDOMIZER_RATE = 0.02;
+    private static final double RANDOMIZER_RATE = 0.9;
 
     private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String EXCHANGE = "Poloniex";
@@ -44,9 +44,9 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 7461676;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
-//    private static final double PRICE = 0.0504;
-//    private static final double RANGE = 0.0045;
-//    private static final double AMOUNT = 13.65;
+//    private static final double PRICE = 0.056;
+//    private static final double RANGE = 0.01;
+//    private static final double AMOUNT = 215;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
 
 //    private static final double PRICE = 2180;
@@ -74,15 +74,15 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 155194;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-    private static final double PRICE = 0.0162;
-    private static final double RANGE = 0.0024;
-    private static final double AMOUNT = 900;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+//    private static final double PRICE = 0.01625;
+//    private static final double RANGE = 0.0024;
+//    private static final double AMOUNT = 1100;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.096;
-//    private static final double RANGE = 0.007;
-//    private static final double AMOUNT = 180;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+    private static final double PRICE = 0.073;
+    private static final double RANGE = 0.01;
+    private static final double AMOUNT = 84;
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
@@ -114,8 +114,8 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 176282;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
 
-    private static final int BUCKETS = 240;
-    private static final TradeType TYPE = TradeType.SELL;
+    private static final int BUCKETS = 84;
+    private static final TradeType TYPE = TradeType.BUY;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
@@ -184,7 +184,7 @@ public class TradeSpreader {
                 } catch (InterruptedException e) {}
             }
             try {
-                Thread.sleep(1000);
+                Thread.sleep(250);
             } catch (InterruptedException e) {}
         }
     }

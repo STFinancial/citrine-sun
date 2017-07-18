@@ -21,7 +21,7 @@ import static api.Currency.*;
 class CancelOrders {
     private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
 //    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
 
     public static void main(String[] args) {
         CancelOrders o = new CancelOrders();
@@ -40,9 +40,9 @@ class CancelOrders {
         Map<CurrencyPair, List<TradeOrder>> orders = ((OpenOrderResponse) r).getOpenOrders();
 
         orders.getOrDefault(PAIR, Collections.emptyList()).forEach((order) -> {
-            p.processMarketRequest(new CancelRequest(order.getOrderId(), CancelRequest.CancelType.TRADE, 1, 1));
+            System.out.println(p.processMarketRequest(new CancelRequest(order.getOrderId(), CancelRequest.CancelType.TRADE, 1, 1)).getJsonResponse());
             try {
-                Thread.sleep(500);
+                Thread.sleep(250);
             } catch (InterruptedException e) {
 
             }

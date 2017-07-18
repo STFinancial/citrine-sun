@@ -40,6 +40,7 @@ public final class Bitfinex extends Market {
     public Bitfinex(Credentials credentials) {
         super(credentials);
         if (!credentials.isPublicOnly()) {
+            System.out.println(credentials.getSecretKey());
             this.signer = new HmacSigner(algorithm, credentials.getSecretKey(), false);
         }
         this.requestRewriter = new BitfinexRequestRewriter();
@@ -93,9 +94,10 @@ public final class Bitfinex extends Market {
 //            String sign = signer.getHexDigest(stuff.getBytes());
             String sign = signer.getHexDigest(stuff.getBytes(Charset.forName("UTF-8")));
             httpRequest.addHeader("bfx-signature", sign);
-            ((HttpPost) httpRequest).setEntity(new StringEntity("{}", ContentType.APPLICATION_JSON));
+//            ((HttpPost) httpRequest).setEntity(new StringEntity("{}", ContentType.APPLICATION_JSON));
 //            try { ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(Arrays.asList(new NameValuePair[]{new BasicNameValuePair("json", "{}")}), "UTF-8")); } catch (Exception e) {};
 //            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
+            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_FORM_URLENCODED));
         }
 
         // TODO(stfinancial): This logic is duplicated everywhere, maybe move this to market?
