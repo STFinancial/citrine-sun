@@ -7,6 +7,7 @@ import api.request.MarketResponse;
 import api.request.OpenOrderRequest;
 import api.request.OpenOrderResponse;
 import api.tmp_trade.TradeOrder;
+import keys.KeyManager;
 
 import javax.sound.sampled.*;
 import java.io.File;
@@ -20,7 +21,7 @@ import java.util.Map;
  */
 public class TradeAlerter {
     // TODO(stfinancial): Consider setting up a key manager for this.
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+    private static final String API_KEYS = KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP);
 
     private Map<CurrencyPair, List<TradeOrder>> prevOrders = new HashMap<>();
 

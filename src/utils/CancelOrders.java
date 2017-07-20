@@ -17,7 +17,7 @@ import java.util.Map;
 import static api.Currency.*;
 
 /**
- * Created by Timothy on 3/31/17.
+ * Cancels all orders for a given {@link CurrencyPair} on {@link Poloniex}.
  */
 class CancelOrders {
     private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);

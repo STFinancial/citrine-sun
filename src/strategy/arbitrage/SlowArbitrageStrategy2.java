@@ -198,6 +198,7 @@ class SlowArbitrageStrategy2 extends Strategy {
         CurrencyPairInfo secondarySidePairInfo = secondary.currencyPairInfos.get(pair);
 
         TradeRequest request = new TradeRequest(priorityTrade);
+        request.setPriority(5);
         request.setIsMarket(false);
         request.setIsPostOnly(false);
         request.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
@@ -223,6 +224,7 @@ class SlowArbitrageStrategy2 extends Strategy {
             // The right amount was filled.
             ArbitrageUtils.logAtLevel("Correct amount filled, placing amount on secondary: " + secondaryTrade.getAmount(), 2);
             request = new TradeRequest(secondaryTrade);
+            request.setPriority(5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
             response = secondary.market.processMarketRequest(request);
@@ -255,6 +257,7 @@ class SlowArbitrageStrategy2 extends Strategy {
             secondaryAmount = Math.floor((filledAmount * (1 - prioritySidePairInfo.takerFee) / (1 - secondarySidePairInfo.takerFee)) * HUNDRED_MILLION) / HUNDRED_MILLION;
             Trade revisedTrade = new Trade(secondaryAmount, secondaryTrade.getRate(), secondaryTrade.getPair(), secondaryTrade.getType());
             request = new TradeRequest(revisedTrade);
+            request.setPriority(5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
             ArbitrageUtils.logAtLevel("Placing alternate amount: " + filledAmount, 2);
@@ -286,6 +289,7 @@ class SlowArbitrageStrategy2 extends Strategy {
             // The right amount was filled.
             ArbitrageUtils.logAtLevel("Correct (rounded) amount filled, placing amount on secondary: " + secondaryTrade.getAmount(), 2);
             request = new TradeRequest(secondaryTrade);
+            request.setPriority(5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
             response = secondary.market.processMarketRequest(request);

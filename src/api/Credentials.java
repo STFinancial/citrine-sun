@@ -7,8 +7,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
+// TODO(stfinancial): How do we support API keys with restricted access to certain methods?
 /**
- * Created by Timothy on 2/7/17.
+ * Contains the API key, Secret key, and maybe password for accessing a {@link Market Market's} API.
  */
 public class Credentials {
     // TODO(stfinancial): How is this actually going to be checked in the Market class?
@@ -66,15 +67,15 @@ public class Credentials {
     public static Credentials publicOnly() {
         return PUBLIC_ONLY;
     }
-
-//     TODO(stfinancial): How does the signer get access to the secret key spec without recreating it every time?
-    public byte[] signData(Signer signer, byte[] data) {
-        return signer.sign(data);
-    }
-
-    public String getHexDigest(Signer signer, byte[] data) {
-        return signer.getHexDigest(data);
-    }
+//
+////     TODO(stfinancial): How does the signer get access to the secret key spec without recreating it every time?
+//    public byte[] signData(Signer signer, byte[] data) {
+//        return signer.sign(data);
+//    }
+//
+//    public String getHexDigest(Signer signer, byte[] data) {
+//        return signer.getHexDigest(data);
+//    }
 
     // TODO(stfinancial): Remove these, or significantly reduce access.
     public String getApiKey() { return apiKey; }

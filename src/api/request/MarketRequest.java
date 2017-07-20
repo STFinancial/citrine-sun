@@ -17,6 +17,7 @@ public abstract class MarketRequest {//implements Comparable<MarketRequest> {
     // TODO(stfinancial): Should this be protected?
     public MarketRequest() {}
 
+    // TODO(stfinancial): We could also make an alternate constructor for this...
     public void setPriority(int priority) { this.priority = priority; }
     // TODO(stfinancial): Add documentation here and figure out how exactly the RequestQueue will assign a timestamp if this is set
     public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
