@@ -8,6 +8,7 @@ import api.request.MarketResponse;
 import api.request.OpenOrderRequest;
 import api.request.OpenOrderResponse;
 import api.tmp_trade.TradeOrder;
+import keys.KeyManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -19,8 +20,6 @@ import static api.Currency.*;
  * Created by Timothy on 3/31/17.
  */
 class CancelOrders {
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
     private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 
     public static void main(String[] args) {
@@ -29,7 +28,7 @@ class CancelOrders {
     }
 
     private void run() {
-        Credentials c = Credentials.fromFileString(API_KEYS);
+        Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP));
         Poloniex p = new Poloniex(c);
         MarketResponse r = p.processMarketRequest(new OpenOrderRequest(PAIR));
         if (!r.isSuccess()) {

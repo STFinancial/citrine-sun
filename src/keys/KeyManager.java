@@ -18,8 +18,6 @@ public final class KeyManager {
             this.suffix = suffix;
         }
     }
-    private static final String DESKTOP_SUFFIX = "d";
-    private static final String LAPTOP_SUFFIX = "l";
 
     private static final Map<String, String> KEYS = Collections.unmodifiableMap(new HashMap<String, String>(){{
         put("Poloniex_d", "F:\\\\Users\\\\Zarathustra\\\\Documents\\\\main_key.txt");
