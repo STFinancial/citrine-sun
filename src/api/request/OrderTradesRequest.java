@@ -8,8 +8,7 @@ public final class OrderTradesRequest extends MarketRequest {
     // TODO(stfinancial): Support for multiple order ids.
     private final String id;
 
-    public OrderTradesRequest(String id, int priority, long timestamp) {
-        super(priority, timestamp);
+    public OrderTradesRequest(String id) {
         this.id = id;
     }
 

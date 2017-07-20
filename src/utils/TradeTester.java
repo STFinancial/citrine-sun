@@ -29,7 +29,7 @@ public class TradeTester {
         Credentials c = Credentials.fromFileString(API_KEYS);
         Poloniex polo = new Poloniex(c);
         Trade t = new Trade(AMOUNT, PRICE, PAIR, TYPE);
-        TradeRequest req = new TradeRequest(t, 1, System.currentTimeMillis());
+        TradeRequest req = new TradeRequest(t);
         req.setIsMargin(IS_MARGIN);
         req.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
         MarketResponse resp = polo.processMarketRequest(req);

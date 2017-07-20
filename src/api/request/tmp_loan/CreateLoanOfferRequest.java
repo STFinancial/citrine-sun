@@ -9,8 +9,7 @@ import api.tmp_loan.PrivateLoanOrder;
 public class CreateLoanOfferRequest extends MarketRequest {
     private final PrivateLoanOrder order;
 
-    public CreateLoanOfferRequest(PrivateLoanOrder order, int priority, long timestamp) {
-        super(priority, timestamp);
+    public CreateLoanOfferRequest(PrivateLoanOrder order) {
         this.order = order;
     }
 

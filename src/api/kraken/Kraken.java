@@ -59,7 +59,7 @@ public class Kraken extends Market {
         }
         requestRewriter = new KrakenRequestRewriter(this);
         responseParser = new KrakenResponseParser(this);
-        AssetPairRequest apr = new AssetPairRequest(1, System.currentTimeMillis());
+        AssetPairRequest apr = new AssetPairRequest();
         MarketResponse r = processMarketRequest(apr);
         int retryCount = 5;
         while (!r.isSuccess() && retryCount-- > 0) {

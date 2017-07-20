@@ -38,7 +38,7 @@ public class TradeAlerter {
 
         Credentials c = Credentials.fromFileString(API_KEYS);
         Poloniex polo = new Poloniex(c);
-        MarketResponse resp = polo.processMarketRequest(new OpenOrderRequest(1, System.currentTimeMillis()));
+        MarketResponse resp = polo.processMarketRequest(new OpenOrderRequest());
         if (resp.isSuccess()) {
             OpenOrderResponse ooResp = (OpenOrderResponse) resp;
             prevOrders = ooResp.getOpenOrders();
@@ -57,7 +57,7 @@ public class TradeAlerter {
                 return;
             }
             totals.clear();
-            resp = polo.processMarketRequest(new OpenOrderRequest(1, System.currentTimeMillis()));
+            resp = polo.processMarketRequest(new OpenOrderRequest());
             if (resp.isSuccess()) {
                 OpenOrderResponse ooResp = (OpenOrderResponse) resp;
 //                System.out.println(ooResp.getJsonResponse());

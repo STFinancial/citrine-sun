@@ -73,7 +73,7 @@ public final class NaiveLendingStrategy extends Strategy {
             do {
                 sleep(300);
                 // TODO(stfinancial): Figure out why this doesn't work. The timeframe may be too short for Poloniex.
-            } while (!(resp = polo.processMarketRequest(new GetLendingHistoryRequest(prevTime, currentTime, 1, 1))).isSuccess());
+            } while (!(resp = polo.processMarketRequest(new GetLendingHistoryRequest(prevTime, currentTime))).isSuccess());
             // Transfer gains.
             ((GetLendingHistoryResponse) resp).getLoans().forEach((loan) -> {
                 double earned = loan.getEarned();
@@ -88,18 +88,18 @@ public final class NaiveLendingStrategy extends Strategy {
                 do {
                     sleep(300);
                     System.out.println("Transferring " + (earned * EXCHANGE_TRANSFER_FRACTION) + currency.toString() + " to EXCHANGE.");
-                } while (!polo.processMarketRequest(new TransferBalanceRequest(currency, earned * EXCHANGE_TRANSFER_FRACTION, AccountType.LOAN, AccountType.EXCHANGE, 1, 1)).isSuccess());
+                } while (!polo.processMarketRequest(new TransferBalanceRequest(currency, earned * EXCHANGE_TRANSFER_FRACTION, AccountType.LOAN, AccountType.EXCHANGE)).isSuccess());
                 do {
                     sleep(300);
                     System.out.println("Transferring " + (earned * MARGIN_TRANSFER_FRACTION) + currency.toString() + " to MARGIN.");
-                } while (!polo.processMarketRequest(new TransferBalanceRequest(currency, earned * MARGIN_TRANSFER_FRACTION, AccountType.LOAN, AccountType.MARGIN, 1, 1)).isSuccess());
+                } while (!polo.processMarketRequest(new TransferBalanceRequest(currency, earned * MARGIN_TRANSFER_FRACTION, AccountType.LOAN, AccountType.MARGIN)).isSuccess());
             });
 
 
             // Obtain all private open loan offers and cancel them.
             do {
                 sleep(300);
-            } while (!(resp = polo.processMarketRequest(new GetPrivateLoanOffersRequest(1, 1))).isSuccess());
+            } while (!(resp = polo.processMarketRequest(new GetPrivateLoanOffersRequest())).isSuccess());
 
             // TODO(stfinancial): this check is redundant, fix this.
             if (resp.isSuccess()) {
@@ -112,7 +112,7 @@ public final class NaiveLendingStrategy extends Strategy {
 //                            System.out.println("Stale time: " + (offer.getTimestamp() + ORDER_DURATION) * 1000);
                             do {
                                 sleep(300);
-                            } while(!polo.processMarketRequest(new CancelRequest(offer.getOrderId(), CancelRequest.CancelType.LOAN, 1, 1)).isSuccess());
+                            } while(!polo.processMarketRequest(new CancelRequest(offer.getOrderId(), CancelRequest.CancelType.LOAN)).isSuccess());
                         }
                     });
                 });
@@ -122,7 +122,7 @@ public final class NaiveLendingStrategy extends Strategy {
             sleep(300);
 
             // Get account balances.
-            resp = polo.processMarketRequest(new AccountBalanceRequest(AccountType.LOAN, 1, 1));
+            resp = polo.processMarketRequest(new AccountBalanceRequest(AccountType.LOAN));
 
             Map<Currency, Double> balances;
             if (resp.isSuccess()) {
@@ -138,7 +138,7 @@ public final class NaiveLendingStrategy extends Strategy {
                 continue;
             }
 
-            resp = polo.processMarketRequest(new VolumeRequest(1, 1));
+            resp = polo.processMarketRequest(new VolumeRequest());
             Map<Currency, Double> volumes;
             if (resp.isSuccess()) {
                 volumes = ((VolumeResponse) resp).getCurrencyVolumes();
@@ -167,7 +167,7 @@ public final class NaiveLendingStrategy extends Strategy {
                 } catch (InterruptedException e) {
                     continue;
                 }
-                resp = polo.processMarketRequest(new GetPublicLoanOrdersRequest(c, 1, 1));
+                resp = polo.processMarketRequest(new GetPublicLoanOrdersRequest(c));
                 if (!resp.isSuccess()) {
                     System.out.println("Failure processing request: " + resp.getJsonResponse().toString());
                     continue;
@@ -203,7 +203,7 @@ public final class NaiveLendingStrategy extends Strategy {
                     loan = new Loan(balances.get(c), rate, c, LoanType.OFFER);
                     order = new PrivateLoanOrder(loan, "1", System.currentTimeMillis(), duration, false);
                 }
-                resp = polo.processMarketRequest(new CreateLoanOfferRequest(order, 1, 1));
+                resp = polo.processMarketRequest(new CreateLoanOfferRequest(order));
                 System.out.println("Placing loan offer: { amount: " + order.getAmount() + ", rate: " + order.getRate() + ", currency: " + order.getCurrency().toString() + ", duration: " + order.getDuration() + " }");
                 if (!resp.isSuccess()) {
                     System.out.println("Failure placing request: " + resp.getJsonResponse().toString());

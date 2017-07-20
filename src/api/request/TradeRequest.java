@@ -36,8 +36,7 @@ public final class TradeRequest extends MarketRequest {
     // TODO(stfinancial): Do we want a builder, a long constructor, some options, or just setters?
     // TODO(stfinancial): Go through and rename all of these timestamp to requestTimestamp
     // TODO(stfinancial): Clarify what this timestamp, I'm not even sure that I know.
-    public TradeRequest(Trade trade, int priority, long timestamp) {
-        super(priority, timestamp);
+    public TradeRequest(Trade trade) {
         this.trade = trade;
     }
 

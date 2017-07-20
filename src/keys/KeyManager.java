@@ -32,6 +32,6 @@ public final class KeyManager {
 
     // TODO(stfinancial): Does it make sense to take in the market as a string or create an enum for it?
     public static String getKeyForMarket(String marketName, Machine machine) {
-        return KEYS.getOrDefault(marketName + machine.suffix, "");
+        return KEYS.getOrDefault(marketName + "_" + machine.suffix, "");
     }
 }

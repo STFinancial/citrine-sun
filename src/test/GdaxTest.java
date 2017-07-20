@@ -23,10 +23,10 @@ public class GdaxTest {
     public void test() {
         Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Gdax", KeyManager.Machine.LAPTOP));
         Gdax gdax = new Gdax(c);
-//        TradeRequest req = new TradeRequest(new Trade(1, 1500, CurrencyPair.of(Currency.BTC, Currency.USD), TradeType.BUY), 1, 1);
+//        TradeRequest req = new TradeRequest(new Trade(1, 1500, CurrencyPair.of(Currency.BTC, Currency.USD), TradeType.BUY));
 //        req.setIsPostOnly(false);
-        AssetPairRequest req = new AssetPairRequest(1, 1);
-//        TickerRequest req = new TickerRequest(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.BTC)}), 1, 1);
+        AssetPairRequest req = new AssetPairRequest();
+//        TickerRequest req = new TickerRequest(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.BTC)}));
         MarketResponse resp = gdax.processMarketRequest(req);
         System.out.println(resp.getJsonResponse());
 //        if (!resp.isSuccess()) {
@@ -39,10 +39,10 @@ public class GdaxTest {
 //            e.printStackTrace();
 //        }
 //
-//        resp = gdax.processMarketRequest(new CancelRequest(((TradeResponse) resp).getOrderNumber(), CancelRequest.CancelType.TRADE, 1, 1));
+//        resp = gdax.processMarketRequest(new CancelRequest(((TradeResponse) resp).getOrderNumber(), CancelRequest.CancelType.TRADE));
 //        System.out.println(resp.getJsonResponse().toString());
 //
-//        resp = gdax.processMarketRequest(new OrderBookRequest(CurrencyPair.of(Currency.LTC, Currency.BTC), 50, 1, 1));
+//        resp = gdax.processMarketRequest(new OrderBookRequest(CurrencyPair.of(Currency.LTC, Currency.BTC), 50));
 //        System.out.println(resp.getJsonResponse().toString());
     }
 

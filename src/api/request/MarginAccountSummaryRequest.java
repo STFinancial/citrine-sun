@@ -7,7 +7,5 @@ import api.request.MarketRequest;
  */
 public class MarginAccountSummaryRequest extends MarketRequest {
 
-    public MarginAccountSummaryRequest(int priority, long timestamp) {
-        super(priority, timestamp);
-    }
+    public MarginAccountSummaryRequest() {}
 }

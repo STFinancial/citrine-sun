@@ -31,7 +31,7 @@ class CancelOrders {
     private void run() {
         Credentials c = Credentials.fromFileString(API_KEYS);
         Poloniex p = new Poloniex(c);
-        MarketResponse r = p.processMarketRequest(new OpenOrderRequest(1, 1, PAIR));
+        MarketResponse r = p.processMarketRequest(new OpenOrderRequest(PAIR));
         if (!r.isSuccess()) {
             System.out.println("Failure to get Orders: " + r.getJsonResponse());
             return;
@@ -40,7 +40,7 @@ class CancelOrders {
         Map<CurrencyPair, List<TradeOrder>> orders = ((OpenOrderResponse) r).getOpenOrders();
 
         orders.getOrDefault(PAIR, Collections.emptyList()).forEach((order) -> {
-            System.out.println(p.processMarketRequest(new CancelRequest(order.getOrderId(), CancelRequest.CancelType.TRADE, 1, 1)).getJsonResponse());
+            System.out.println(p.processMarketRequest(new CancelRequest(order.getOrderId(), CancelRequest.CancelType.TRADE)).getJsonResponse());
             try {
                 Thread.sleep(250);
             } catch (InterruptedException e) {

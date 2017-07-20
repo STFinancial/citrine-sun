@@ -35,18 +35,18 @@ public class KrakenTestTest {
         List<CurrencyPair> pairs = new ArrayList<>();
         pairs.add(CurrencyPair.of(Currency.DASH, Currency.BTC));
         pairs.add(CurrencyPair.of(Currency.BTC, Currency.USD));
-        TickerRequest r = new TickerRequest(pairs, 1, 1);
+        TickerRequest r = new TickerRequest(pairs);
         Future<MarketResponse> resp;
 
         System.out.println("Sending request 1");
-        Future<MarketResponse> r1 = k.processMarketRequest(new TickerRequest(pairs, 1, 1));
+        Future<MarketResponse> r1 = k.processMarketRequest(new TickerRequest(pairs));
         System.out.println("Sending request 2");
-        Future<MarketResponse> r2 = k.processMarketRequest(new TickerRequest(pairs, 1, 2));
+        Future<MarketResponse> r2 = k.processMarketRequest(new TickerRequest(pairs));
         System.out.println("Sending request 3");
-        Future<MarketResponse> r3 = k.processMarketRequest(new TickerRequest(pairs, 1, 3));
+        Future<MarketResponse> r3 = k.processMarketRequest(new TickerRequest(pairs));
         System.out.println("Sending request 4");
-        Future<MarketResponse> r4 = k.processMarketRequest(new TickerRequest(pairs, 1, 4));
+        Future<MarketResponse> r4 = k.processMarketRequest(new TickerRequest(pairs));
         System.out.println("Sending request 5");
-        Future<MarketResponse> r5 = k.processMarketRequest(new TickerRequest(pairs, 1, 5));
+        Future<MarketResponse> r5 = k.processMarketRequest(new TickerRequest(pairs));
     }
 }

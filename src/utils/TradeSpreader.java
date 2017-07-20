@@ -152,7 +152,7 @@ public class TradeSpreader {
                 return;
         }
         if (!ALLOW_MARKET_TAKES) {
-            MarketResponse r = market.processMarketRequest(new TickerRequest(Arrays.asList(PAIR), 1, 1));
+            MarketResponse r = market.processMarketRequest(new TickerRequest(Arrays.asList(PAIR)));
             if (!r.isSuccess()) {
                 System.out.println("Failed to obtain ticker data.");
                 System.out.println(r.getJsonResponse().toString());
@@ -230,7 +230,7 @@ public class TradeSpreader {
                           roundedPrice,
                           PAIR,
                           TYPE);
-            r = new TradeRequest(t, 1, System.currentTimeMillis());
+            r = new TradeRequest(t);
             r.setIsMargin(IS_MARGIN);
             requests.add(r);
         }

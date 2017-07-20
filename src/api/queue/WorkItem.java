@@ -65,6 +65,7 @@ public class WorkItem implements Callable<MarketResponse>, Comparable<WorkItem> 
                 wait();
             }
         }
+        // TODO(stfinancial): How exactly does this work with one instance of the market class? Will this be called by another WorkItem before the previous one completes?
         return market.processMarketRequest(request);
     }
 }

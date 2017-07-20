@@ -26,7 +26,7 @@ public class OrderSummer {
         Credentials c = Credentials.fromFileString(API_KEYS);
         Poloniex polo = new Poloniex(c);
 //        parseAndPrintOrders(polo.processMarketRequest(new OpenOrderRequest(1, 1)).getJsonResponse());
-        parseAndPrintOrders(polo.processMarketRequest(new OpenOrderRequest(1, 1, PAIR)).getJsonResponse());
+        parseAndPrintOrders(polo.processMarketRequest(new OpenOrderRequest(PAIR)).getJsonResponse());
     }
 
     private void parseAndPrintOrders(JsonNode orders) {

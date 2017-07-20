@@ -44,7 +44,7 @@ public class CandleCatcher extends Strategy {
         Poloniex polo = new Poloniex(credentials);
 
         // TODO(stfinancial): Subscribe to the pubsub at some point.
-        MarketResponse resp = polo.processMarketRequest(new TickerRequest(1, 1));
+        MarketResponse resp = polo.processMarketRequest(new TickerRequest());
         // Place trades at specified price fractions
         TickerResponse ticker;
         if (resp.isSuccess()) {
@@ -60,7 +60,7 @@ public class CandleCatcher extends Strategy {
         for (double frac : ABOVE_FRACS) {
             price = lowestAsk * (1 + frac);
             t = new Trade(price, BTC_AMOUNT / price, PAIR, TradeType.SELL);
-            r = new TradeRequest(t, 1, 1);
+            r = new TradeRequest(t);
             r.setIsMargin(IS_MARGIN);
             r.setIsPostOnly(true);
             above_trades.add(r);
@@ -71,7 +71,7 @@ public class CandleCatcher extends Strategy {
         for (double frac : BELOW_FRACS) {
             price = highestBid * (1 - frac);
             t = new Trade(price, BTC_AMOUNT / price, PAIR, TradeType.BUY);
-            r = new TradeRequest(t, 1, 1);
+            r = new TradeRequest(t);
             r.setIsMargin(IS_MARGIN);
             r.setIsPostOnly(true);
             below_trades.add(r);
@@ -118,7 +118,7 @@ public class CandleCatcher extends Strategy {
                 continue;
             }
             // Check that our previously placed orders are not missing
-            MarketResponse mResp = polo.processMarketRequest(new OpenOrderRequest(1, 1));
+            MarketResponse mResp = polo.processMarketRequest(new OpenOrderRequest());
             if (!mResp.isSuccess()) {
                 System.out.println("Error: " + mResp.getJsonResponse());
                 continue;
@@ -154,7 +154,7 @@ public class CandleCatcher extends Strategy {
                 counter = 0;
                 // TODO(stfinancial): Cancel all of the orders and replace them.
                 for (String s : above_orders.keySet()) {
-                    polo.processMarketRequest(new CancelRequest(s, CancelRequest.CancelType.TRADE, 1, 1));
+                    polo.processMarketRequest(new CancelRequest(s, CancelRequest.CancelType.TRADE));
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {
@@ -162,7 +162,7 @@ public class CandleCatcher extends Strategy {
                     }
                 }
                 for (String s : below_orders.keySet()) {
-                    polo.processMarketRequest(new CancelRequest(s, CancelRequest.CancelType.TRADE, 1, 1));
+                    polo.processMarketRequest(new CancelRequest(s, CancelRequest.CancelType.TRADE));
                     try {
                         Thread.sleep(200);
                     } catch (InterruptedException e) {

@@ -28,16 +28,16 @@ public class KrakenTest {
         Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Kraken", KeyManager.Machine.LAPTOP));
         Kraken k = new Kraken(c);
 //        OpenOrderRequest r = new OpenOrderRequest(1, 1);
-//        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.DASH, Currency.BTC), CurrencyPair.of(Currency.EOS, Currency.ETH)})), 1, 1);
-//        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.USD)})), 1, 1);
+//        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.DASH, Currency.BTC), CurrencyPair.of(Currency.EOS, Currency.ETH)})));
+//        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.USD)})));
 
-        TradeRequest r = new TradeRequest(new Trade(0.01, 0.02, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY), 1, 1);
-//        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
-//        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.DASH, Currency.USD), 5, 1, 1);
+        TradeRequest r = new TradeRequest(new Trade(0.01, 0.02, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY));
+//        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.EXCHANGE);
+//        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.DASH, Currency.USD), 5);
 //        List<CurrencyPair> pairs = new ArrayList<>();
 //        pairs.add(CurrencyPair.of(Currency.DASH, Currency.BTC));
 //        pairs.add(CurrencyPair.of(Currency.BTC, Currency.USD));
-//        TickerRequest r = new TickerRequest(pairs, 1, 1);
+//        TickerRequest r = new TickerRequest(pairs);
         MarketResponse resp = k.processMarketRequest(r);
         System.out.println(resp.getJsonResponse());
     }

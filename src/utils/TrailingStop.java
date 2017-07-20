@@ -70,12 +70,12 @@ public class TrailingStop implements Runnable {
                 } catch (InterruptedException e) {
                     continue;
                 }
-                resp = market.processMarketRequest(new MarginPositionRequest(pair, 1, 1));
+                resp = market.processMarketRequest(new MarginPositionRequest(pair));
                 if (!resp.isSuccess()) {
                     continue;
                 }
                 pos = ((MarginPositionResponse) resp).getPosition();
-                resp = market.processMarketRequest(new MarginAccountSummaryRequest(1, 1));
+                resp = market.processMarketRequest(new MarginAccountSummaryRequest());
                 if (!resp.isSuccess()) {
                     continue;
                 }
@@ -104,13 +104,13 @@ public class TrailingStop implements Runnable {
 
 
                 // Get our position summary again
-                resp = market.processMarketRequest(new MarginPositionRequest(pair, 1, 1));
+                resp = market.processMarketRequest(new MarginPositionRequest(pair));
                 if (!resp.isSuccess()) {
                     continue;
                 }
                 pos = ((MarginPositionResponse) resp).getPosition();
 
-                resp = market.processMarketRequest(new TickerRequest(1, 1));
+                resp = market.processMarketRequest(new TickerRequest());
                 if (!resp.isSuccess()) {
                     continue;
                 }
@@ -145,7 +145,7 @@ public class TrailingStop implements Runnable {
 
                 // Amount is equal to amount of our margin position. (Watch out for negative numbers)
                 Trade t = new Trade(amount, limitPrice, pair, tradeType);
-                TradeRequest req = new TradeRequest(t, 1, 1);
+                TradeRequest req = new TradeRequest(t);
                 req.setIsMargin(true);
                 req.setStop(stopPrice);
                 market.processMarketRequest(req);

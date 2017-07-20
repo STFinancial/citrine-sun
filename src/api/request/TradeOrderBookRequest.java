@@ -8,12 +8,9 @@ import api.CurrencyPair;
 public class TradeOrderBookRequest extends MarketRequest {
     private CurrencyPair currencyPair;
 
-    public TradeOrderBookRequest(int priority, long timestamp) {
-        super(priority, timestamp);
-    }
+    public TradeOrderBookRequest() {}
 
-    public TradeOrderBookRequest(int priority, long timestamp, CurrencyPair currencyPair) {
-        this(priority, timestamp);
+    public TradeOrderBookRequest(CurrencyPair currencyPair) {
         this.currencyPair = currencyPair;
     }
 

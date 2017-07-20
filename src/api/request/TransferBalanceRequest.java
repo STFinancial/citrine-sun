@@ -15,8 +15,7 @@ public final class TransferBalanceRequest extends MarketRequest {
     private final AccountType to;
 
 
-    public TransferBalanceRequest(Currency currency, double amount, AccountType from, AccountType to, int priority, long timestamp) {
-        super(priority, timestamp);
+    public TransferBalanceRequest(Currency currency, double amount, AccountType from, AccountType to) {
         this.currency = currency;
         this.amount = amount;
         this.from = from;

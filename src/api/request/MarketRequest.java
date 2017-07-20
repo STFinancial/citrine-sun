@@ -4,7 +4,7 @@ package api.request;
 /**
  * Abstract class from which all requests to a {@link api.Market Market} should derive.
  */
-public abstract class MarketRequest implements Comparable<MarketRequest> {
+public abstract class MarketRequest {//implements Comparable<MarketRequest> {
     // TODO(stfinancial): Add support for registering callback to be completed upon the request being done. This may require having a wrapper around the MarketResponse Future
 
     private int priority;
@@ -14,10 +14,17 @@ public abstract class MarketRequest implements Comparable<MarketRequest> {
     private long maxWaitTime;
     private boolean priorityOverride = false;
 
-    public MarketRequest(int priority, long timestamp) {
-        this.priority = priority;
-        this.timestamp = timestamp;
-    }
+    // TODO(stfinancial): Should this be protected?
+    public MarketRequest() {}
+
+    public void setPriority(int priority) { this.priority = priority; }
+    // TODO(stfinancial): Add documentation here and figure out how exactly the RequestQueue will assign a timestamp if this is set
+    public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+
+//    public MarketRequest(int priority, long timestamp) {
+//        this.priority = priority;
+//        this.timestamp = timestamp;
+//    }
 
     public final void setUseCachedValues(boolean useCachedValues) {
         this.useCachedValues = useCachedValues;
@@ -35,22 +42,22 @@ public abstract class MarketRequest implements Comparable<MarketRequest> {
         priorityOverride = true;
     }
 
-    @Override
-    public final int compareTo(MarketRequest req) {
-        // TODO(stfinancial): I'm not sure about having to rely on timestamp being set properly. Maybe we can set a timestamp when it hits the queue?
-        if (priorityOverride && System.currentTimeMillis() > timestamp + maxWaitTime) {
-            return 1;
-        }
-        if (priority > req.priority) {
-            return 1;
-        } else if (priority < req.priority) {
-            return -1;
-        } else if (timestamp > req.timestamp) {
-            return -1;
-        } else {
-            return 1;
-        }
-    }
+//    @Override
+//    public final int compareTo(MarketRequest req) {
+//        // TODO(stfinancial): I'm not sure about having to rely on timestamp being set properly. Maybe we can set a timestamp when it hits the queue?
+//        if (priorityOverride && System.currentTimeMillis() > timestamp + maxWaitTime) {
+//            return 1;
+//        }
+//        if (priority > req.priority) {
+//            return 1;
+//        } else if (priority < req.priority) {
+//            return -1;
+//        } else if (timestamp > req.timestamp) {
+//            return -1;
+//        } else {
+//            return 1;
+//        }
+//    }
 
     // TODO(stfinancial): This seems a bit excessive to avoid an unchecked cast in CachedResource.
     // There are other good reasons to do this. Probably implement it in the future.

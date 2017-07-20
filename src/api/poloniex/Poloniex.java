@@ -141,6 +141,7 @@ public final class Poloniex extends Market { //implements Tradable {
         } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
+            // TODO(stfinancial): Not sure this is threadsafe.
             String sign = signer.getHexDigest(args.getQueryString().getBytes());
 //            System.out.println(args.getUrl());
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?

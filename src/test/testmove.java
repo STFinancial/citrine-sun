@@ -27,7 +27,7 @@ public class testmove {
         Credentials c = Credentials.fromFileString(API_KEYS);
         Poloniex polo = new Poloniex(c);
 
-        TradeRequest t = new TradeRequest(new Trade(1, 0.00015000, CurrencyPair.of(Currency.MAID, Currency.BTC), TradeType.BUY), 1, 1);
+        TradeRequest t = new TradeRequest(new Trade(1, 0.00015000, CurrencyPair.of(Currency.MAID, Currency.BTC), TradeType.BUY));
         t.setIsMargin(true);
         JsonNode j = polo.processMarketRequest(t).getJsonResponse();
 
@@ -38,6 +38,6 @@ public class testmove {
             e.printStackTrace();
         }
 
-        polo.processMarketRequest(new MoveOrderRequest(j.get("orderNumber").asLong(), 0.0001750, 1, 1));
+        polo.processMarketRequest(new MoveOrderRequest(j.get("orderNumber").asLong(), 0.0001750));
     }
 }

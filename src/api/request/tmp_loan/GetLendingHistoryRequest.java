@@ -13,8 +13,7 @@ public final class GetLendingHistoryRequest extends MarketRequest {
     private final long end;
 
     // TODO(stfinancial): Potentially take a Currency here.
-    public GetLendingHistoryRequest(long start, long end, int priority, long timestamp) {
-        super(priority, timestamp);
+    public GetLendingHistoryRequest(long start, long end) {
         this.start = start;
         this.end = end;
     }

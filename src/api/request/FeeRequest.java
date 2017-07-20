@@ -13,13 +13,11 @@ public final class FeeRequest extends MarketRequest {
 
     private final Set<CurrencyPair> pairs;
 
-    public FeeRequest(int priority, long timestamp) {
-        super(priority, timestamp);
+    public FeeRequest() {
         pairs = Collections.emptySet();
     }
 
-    public FeeRequest(Set<CurrencyPair> pairs, int priority, long timestamp) {
-        super(priority, timestamp);
+    public FeeRequest(Set<CurrencyPair> pairs) {
         this.pairs = Collections.unmodifiableSet(pairs);
     }
 
