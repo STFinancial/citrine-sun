@@ -8,6 +8,7 @@ import api.kraken.Kraken;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
+import keys.KeyManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,17 +19,13 @@ import java.util.List;
  * Created by Timothy on 6/17/17.
  */
 public class KrakenTest {
-    private static final String KRAKEN_KEYS = "/Users/Timothy/Documents/Keys/kraken_key.txt";
-    // TODO(stfinancial): There are no actual keys in this file. Fix this.
-//    private static final String KRAKEN_KEYS = "F:\\\\Users\\\\Zarathustra\\\\Documents\\\\main_key.txt";
-
     public static void main(String[] args) {
         KrakenTest t = new KrakenTest();
         t.test();
     }
 
     public void test() {
-        Credentials c = Credentials.fromFileString(KRAKEN_KEYS);
+        Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Kraken", KeyManager.Machine.LAPTOP));
         Kraken k = new Kraken(c);
 //        OpenOrderRequest r = new OpenOrderRequest(1, 1);
 //        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.DASH, Currency.BTC), CurrencyPair.of(Currency.EOS, Currency.ETH)})), 1, 1);

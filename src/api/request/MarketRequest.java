@@ -1,10 +1,11 @@
 package api.request;
 
+// TODO(stfinancial): Convert this into a JSON?
 /**
  * Abstract class from which all requests to a {@link api.Market Market} should derive.
  */
 public abstract class MarketRequest implements Comparable<MarketRequest> {
-    // TODO(stfinancial): Add support for registering callback to be completed upon the request being done.
+    // TODO(stfinancial): Add support for registering callback to be completed upon the request being done. This may require having a wrapper around the MarketResponse Future
 
     private int priority;
     private long timestamp;
@@ -25,6 +26,8 @@ public abstract class MarketRequest implements Comparable<MarketRequest> {
     public final int getPriority() { return priority; }
     public final boolean getUseCachedValues() { return useCachedValues; }
     public final long getTimestamp() { return timestamp; }
+    public final long getMaxWaitTime() { return maxWaitTime; }
+    public final boolean hasPriorityOverride() { return priorityOverride; }
 
     // TODO(stfinancial): I'm not sure about having to rely on timestamp being set properly. Maybe we can set a timestamp when it hits the queue?
     public final void maxPriorityAfter(long millis) {

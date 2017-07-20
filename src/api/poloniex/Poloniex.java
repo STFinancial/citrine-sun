@@ -52,10 +52,8 @@ public final class Poloniex extends Market { //implements Tradable {
 
     private static HashMap<String, PoloniexQueue> accountQueues = new HashMap<>();
 
-    private PriorityBlockingQueue<MarketRequest> requestQueue;
     //    private final PoloniexTrader trader;
     private final PoloniexQueue queue;
-
 
     // TODO(stfinancial): Switch to static factory method to avoid multiple instances with the same API keys.
     // Need to avoid IP bans by ensuring that a single IP can have a single market instance.
@@ -64,7 +62,7 @@ public final class Poloniex extends Market { //implements Tradable {
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), false);
 //        this.trader = new PoloniexTrader(this);
         if (!accountQueues.containsKey(apiKey)) {
-            queue = new PoloniexQueue(QueueStrategy.STRICT, 10000);
+            queue = new PoloniexQueue(this, QueueStrategy.STRICT, 5);
             accountQueues.put(apiKey, queue);
         } else {
             queue = accountQueues.get(apiKey);

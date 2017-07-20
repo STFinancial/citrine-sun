@@ -7,6 +7,7 @@ import api.gdax.Gdax;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
+import keys.KeyManager;
 
 import java.util.Arrays;
 
@@ -14,16 +15,13 @@ import java.util.Arrays;
  * Created by Zarathustra on 4/26/2017.
  */
 public class GdaxTest {
-    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-//    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
-
     public static void main(String[] args) {
         GdaxTest t = new GdaxTest();
         t.test();
     }
 
     public void test() {
-        Credentials c = Credentials.fromFileString(GDAX_KEY);
+        Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Gdax", KeyManager.Machine.LAPTOP));
         Gdax gdax = new Gdax(c);
 //        TradeRequest req = new TradeRequest(new Trade(1, 1500, CurrencyPair.of(Currency.BTC, Currency.USD), TradeType.BUY), 1, 1);
 //        req.setIsPostOnly(false);

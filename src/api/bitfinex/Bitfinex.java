@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
+// TODO(stfinancial): Apparently you can't place a trade through the rest API... so you need to get the websocket shit working.
 /**
  * Class representing the Bitfinex {@code Market}.
  */

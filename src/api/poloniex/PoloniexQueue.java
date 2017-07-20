@@ -1,88 +1,57 @@
 package api.poloniex;
 
+import api.Market;
 import api.QueueStrategy;
-import api.WorkItem;
-import api.request.MarketRequest;
+import api.queue.RequestQueue;
+import api.queue.WorkItem;
 
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.concurrent.*;
-
-/**
- * Created by Timothy on 11/27/16.
- */
-class PoloniexQueue implements Runnable {
-    // Number of requests per second as limited by the API.
-    private static final int REQUESTS_PER_SECOND = 6;
-
-//    private int requestsInLastSecond = 0;
-
-    PriorityBlockingQueue<WorkItem> requestQueue;
-    private QueueStrategy strategy;
-    private long timeout;
-    private ExecutorService workers;
-
-    Queue<WorkItem> previousRequests;
-
-    PoloniexQueue(QueueStrategy strategy, long timeout) {
-        this.strategy = strategy;
-        this.timeout = timeout;
-        requestQueue = new PriorityBlockingQueue<>();
-        previousRequests = new LinkedList<>();
-        workers = Executors.newFixedThreadPool(12); // We will say 2 seconds for now, later use the timeout value to find a good number.
-//        workers = Executors.newFixedThreadPool((int) (REQUESTS_PER_SECOND / (timeout / 1000)));
-    }
-
-//    Future<? extends MarketResponse> process(MarketRequest request) {
-//        workers.submit()
-//    }
-
-    void addWorkItem(WorkItem item) {
-        item.setTimestamp(System.currentTimeMillis());
-        requestQueue.add(item);
+final class PoloniexQueue extends RequestQueue {
+    protected PoloniexQueue(Market market, QueueStrategy strategy, int numWorkers) {
+        super(market, strategy, numWorkers);
     }
 
     @Override
     public void run() {
+        // TODO(stfinancial): We are assuming strategy is STRICT for now.
         while (true) {
-            long time = System.currentTimeMillis();
-            WorkItem oldestRequest = previousRequests.peek();
-            // Get rid of requests older than 1 second.
-            while (oldestRequest != null && oldestRequest.getTimestamp() + 1000 < time) {
-                previousRequests.poll();
-                oldestRequest = previousRequests.peek();
-            }
-
-            WorkItem newItem;
-            while (previousRequests.size() < 6) {
+//                System.out.println("In PoloniexQueue loop.");
+            // TODO(stfinancial): Embed this all in try catch for Interrupted Exception?
+            // TODO(stfinancial): Need to think about whether this is safe. Can the workQueue/timestampQueue ever grow too large?
+            if (timestampQueue.size() < 6) {
                 try {
-                    newItem = requestQueue.take();
+//                        System.out.println("About to take work item.");
+                    WorkItem item = workQueue.take();
+//                        System.out.println("Obtained work item.");
+                    timestampQueue.add(System.currentTimeMillis());
+                    // TODO(stfinancial): How big should this block be?
+//                        System.out.println("Notifying work item.");
+                    synchronized (item) {
+                        item.setRateBlocked(false);
+                        item.notify();
+                    }
                 } catch (InterruptedException e) {
-                    // TODO(stfinancial): How slow is this try catch?
-                    break;
+                    System.out.println("PoloniexQueue interrupted 1.");
+                    continue;
                 }
-                newItem.setWork(workers.submit(newItem)); // How do I return the future here...
-                previousRequests.add(newItem);
+            }
+            if (timestampQueue.size() == 6) {
+                // Continue if the queue is not empty and the oldest item is older than 1 second.
+                while (!timestampQueue.isEmpty() && System.currentTimeMillis() - timestampQueue.peek() > 1000) {
+                    timestampQueue.poll();
+                }
+            }
+            if (!timestampQueue.isEmpty()) {
+                long sleepTime = timestampQueue.peek() + 1000 - System.currentTimeMillis();
+                System.out.println("Sleep time: " + sleepTime);
+                if (sleepTime > 0) {
+                    try {
+                        Thread.sleep(sleepTime);
+                    } catch (InterruptedException e) {
+                        System.out.println("PoloniexQueue interrupted 2.");
+                        continue;
+                    }
+                }
             }
         }
     }
-
-//    void setStrategy(QueueStrategy strategy) {
-//        this.strategy = strategy;
-//    }
-//
-//    QueueStrategy getStrategy() {
-//        return strategy;
-//    }
-//
-//    void setTimeout(long timeout) {
-//        // Change thread pool size?
-//        this.timeout = timeout;
-//    }
-//
-//    long getTimeout() {
-//        return timeout;
-//    }
-
-
 }
