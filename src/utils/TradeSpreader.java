@@ -37,14 +37,14 @@ public class TradeSpreader {
 //    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
 //    private static final int ROUND_DECIMALS = 2;
 
-//    private static final double PRICE = 0.00000086;
-//    private static final double RANGE = 0.00000014;
-//    private static final double AMOUNT = 100000;
+//    private static final double PRICE = 0.00000090;
+//    private static final double RANGE = 0.00000003;
+//    private static final double AMOUNT = 19388297;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
-//    private static final double PRICE = 0.0504;
-//    private static final double RANGE = 0.0045;
-//    private static final double AMOUNT = 13.65;
+//    private static final double PRICE = 0.0824;
+//    private static final double RANGE = 0.006;
+//    private static final double AMOUNT = 103.14;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
 
 //    private static final double PRICE = 2180;
@@ -72,10 +72,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 73800;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-//    private static final double PRICE = 0.0158;
-//    private static final double RANGE = 0.001;
-//    private static final double AMOUNT = 698;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+    private static final double PRICE = 0.02025;
+    private static final double RANGE = 0.00045;
+    private static final double AMOUNT = 341.9;
+    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
 //    private static final double PRICE = 0.104;
 //    private static final double RANGE = 0.004;
@@ -102,18 +102,18 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 250;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
 
-//    private static final double PRICE = 0.00001;
-//    private static final double RANGE = 0.00000235;
-//    private static final double AMOUNT = 777328;
+//    private static final double PRICE = 0.000009;
+//    private static final double RANGE = 0.000001;
+//    private static final double AMOUNT = 837989;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(STR, BTC);
 
-    private static final double PRICE = 0.00008000;
-    private static final double RANGE = 0.00001350;
-    private static final double AMOUNT = 64500;
-    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
+//    private static final double PRICE = 0.00008000;
+//    private static final double RANGE = 0.00001350;
+//    private static final double AMOUNT = 64500;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
 
-    private static final int BUCKETS = 109;
-    private static final TradeType TYPE = TradeType.BUY;
+    private static final int BUCKETS = 91;
+    private static final TradeType TYPE = TradeType.SELL;
     private static final boolean IS_MARGIN = true;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
@@ -222,7 +222,7 @@ public class TradeSpreader {
             double amount = ((long) ((amountPerBucket + (randomizationRates.get(bucket) * randAmount)) * 100000000)) / 100000000.0;
             double unroundedPrice = startPrice + (bucket * priceIncrement);
             System.out.println("Unrounded: " + unroundedPrice);
-            double roundedPrice = ((long) (unroundedPrice * ((long) Math.pow(10, ROUND_DECIMALS)))) / Math.pow(10, ROUND_DECIMALS);
+            double roundedPrice = ((long) Math.round(unroundedPrice * ((long) Math.pow(10, ROUND_DECIMALS)))) / Math.pow(10, ROUND_DECIMALS);
             System.out.println("Rounded: " + roundedPrice);
             t = new Trade(amount,
                           roundedPrice,

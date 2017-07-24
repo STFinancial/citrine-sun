@@ -1,6 +1,5 @@
 package strategy.arbitrage;
 
-
 import api.*;
 import api.Currency;
 import api.gdax.Gdax;
@@ -19,6 +18,7 @@ class SlowArbitrageStrategy2 extends Strategy {
     static final double SATOSHI = 0.00000001;
 
     // TODO(stfinancial): Use moving averages to determine how often to get the order books.
+    // TODO(stfinancial): Tally trades (e.g. sell on gdax, buy on poloniex) and use to add a weight to rebalance multiplier. This mitigates a bit of the issue of some exchanges running consistently higher than others.
 
     // TODO(stfinancial): IOC both trades and have a "holdover" potentially... HIGH PRIORITY!!!!.
     // TODO(stfinancial): See if we can fix 0.01 gdax issue.
@@ -39,8 +39,8 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
-        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.6);
-        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.15);
+        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.0);
+//        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.15);
     }});
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.01;
@@ -87,7 +87,7 @@ class SlowArbitrageStrategy2 extends Strategy {
         MarketInfo askSide;
         MarketInfo bidSide;
         while (true) {
-            ArbitrageUtils.sleep(400);
+            ArbitrageUtils.sleep(250);
             if (!maybeUpdateFeesAndBalances(markets)) { continue; }
 
             /* Get new order books */
