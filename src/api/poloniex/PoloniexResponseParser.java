@@ -155,7 +155,7 @@ final class PoloniexResponseParser {
                 CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, request.getPair()), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
                 b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
                 b.globalTradeId(t.get("globalTradeID").asText());
-                b.fee(t.get("fee").asDouble());
+//                b.fee(t.get("fee").asDouble()); // TODO(stfinancial): Decide whether to convert this to quote or base currency.
                 // TODO(stfinancial): Infer isMake from the fee and our fee rate.
                 trades.add(b.build());
             });
@@ -166,6 +166,7 @@ final class PoloniexResponseParser {
                 CurrencyPair pair = PoloniexUtils.parseCurrencyPair(tradesForPairs.getKey());
                 List<CompletedTrade> trades = new ArrayList<>();
                 tradesForPairs.getValue().elements().forEachRemaining((t) -> {
+                    // TODO(stfinancial): Ensure that "amount" is before fees.
                     CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, pair), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
                     b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
                     b.globalTradeId(t.get("globalTradeID").asText());

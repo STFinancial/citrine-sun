@@ -114,6 +114,7 @@ public class Kraken extends Market {
         }
         System.out.println("URL: " + url);
         if (args.isPrivate()) {
+            // TODO(stfinancial): Something here is not being encoded correctly, issues with commas and spaces.
             String baseQueryString = args.getQueryString();
             System.out.println("Base QueryString: " + baseQueryString);
 //            try { baseQueryString = URLEncoder.encode(baseQueryString, ENCODING); } catch (Exception e) {}

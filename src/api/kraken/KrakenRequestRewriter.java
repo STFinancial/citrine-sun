@@ -118,7 +118,17 @@ final class KrakenRequestRewriter {
 
     private RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
-        // TODO(stfinancial): Finish this.
+        builder.withResource("0");
+        builder.withResource("private");
+        builder.withResource("TradesHistory");
+        // TODO(stfinancial): Do we want to specify "all" or "closed" for type.
+        // TODO(stfinancial): What does the "trades" option do?
+        if (request.getEnd() != 0 || request.getStart() != 0) {
+            builder.withParam("start", String.valueOf(request.getStart()));
+            builder.withParam("end", String.valueOf(request.getEnd()));
+        }
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
         return builder.build();
     }
 
