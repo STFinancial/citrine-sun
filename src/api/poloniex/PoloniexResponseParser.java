@@ -78,6 +78,8 @@ final class PoloniexResponseParser {
         } else if (request instanceof MoveOrderRequest) {
             // TODO(stfinancial): Potentially rename this, as there is no such thing as a moveorderresponse.
             return createMoveOrderResponse(jsonResponse, (MoveOrderRequest) request, timestamp);
+        } else if (request instanceof TradeHistoryRequest) {
+            return createTradeHistoryResponse(jsonResponse, (TradeHistoryRequest) request, timestamp);
         } else if (request instanceof MarginPositionRequest) {
             return createMarginPositionResponse(jsonResponse, (MarginPositionRequest) request, timestamp);
         } else if (request instanceof MarginAccountSummaryRequest) {
@@ -142,6 +144,38 @@ final class PoloniexResponseParser {
         });
         System.out.println(jsonResponse.toString());
         return new MoveOrderResponse(jsonResponse.get("orderNumber").asLong(), completedTradeMap, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private static MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
+        // TODO(stfinancial): Test that this actually works.
+        Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
+        if (request.getPair() != null) {
+            List<CompletedTrade> trades = new ArrayList<>();
+            jsonResponse.elements().forEachRemaining((t) -> {
+                CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, request.getPair()), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
+                b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
+                b.globalTradeId(t.get("globalTradeID").asText());
+                b.fee(t.get("fee").asDouble());
+                // TODO(stfinancial): Infer isMake from the fee and our fee rate.
+                trades.add(b.build());
+            });
+            completedTrades.put(request.getPair(), trades);
+        } else {
+            jsonResponse.fields().forEachRemaining((tradesForPairs) -> {
+                CurrencyPair pair = PoloniexUtils.parseCurrencyPair(tradesForPairs.getKey());
+                List<CompletedTrade> trades = new ArrayList<>();
+                tradesForPairs.getValue().elements().forEachRemaining((t) -> {
+                    CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, pair), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
+                    b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
+                    b.globalTradeId(t.get("globalTradeID").asText());
+                    b.fee(t.get("fee").asDouble());
+                    // TODO(stfinancial): Infer isMake from the fee and our fee rate.
+                    trades.add(b.build());
+                });
+                completedTrades.put(pair, trades);
+            });
+        }
+        return new TradeHistoryResponse(completedTrades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
     private static MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {

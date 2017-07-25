@@ -18,7 +18,7 @@ public final class CompletedTrade {
     private final long completionTimestamp;
 
     /* Optional Params */
-    private final String globalTradeId;
+    private final String globalTradeId; // TODO(stfinancail): What is this actually for?
     private final double total;
     private final double fee;
     private final boolean isMake; // Whether this trade was a market make or take. Potentially make this an enum as well. Perhaps LiquidityType or something?

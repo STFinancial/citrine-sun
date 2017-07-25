@@ -4,6 +4,7 @@ import api.AccountType;
 import api.Currency;
 import api.CurrencyPair;
 import api.MarginType;
+import api.tmp_trade.CompletedTrade;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -28,11 +29,28 @@ final class PoloniexUtils {
     private static final String SHORT_STRING = "short";
     private static final String LONG_STRING = "long";
 
+    private static final String EXCHANGE_STRING = "exchange";
+    private static final String SETTLEMENT_STRING = "settlement";
+    private static final String MARGIN_TRADE_STRING = "marginTrade";
+
     static Trade getTradeFromJson(JsonNode json, CurrencyPair pair) {
         // TODO(stfinancial): Unmarshall this directly to the object.
         // TODO(stfinancial): See if we can convert to using decimalValue in the future by searching for the proper decimal format.
         TradeType type = getTradeTypeFromString(json.get("type").asText());
         return new Trade(json.get("amount").asDouble(), json.get("rate").asDouble(), pair, type);
+    }
+
+    @Nullable
+    static CompletedTrade.Category parseCategory(String category) {
+        if (category.equals(SETTLEMENT_STRING)) {
+            return CompletedTrade.Category.SETTLEMENT;
+        } else if (category.equals(MARGIN_TRADE_STRING)) {
+            return CompletedTrade.Category.MARGIN;
+        } else if (category.equals(EXCHANGE_STRING)) {
+            return CompletedTrade.Category.EXCHANGE;
+        } else {
+            return null;
+        }
     }
 
     // TODO(stfinancial): This is a bit confusing... maybe just simplify this?
