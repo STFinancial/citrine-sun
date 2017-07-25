@@ -82,12 +82,16 @@ public class Gdax extends Market {
             JsonNode json = args.asJson();
             System.out.println(json);
             String what;
-            if (json.isNull()) {
-                what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath();
+            if (args.getHttpRequestType() != RequestArgs.HttpRequestType.POST || json.isNull()) {
+                if (args.getQueryString() != null || !args.getQueryString().isEmpty()) {
+                    what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + "?" + args.getQueryString();
+                } else {
+                    what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath();
+                }
             } else {
                 what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + args.asJson().toString();
             }
-//            System.out.println("what: " + what);
+            System.out.println("what: " + what);
             httpRequest.addHeader("CB-ACCESS-KEY", apiKey);
             httpRequest.addHeader("CB-ACCESS-SIGN", signer.getBase64Digest(what.getBytes()));
             httpRequest.addHeader("CB-ACCESS-TIMESTAMP", CB_ACCESS_TIMESTAMP);

@@ -9,12 +9,14 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
+import java.time.temporal.ChronoField;
 
 /**
  * Useful helpful methods for {@link Gdax}.
  */
 final class GdaxUtils {
-    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX";
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
 
@@ -66,7 +68,7 @@ final class GdaxUtils {
     }
 
     static long getTimestampFromGdaxTimestamp(String gdaxTimestamp) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"));
+        DateTimeFormatter formatter = new DateTimeFormatterBuilder().append(DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"))).appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true).append(DateTimeFormatter.ofPattern("X").withZone(ZoneId.of("UTC"))).toFormatter();
         LocalDateTime d = LocalDateTime.from(formatter.parse(gdaxTimestamp));
         return d.atZone(ZoneOffset.UTC).toEpochSecond();
     }

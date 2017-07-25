@@ -22,7 +22,7 @@ public final class CompletedTrade {
     private final String globalTradeId; // TODO(stfinancial): What is this actually for?
     /** The amount of the trade in the quote currency. Fees are irrelevant, as they are assessed after this. */
     private final double total;
-    private final double fee;
+    private final double fee; // TODO(stfinancial): Decide whether this should be in quote or base currency.
     private final boolean isMake; // Whether this trade was a market make or take. Potentially make this an enum as well. Perhaps LiquidityType or something?
     // TODO(stfinancial): Should this be margin for margin sales and exchange for normal sales?
     private final Category category;

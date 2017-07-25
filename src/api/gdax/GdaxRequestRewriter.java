@@ -23,6 +23,8 @@ final class GdaxRequestRewriter {
             return rewriteOrderTradesRequest((OrderTradesRequest) request);
         } else if (request instanceof AccountBalanceRequest) {
             return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
+        } else if (request instanceof TradeHistoryRequest) {
+            return rewriteTradeHistoryRequest((TradeHistoryRequest) request);
         } else if (request instanceof FeeRequest) {
             return rewriteFeeRequest((FeeRequest) request);
         } else if (request instanceof AssetPairRequest) {
@@ -131,6 +133,21 @@ final class GdaxRequestRewriter {
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("accounts");
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private static RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
+        // TODO(stfinancial): Make sure that this is actually what we want?
+        // TODO(stfinancial): How do we get our complete trade history?
+        // TODO(stfinancial): How do we inform that we cannot restrict to timestamps within the request?
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        builder.withResource("fills");
+        if (request.getPair() != null) {
+            // It makes sense for this to be a query parameter since this is a GET request.
+            builder.withParam("product_id", GdaxUtils.formatCurrencyPair(request.getPair()), true, true);
+        }
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         builder.isPrivate(true);
         return builder.build();
