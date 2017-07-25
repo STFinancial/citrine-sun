@@ -15,7 +15,6 @@ import api.request.TradeRequest;
 import api.tmp_trade.TradeType;
 import api.poloniex.Poloniex;
 
-import java.math.BigDecimal;
 import java.util.*;
 
 public class TradeSpreader {

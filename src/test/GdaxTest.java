@@ -12,7 +12,7 @@ import keys.KeyManager;
 import java.util.Arrays;
 
 /**
- * Created by Zarathustra on 4/26/2017.
+ * Test of various {@link MarketRequest} types on {@link Gdax}.
  */
 public class GdaxTest {
     public static void main(String[] args) {

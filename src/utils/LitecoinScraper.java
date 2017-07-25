@@ -26,7 +26,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Created by Zarathustra on 4/1/2017.
+ * Scrapes Segwit block information for Litecoin, buying as soon as possible if a new pool is signaling.
  */
 public final class LitecoinScraper {
     //    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
@@ -37,8 +37,6 @@ public final class LitecoinScraper {
     private static final String CHECK = "✓";
 
     private final CloseableHttpClient httpClient;
-
-    // TODO(stfinancial): Short if we see F2Pool stop signaling??
 
     private Map<String, Boolean> signals;
     private final Poloniex polo;
@@ -62,7 +60,6 @@ public final class LitecoinScraper {
         String pool;
         String segwit;
         String segwitBackup;
-
 
         while (true) {
             try {
@@ -117,7 +114,6 @@ public final class LitecoinScraper {
                     if (segwit.equals(segwitBackup)) {
                         signals.put(pool, true);
                         if (pool.equals("LTC1BTC") || pool.equals("Antpool") || pool.equals("LTC.top") || pool.equals("BW.com")) {
-                            // TODO(stfinancial): Do we check that F2Pool is still signaling?
                             if (!signals.containsKey("F2Pool") || !signals.get("F2Pool")) {
                                 System.out.println("F2Pool is no longer signaling. Not purchasing.");
                             }
@@ -180,7 +176,5 @@ public final class LitecoinScraper {
                 }
             }
         }
-
-
     }
 }

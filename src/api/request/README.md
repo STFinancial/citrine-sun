@@ -7,6 +7,8 @@ Ticker:
 * Request
     + Poloniex - 
     + Bitfinex -
+    + Kraken -
 * Response
     + Poloniex -
     + Bitfinex -
+    + Kraken - 

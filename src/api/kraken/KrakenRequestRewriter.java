@@ -30,7 +30,10 @@ final class KrakenRequestRewriter {
             return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
         } else if (request instanceof OrderTradesRequest) {
             return rewriteOrderTradesRequest((OrderTradesRequest) request);
+        } else if (request instanceof CancelRequest) {
+            return rewriteCancelRequest((CancelRequest) request);
         } else if (request instanceof FeeRequest) {
+            // TODO(stfinancial): I don't think we ever programmed FeeResponse.
             return rewriteFeeRequest((FeeRequest) request);
         } else if (request instanceof AssetPairRequest) {
             return rewriteAssetPairRequest((AssetPairRequest) request);
@@ -94,6 +97,17 @@ final class KrakenRequestRewriter {
         builder.withResource("private");
         builder.withResource("QueryOrders");
         // TODO(stfinancial): Support for multiple requests.
+        builder.withParam("txid", request.getId());
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteCancelRequest(CancelRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        builder.withResource("0");
+        builder.withResource("private");
+        builder.withResource("CancelOrder");
         builder.withParam("txid", request.getId());
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.isPrivate(true);
