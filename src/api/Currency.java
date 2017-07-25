@@ -30,6 +30,7 @@ public enum Currency {
     CAD(Arrays.asList("CAD"), "Z"), // Canadian Dollar
     CLAM(Arrays.asList("CLAM"), "X"),
     CURE(Arrays.asList("CURE"), "X"),
+    DAO(Arrays.asList("DAO"), "X"), // The DAO tokens.
     DASH(Arrays.asList("DASH","DSH"), "X"), // Dash
     DCR(Arrays.asList("DCR"), "X"), // Decred
     DGB(Arrays.asList("DGB"), "X"), // Digibyte

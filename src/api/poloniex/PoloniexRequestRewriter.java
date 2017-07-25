@@ -255,8 +255,11 @@ final class PoloniexRequestRewriter {
         } else {
             builder.withParam("currencyPair", "all");
         }
-        builder.withParam("start", String.valueOf(request.getStart()));
-        builder.withParam("end", String.valueOf(request.getEnd()));
+        if (request.getStart() != 0 && request.getEnd() != 0) {
+            // TODO(stfinancial): These are not exactly working right, but I think it is Poloniex's fault.
+            builder.withParam("start", String.valueOf(request.getStart()));
+            builder.withParam("end", String.valueOf(request.getEnd()));
+        }
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));

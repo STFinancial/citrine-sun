@@ -20,7 +20,7 @@ import static api.Currency.*;
  * Created by Timothy on 2/12/17.
  */
 public class CandleCatcher extends Strategy {
-    // TODO(stfinancial): This code definitely needs to be cleaned up.
+    // TODO(stfinancial): Not functional. Garbage code. Probably just rewrite this.
 
     private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final double[] ABOVE_FRACS = { 0.05 };

@@ -162,6 +162,7 @@ final class PoloniexResponseParser {
             completedTrades.put(request.getPair(), trades);
         } else {
             jsonResponse.fields().forEachRemaining((tradesForPairs) -> {
+                System.out.println(tradesForPairs.getKey());
                 CurrencyPair pair = PoloniexUtils.parseCurrencyPair(tradesForPairs.getKey());
                 List<CompletedTrade> trades = new ArrayList<>();
                 tradesForPairs.getValue().elements().forEachRemaining((t) -> {

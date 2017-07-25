@@ -32,6 +32,8 @@ final class KrakenRequestRewriter {
             return rewriteOrderTradesRequest((OrderTradesRequest) request);
         } else if (request instanceof CancelRequest) {
             return rewriteCancelRequest((CancelRequest) request);
+        } else if (request instanceof TradeHistoryRequest) {
+            return rewriteTradeHistoryRequest((TradeHistoryRequest) request);
         } else if (request instanceof FeeRequest) {
             // TODO(stfinancial): I don't think we ever programmed FeeResponse.
             return rewriteFeeRequest((FeeRequest) request);
@@ -111,6 +113,12 @@ final class KrakenRequestRewriter {
         builder.withParam("txid", request.getId());
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        // TODO(stfinancial): Finish this.
         return builder.build();
     }
 
