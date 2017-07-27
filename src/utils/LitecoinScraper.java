@@ -122,7 +122,7 @@ public final class LitecoinScraper {
                                 System.out.println("F2Pool is no longer signaling. Not purchasing.");
                             }
                             System.out.println("POOL IS SIGNALING SEGWIT. BUYING LITECOIN");
-                            MarketResponse resp = polo.processMarketRequest(new TickerRequest(2,2));
+                            MarketResponse resp = polo.processMarketRequest(new TickerRequest());
                             double price;
                             if (!resp.isSuccess()) {
                                 price = 0.012;
@@ -134,7 +134,7 @@ public final class LitecoinScraper {
                                     price = t.getLowestAsk();
                                 }
                             }
-                            TradeRequest req = new TradeRequest(new Trade(1 / price, price + 0.001, PAIR, TradeType.BUY), 2, 2);
+                            TradeRequest req = new TradeRequest(new Trade(1 / price, price + 0.001, PAIR, TradeType.BUY));
                             req.setIsMargin(true);
                             req.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
                             int success_count = 0;
@@ -155,7 +155,7 @@ public final class LitecoinScraper {
                                 }
                             }
                             // Now where do we place the sell orders?
-                            req = new TradeRequest(new Trade(success_count / price, price * 1.39, PAIR, TradeType.SELL), 2, 2);
+                            req = new TradeRequest(new Trade(success_count / price, price * 1.39, PAIR, TradeType.SELL));
                             req.setIsMargin(true);
                             do {
                                 try {

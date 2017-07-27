@@ -3,10 +3,8 @@ package api.poloniex;
 import api.Currency;
 import api.MarketConstants;
 
-import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 import static api.Currency.*;
@@ -29,7 +27,7 @@ public final class PoloniexConstants extends MarketConstants {
     private static final int MAX_LENDING_DURATION = 60;
 
     // TODO(stfinancial): Don't we need to update this every so often?
-    private static final List<Currency> LENDABLE_CURRENCIES = Collections.unmodifiableList(Arrays.asList(BTC, BTS, CLAM, DASH, DOGE, ETH, FCT, LTC, MAID, STR, XMR, XRP));
+    private static final List<Currency> LENDABLE_CURRENCIES = Collections.unmodifiableList(Arrays.asList(BTC, BTS, CLAM, DASH, DOGE, ETH, FCT, LTC, MAID, XLM, XMR, XRP));
     // TODO(stfinancial): Do we want separate instances for public and private constants?
 
     private PoloniexConstants() {}

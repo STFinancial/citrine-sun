@@ -8,6 +8,7 @@ import api.request.MarketResponse;
 import api.request.OpenOrderRequest;
 import api.request.OpenOrderResponse;
 import api.tmp_trade.TradeOrder;
+import keys.KeyManager;
 
 import java.util.Collections;
 import java.util.List;
@@ -16,12 +17,10 @@ import java.util.Map;
 import static api.Currency.*;
 
 /**
- * Created by Timothy on 3/31/17.
+ * Cancels all orders for a given {@link CurrencyPair} on {@link Poloniex}.
  */
 class CancelOrders {
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
     public static void main(String[] args) {
         CancelOrders o = new CancelOrders();
@@ -29,9 +28,9 @@ class CancelOrders {
     }
 
     private void run() {
-        Credentials c = Credentials.fromFileString(API_KEYS);
+        Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.DESKTOP));
         Poloniex p = new Poloniex(c);
-        MarketResponse r = p.processMarketRequest(new OpenOrderRequest(1, 1, PAIR));
+        MarketResponse r = p.processMarketRequest(new OpenOrderRequest(PAIR));
         if (!r.isSuccess()) {
             System.out.println("Failure to get Orders: " + r.getJsonResponse());
             return;
@@ -40,9 +39,9 @@ class CancelOrders {
         Map<CurrencyPair, List<TradeOrder>> orders = ((OpenOrderResponse) r).getOpenOrders();
 
         orders.getOrDefault(PAIR, Collections.emptyList()).forEach((order) -> {
-            p.processMarketRequest(new CancelRequest(order.getOrderId(), CancelRequest.CancelType.TRADE, 1, 1));
+            System.out.println(p.processMarketRequest(new CancelRequest(order.getOrderId(), CancelRequest.CancelType.TRADE)).getJsonResponse());
             try {
-                Thread.sleep(500);
+                Thread.sleep(250);
             } catch (InterruptedException e) {
 
             }

@@ -16,8 +16,7 @@ public class MoveOrderRequest extends MarketRequest {
 
 
     // TODO(stfinancial):
-    public MoveOrderRequest(long orderNumber, double rate, int priority, long timestamp) {
-        super(priority, timestamp);
+    public MoveOrderRequest(long orderNumber, double rate) {
         this.orderNumber = orderNumber;
         this.rate = rate;
     }

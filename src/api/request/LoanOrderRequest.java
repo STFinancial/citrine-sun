@@ -11,8 +11,7 @@ public final class LoanOrderRequest extends MarketRequest {
     private final PrivateLoanOrder order;
     private final boolean isAutoRenew = false;
 
-    protected LoanOrderRequest(PrivateLoanOrder order, int priority, long timestamp) {
-        super(priority, timestamp);
+    protected LoanOrderRequest(PrivateLoanOrder order) {
         this.order = order;
     }
 

@@ -20,7 +20,7 @@ private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_
         long end = System.currentTimeMillis();
         long start = end - (3000 * 1000);
 //        System.out.println()
-        GetLendingHistoryRequest r = new GetLendingHistoryRequest(start, end, 1, 1);
+        GetLendingHistoryRequest r = new GetLendingHistoryRequest(start, end);
         MarketResponse resp = p.processMarketRequest(r);
         System.out.println(resp.getJsonResponse().toString());
         System.out.println(((GetLendingHistoryResponse)resp).getLoans().size());

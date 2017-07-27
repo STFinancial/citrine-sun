@@ -25,8 +25,7 @@ public final class CancelRequest extends MarketRequest {
     private final String id;
     private final CancelType type;
 
-    public CancelRequest(String id, CancelType type, int priority, long timestamp) {
-        super(priority, timestamp);
+    public CancelRequest(String id, CancelType type) {
         this.id = id;
         this.type = type;
     }

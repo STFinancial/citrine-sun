@@ -27,13 +27,15 @@ public enum Currency {
     BTM(Arrays.asList("BTM"), "X"), // Bitmark
     BURST(Arrays.asList("BURST"), "X"), // Burstcoin
     C2(Arrays.asList("C2"), "X"),
+    CAD(Arrays.asList("CAD"), "Z"), // Canadian Dollar
     CLAM(Arrays.asList("CLAM"), "X"),
     CURE(Arrays.asList("CURE"), "X"),
-    DASH(Arrays.asList("DASH"), "X"), // Dash
+    DASH(Arrays.asList("DASH","DSH"), "X"), // Dash
     DCR(Arrays.asList("DCR"), "X"), // Decred
     DGB(Arrays.asList("DGB"), "X"), // Digibyte
     DOGE(Arrays.asList("DOGE","XDG"), "X"), // Dogecoin
     EMC2(Arrays.asList("EMC2"), "X"),
+    EOS(Arrays.asList("EOS"), "X"), // Eos
     ETC(Arrays.asList("ETC"), "X"), // Ethereum Classic
     ETH(Arrays.asList("ETH"), "X"), // Ethereum
     EUR(Arrays.asList("EUR"), "Z"), // Euro
@@ -50,10 +52,13 @@ public enum Currency {
     HZ(Arrays.asList("HZ"), "X"),
     ICN(Arrays.asList("ICN"), "X"),
     IOC(Arrays.asList("IOC"), "X"),
+    IOTA(Arrays.asList("IOTA","IOT"), "X"), // Iota
+    JPY(Arrays.asList("JPY"), "X"), // Japanese Yen
     LBC(Arrays.asList("LBC"), "X"), // Library Credits
     LSK(Arrays.asList("LSK"), "X"), // Lisk
     LTC(Arrays.asList("LTC"), "X"), // Litecoin
     MAID(Arrays.asList("MAID"), "X"), // Maidsafe Coin
+    MLN(Arrays.asList("MLN"), "X"), // Melonport
     MYR(Arrays.asList("MYR"), "X"),
     NAUT(Arrays.asList("NAUT"), "X"),
     NAV(Arrays.asList("NAV"), "X"),
@@ -73,17 +78,18 @@ public enum Currency {
     QBK(Arrays.asList("QBK"), "X"),
     QORA(Arrays.asList("QORA"), "X"),
     QTL(Arrays.asList("QTL"), "X"),
+    PIVX(Arrays.asList("PIVX"), "X"), // Pivx
     RADS(Arrays.asList("RADS"), "X"),
     RBY(Arrays.asList("RBY"), "X"),
     REP(Arrays.asList("REP"), "X"), // Augur
     RIC(Arrays.asList("RIC"), "X"),
+    RRT(Arrays.asList("RRT"), "X"),
     SBD(Arrays.asList("SBD"), "X"),
     SC(Arrays.asList("SC"), "X"), // Siacoin
     SDC(Arrays.asList("SDC"), "X"),
     SJCX(Arrays.asList("SJCX"), "X"), // Storjcoin
     SNT(Arrays.asList("SNT"), "X"), // Status Network Token
     STEEM(Arrays.asList("STEEM"), "X"), // Steem
-    STR(Arrays.asList("STR","XLM"), "X"), // Stellar Lumens
     STRAT(Arrays.asList("STRAT"), "X"),
     SYS(Arrays.asList("SYS"), "X"), // Syscoin
     UNITY(Arrays.asList("UNITY"), "X"),
@@ -93,9 +99,11 @@ public enum Currency {
     VOX(Arrays.asList("VOX"), "X"), // Voxels
     VRC(Arrays.asList("VRC"), "X"),
     VTC(Arrays.asList("VTC"), "X"),
+    WAVES(Arrays.asList("WAVES"), "X"), // Waves
     XBC(Arrays.asList("XBC"), "X"),
     XCP(Arrays.asList("XCP"), "X"), // Counterparty
     XEM(Arrays.asList("XEM"), "X"),
+    XLM(Arrays.asList("XLM","STR"), "X"), // Stellar Lumens // TODO(stfinancial): Rename this to XLM
     XMG(Arrays.asList("XMG"), "X"),
     XMR(Arrays.asList("XMR"), "X"), // Monero
     XPM(Arrays.asList("XPM"), "X"),
@@ -123,8 +131,7 @@ public enum Currency {
     }
 
     Currency(List<String> aliases, String isoNamespace) {
-        // TODO(stfinancial): Unmodifiable map.
-        this.aliases = aliases;
+        this.aliases = Collections.unmodifiableList(aliases);
         this.isoNamespace = isoNamespace;
     }
 
@@ -133,7 +140,6 @@ public enum Currency {
     }
 
     // TODO(stfinancial): Shorter name to improve readability of entire program. Maybe fromString?
-    @Nullable
     /**
      * A {@link Currency} may have different representations on different {@link Market Markets}. For example,
      * some sites use "XBT" for Bitcoin while others use "BTC". To maintain market agnostic currency representations,
@@ -141,6 +147,7 @@ public enum Currency {
      * @param alias The representation of the currency used on the specific Market.
      * @return The Currency enum corresponding to this alias name, null if the name does not correspond to a Currency.
      */
+    @Nullable
     public static Currency getCanonicalRepresentation(String alias) {
         // TODO(stfinancial): Does this make sense, or should this be moved to a Market level thing?
 //        System.out.println(alias);

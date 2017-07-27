@@ -1,6 +1,8 @@
 package api.kraken;
 
 import api.*;
+import api.request.AssetPairRequest;
+import api.request.AssetPairResponse;
 import api.request.MarketRequest;
 import api.request.MarketResponse;
 import api.request.RequestStatus;
@@ -8,7 +10,6 @@ import api.request.StatusType;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -18,20 +19,19 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 
 /**
- * Created by Timothy on 3/7/17.
+ * Class representing the Kraken {@code Market}.
  */
 public class Kraken extends Market {
     // TODO(stfinancial): Kraken has a nonce window depending on the api key.
@@ -43,19 +43,34 @@ public class Kraken extends Market {
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
     private MessageDigest digest;
 
-
-    // TODO(stfinancial): Review the thread safety of this object.
-    // TODO(stfinancial): Potentially move this into the superclass if we are going to do this for every market.
-    private static final ObjectMapper mapper = new ObjectMapper();
+    // TODO(stfinancial): This needs to be unified across all markets.
+    // TODO(stfinancial): Does this really make sense? Do these objects ever hold state?
+    private final KrakenResponseParser responseParser;
+    private final KrakenRequestRewriter requestRewriter;
+    private final KrakenData data;
 
     public Kraken(Credentials credentials) {
-        this.apiKey = credentials.getApiKey();
+        super(credentials);
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
-        this.httpClient = HttpClients.createDefault();
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
+        }
+        requestRewriter = new KrakenRequestRewriter(this);
+        responseParser = new KrakenResponseParser(this);
+        AssetPairRequest apr = new AssetPairRequest();
+        MarketResponse r = processMarketRequest(apr);
+        int retryCount = 5;
+        while (!r.isSuccess() && retryCount-- > 0) {
+            System.out.println("Could not get market data for " + NAME + ": " + r.getJsonResponse());
+            r = processMarketRequest(apr);
+        }
+        if (!r.isSuccess()) {
+            data = new KrakenData(Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+        } else {
+            System.out.println(r.getJsonResponse());
+            data = new KrakenData(((AssetPairResponse) r).getAssetPairs(), ((AssetPairResponse) r).getAssetPairNames(), ((AssetPairResponse) r).getAssetPairKeys());
         }
     }
 
@@ -64,74 +79,88 @@ public class Kraken extends Market {
         return sendRequest(request);
     }
 
-    private MarketResponse sendRequest(MarketRequest request) {
+    @Override
+    protected MarketResponse sendRequest(MarketRequest request) {
+        // TODO(stfinancial): Cleanup
         HttpUriRequest httpRequest;
         long timestamp = System.currentTimeMillis();
         String responseString;
         JsonNode jsonResponse;
-        int statusCode = -1;
+        int statusCode = -1; // TODO(stfinancial): Think about how to properly use this error code.
 
-        final RequestArgs args = KrakenRequestRewriter.rewriteRequest(request);
+        final RequestArgs args = requestRewriter.rewriteRequest(request);
+        System.out.println("Json: " + args.asJson().toString());
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }
+        String url;
         switch (args.getHttpRequestType()) {
             case GET:
-                httpRequest = new HttpGet(args.getUrl());
+                url = args.asUrl(true);
+                httpRequest = new HttpGet(url);
                 break;
             case POST:
-                httpRequest = new HttpPost(args.getUrl());
+                if (args.isPrivate()) {
+                    url = args.asUrl(false);
+                } else {
+                    // TODO(stfinancial): First of all, can this case ever happen? Second is this always true? May need another refactor of RequestArgs...
+                    url = args.asUrl(true);
+                }
+                httpRequest = new HttpPost(url);
                 break;
             default:
                 System.out.println("(" + NAME + ")" + "Invalid HttpRequestType: " + args.getHttpRequestType());
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST, "Invalid HttpRequestType: " + args.getHttpRequestType()));
         }
-        System.out.println(args.getUrl());
+        System.out.println("URL: " + url);
         if (args.isPrivate()) {
-            // TODO(stfinancial): Implement this.
-            // TODO(stfinancial): Change names once we have confirmed it is working.
-            String API_KEY = apiKey;
-            // TODO(stfinancial): We know it's httppost, so the above code is a bit awkward.
-            System.out.println("QueryString: " + args.getQueryString());
-            System.out.println("Resource Path: " + args.getResourcePath());
-            String encoded;
-            // TODO(stfinancial): Use getBytes(Charset.forName(ENCODING)) instead. Or... getBytes(CHARSET).
-            try {
-                encoded = URLEncoder.encode(timestamp + "nonce=" + timestamp + args.getQueryString(), ENCODING);
-            } catch (UnsupportedEncodingException e) {
-                System.out.println("Unsupported encoding: " + ENCODING);
-                e.printStackTrace();
-                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
+            String baseQueryString = args.getQueryString();
+            System.out.println("Base QueryString: " + baseQueryString);
+//            try { baseQueryString = URLEncoder.encode(baseQueryString, ENCODING); } catch (Exception e) {}
+//            System.out.println("Base QueryString (UrlEncoder): " + baseQueryString);
+            String path = args.getResourcePath();
+            System.out.println("Resource Path: " + path);
+
+            String postData = "nonce=" + timestamp;
+            if (baseQueryString != null && !baseQueryString.isEmpty()) {
+                postData += "&" + baseQueryString;
             }
-            System.out.println("Encoded: " + encoded);
-            // TODO(stfinancial): Move this into the try block with the encoding?
-            // TODO(stfinancial): Fix all of this.
-            byte[] sha256Hash = digest.digest(encoded.getBytes()); //.getBytes(ENCODING);
-            System.out.println(sha256Hash);
-            System.out.println(digest.digest((timestamp + "nonce=" + timestamp + args.getQueryString()).getBytes(Charset.forName("UTF-8"))));
-            sha256Hash = digest.digest((timestamp + "nonce=" + timestamp + args.getQueryString()).getBytes(Charset.forName("UTF-8")));
-//            byte[] sha256Hash = digest.digest((timestamp + "nonce=" + timestamp + args.getQueryString()).getBytes()); //.getBytes("UTF-8")
-//            byte[] sha256Hash = digest.digest((timestamp + "nonce=" + timestamp).getBytes()); //.getBytes("UTF-8")
-            // TODO(stfinancial): Move this into the try block with the encoding?
-            byte[] pathBytes = args.getResourcePath().getBytes(Charset.forName("UTF-8"));
-//            byte[] pathBytes = args.getResourcePath().getBytes(Charset.forName(ENCODING));
-            byte[] bytes = new byte[pathBytes.length + sha256Hash.length];
-            System.arraycopy(pathBytes, 0, bytes, 0, pathBytes.length);
-            System.arraycopy(sha256Hash, 0, bytes, pathBytes.length, sha256Hash.length);
-            String sign = signer.getBase64Digest(bytes);
-            System.out.println("Sign: "  + sign);
-            httpRequest.addHeader("API-KEY", apiKey);
-            httpRequest.addHeader("API-Sign", sign);
+            System.out.println("Postdata: " + postData);
+
+            byte[] encoded = (timestamp + postData).getBytes(Charset.forName("UTF-8"));
+            System.out.println("Encoded: " + new String(encoded));
+
+            byte[] noncePostdata = digest.digest(encoded);
+            System.out.println("SHA256 of Encoded: " + new String(noncePostdata));
+
+            byte[] pathBytes = path.getBytes(Charset.forName("UTF-8"));
+            System.out.println("PathBytes: " + new String(pathBytes));
+
+            byte[] message = new byte[pathBytes.length + noncePostdata.length];
+            System.arraycopy(pathBytes, 0, message, 0, pathBytes.length);
+            System.arraycopy(noncePostdata, 0, message, pathBytes.length, noncePostdata.length);
+            System.out.println("Message: " + new String(message));
+
+            String signature = signer.getBase64Digest(message);
+            System.out.println("Signature: " + signature);
+
+            httpRequest.addHeader("API-Key", apiKey);
+            httpRequest.addHeader("API-Sign", signature);
+//            httpRequest.addHeader("ContentType", "application/x-www-form-urlencoded");
             try {
                 NameValuePair p = new BasicNameValuePair("nonce", String.valueOf(timestamp));
-                ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(Arrays.asList(p), ENCODING));
+                ArrayList<NameValuePair> nvps = new ArrayList<>();
+                nvps.add(p);
+                nvps.addAll(args.asNameValuePairs());
+                nvps.forEach((nvp)->System.out.println(nvp));
+                ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(nvps, ENCODING));
             } catch (UnsupportedEncodingException e) {
                 System.out.println("Unsupported encoding: " + ENCODING);
                 e.printStackTrace();
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
             }
-//            httpRequest.addHeader("ContentType", "application/x-www-form-urlencoded");
         }
+        System.out.println(httpRequest.toString());
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
             statusCode = response.getStatusLine().getStatusCode();
@@ -171,7 +200,8 @@ public class Kraken extends Market {
         // TODO(stfinancial): More sophisticated handling of errors codes...
         boolean isError = statusCode != HttpStatus.SC_OK;
 //        System.out.println(statusCode);
-        return KrakenResponseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
+//        System.out.println(jsonResponse);
+        return responseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
     }
 
     @Override
@@ -183,4 +213,6 @@ public class Kraken extends Market {
     public MarketConstants getConstants() {
         return null;
     }
+
+    protected KrakenData getData() { return data; }
 }

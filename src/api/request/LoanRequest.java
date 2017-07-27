@@ -13,12 +13,7 @@ public class LoanRequest extends MarketRequest {
     // TODO(stfinancial): Need to make sure this is handled properly in the case of a tmp_loan demand.
     private int loanDuration = 2; // TODO(stfinancial): What is a reasonable default here.
 
-    protected LoanRequest(Loan loan, int priority, long timestamp) {
-        super(priority, timestamp);
+    protected LoanRequest(Loan loan) {
         this.loan = loan;
     }
-
-
-
-
 }

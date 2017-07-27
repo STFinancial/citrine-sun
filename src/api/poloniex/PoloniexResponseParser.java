@@ -352,8 +352,8 @@ final class PoloniexResponseParser {
     private static FeeResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         FeeInfo info = new FeeInfo(jsonResponse.get("makerFee").asDouble(), jsonResponse.get("takerFee").asDouble(), jsonResponse.get("thirtyDayVolume").asDouble());
         Map<CurrencyPair, FeeInfo> infos = new HashMap<>();
-        if (request.getCurrencyPair().isPresent()) {
-            infos.put(request.getCurrencyPair().get(), info);
+        if (!request.getPairs().isEmpty()) {
+            request.getPairs().forEach(pair -> infos.put(pair, info));
         } else {
             CurrencyPair.getCurrencyPairSet().forEach(pair -> infos.put(pair, info));
         }

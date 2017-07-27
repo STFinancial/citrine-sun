@@ -8,8 +8,7 @@ import api.CurrencyPair;
 public class MarginPositionRequest extends MarketRequest {
     private final CurrencyPair pair;
 
-    public MarginPositionRequest(CurrencyPair pair, int priority, long timestamp) {
-        super(priority, timestamp);
+    public MarginPositionRequest(CurrencyPair pair) {
         this.pair = pair;
     }
 

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
  * Represents the "kernel" of a trade. Any type of trade, whether completed or order, will contain this.
  */
 public final class Trade {
+    // TODO(stfinancial): Potentially move everything into this class. Use a builder. Figure out what to do with stuff like post only, immediate or cancel, etc.
     // TODO(stfinancial): Do we have another constructor/static factory method for double?
 
     // TODO(stfinancial): Do we need bigdecimal if the smallest granularity is satoshi?

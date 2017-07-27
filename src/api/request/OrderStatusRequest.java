@@ -6,8 +6,7 @@ package api.request;
 public final class OrderStatusRequest extends MarketRequest {
     private final String id;
 
-    public OrderStatusRequest(String id, int priority, long timestamp) {
-        super(priority, timestamp);
+    public OrderStatusRequest(String id) {
         this.id = id;
     }
 

@@ -15,6 +15,7 @@ public class OrderBookResponse extends MarketResponse {
     // TODO(stfinancial): In what case do we have multiple currency pairs?
     // TODO(stfinancial): Sequence number?
 
+    // TODO(stfinancial): Why are these maps if the request can only be a single pair?
     private final Map<CurrencyPair, List<Trade>> asks; // sells
     private final Map<CurrencyPair, List<Trade>> bids; // buys
 //    private boolean isFrozen = false;
@@ -26,6 +27,7 @@ public class OrderBookResponse extends MarketResponse {
 //        this.isFrozen = isFrozen;
     }
 
+    // TODO(stfinancial): Figure out what to do about this.
     // *** NOTE *** NO GUARANTEES ABOUT THE GRANULARITY OF THE ORDER BOOK, WHETHER AGGREGATED OR NOT.
 
     // TODO(stfinancial): Should these be made unmodifiable in the constructor?

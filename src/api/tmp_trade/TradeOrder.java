@@ -2,9 +2,11 @@ package api.tmp_trade;
 
 public final class TradeOrder {
 
+    // TODO(stfinancial): Order status: pending, open, closed, canceled, expired. Maybe unify all of these into a single class.
+
     private final Trade trade;
     private final String orderId;
-    private final long timestamp;
+    private final long timestamp; // TODO(stfinancial): Specify that this is a creation/placed timestamp.
     private final boolean isMargin;
 
     // TODO(stfinancial): Probably also want to have isStop here as well, as well as the stop limit?

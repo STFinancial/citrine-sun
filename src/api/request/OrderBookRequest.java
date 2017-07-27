@@ -13,14 +13,12 @@ public class OrderBookRequest extends MarketRequest {
     private final Optional<CurrencyPair> currencyPair;
     private final int depth;
 
-    public OrderBookRequest(int depth, int priority, long timestamp) {
-        super(priority, timestamp);
+    public OrderBookRequest(int depth) {
         this.currencyPair = Optional.empty();
         this.depth = depth;
     }
 
-    public OrderBookRequest(CurrencyPair pair, int depth, int priority, long timestamp) {
-        super(priority, timestamp);
+    public OrderBookRequest(CurrencyPair pair, int depth) {
         this.currencyPair = Optional.of(pair);
         this.depth = depth;
     }

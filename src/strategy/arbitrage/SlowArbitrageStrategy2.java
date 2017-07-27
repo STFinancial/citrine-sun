@@ -7,6 +7,7 @@ import api.poloniex.Poloniex;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
+import keys.KeyManager;
 import strategy.Strategy;
 import util.MovingAverage;
 
@@ -29,13 +30,12 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): Instead of setting limit at exact price, set it at lowest arbitrage price, that will allow fewer unfilled orders.
     // TODO(stfinancial): Priority currencypair/market if one arbitrage is really high or the others are non-existent.
     // TODO(stfinancial): If scaled amount is less than min amount, use min amount (before accounting for balances).
+    // TODO(stfinancial): Set the priority of some of the more important calls.
 
     // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
-//    private static final String POLO_KEY = "/Users/Timothy/Documents/Keys/main_key.txt";
-//    private static final String GDAX_KEY = "/Users/Timothy/Documents/Keys/gdax_key.txt";
-    private static final String POLO_KEY = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final String GDAX_KEY = "F:\\Users\\Zarathustra\\Documents\\gdax_key.txt";
+    private static final String POLO_KEY = KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP);
+    private static final String GDAX_KEY = KeyManager.getKeyForMarket("Gdax", KeyManager.Machine.LAPTOP);
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
@@ -46,8 +46,8 @@ class SlowArbitrageStrategy2 extends Strategy {
     private static final double MIN_AMOUNT = 0.01;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 25;
 
-    private static final FeeRequest FEE_REQUEST = new FeeRequest(1, 1);
-    private static final AccountBalanceRequest ACCOUNT_BALANCE_REQUEST = new AccountBalanceRequest(AccountType.EXCHANGE, 1, 1);
+    private static final FeeRequest FEE_REQUEST = new FeeRequest();
+    private static final AccountBalanceRequest ACCOUNT_BALANCE_REQUEST = new AccountBalanceRequest(AccountType.EXCHANGE);
 
     private static final int FEE_AND_BALANCE_INTERVAL = 50;
     private int feeAndBalanceCount = 500;
@@ -97,8 +97,8 @@ class SlowArbitrageStrategy2 extends Strategy {
             for (CurrencyPair pair : PAIRS.keySet()) {
                 ArbitrageUtils.logAtLevel("Pair: " + pair.toString(), 1);
                 for (MarketInfo market : markets) {
-                    while (!(response = market.market.processMarketRequest(new OrderBookRequest(pair, 20, 2, 1))).isSuccess()) {
-                        ArbitrageUtils.logAtLevel("Failed Orderbook Request, Sleeping...: " + response.getJsonResponse(), 1);
+                    while (!(response = market.market.processMarketRequest(new OrderBookRequest(pair, 20))).isSuccess()) {
+                        ArbitrageUtils.logAtLevel("(" + market.market.getName() + ") " + "Failed Orderbook Request, Sleeping...: " + response.getJsonResponse(), 1);
                         ArbitrageUtils.sleep(500);
                     }
                     orderBookResponse = (OrderBookResponse) response;
@@ -198,7 +198,8 @@ class SlowArbitrageStrategy2 extends Strategy {
         CurrencyPairInfo prioritySidePairInfo = priority.currencyPairInfos.get(pair);
         CurrencyPairInfo secondarySidePairInfo = secondary.currencyPairInfos.get(pair);
 
-        TradeRequest request = new TradeRequest(priorityTrade, 5, 5);
+        TradeRequest request = new TradeRequest(priorityTrade);
+        request.setPriority(5);
         request.setIsMarket(false);
         request.setIsPostOnly(false);
         request.setTimeInForce(TradeRequest.TimeInForce.IMMEDIATE_OR_CANCEL);
@@ -223,7 +224,8 @@ class SlowArbitrageStrategy2 extends Strategy {
         if (filledAmount == priorityTrade.getAmount() || filledAmount + SATOSHI == priorityTrade.getAmount()) {
             // The right amount was filled.
             ArbitrageUtils.logAtLevel("Correct amount filled, placing amount on secondary: " + secondaryTrade.getAmount(), 2);
-            request = new TradeRequest(secondaryTrade, 5, 5);
+            request = new TradeRequest(secondaryTrade);
+            request.setPriority(5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
             response = secondary.market.processMarketRequest(request);
@@ -255,7 +257,8 @@ class SlowArbitrageStrategy2 extends Strategy {
             ArbitrageUtils.logAtLevel("Alternate amount was filled: " + filledAmount + "  Constructing new trade.", 2);
             secondaryAmount = Math.floor((filledAmount * (1 - prioritySidePairInfo.takerFee) / (1 - secondarySidePairInfo.takerFee)) * HUNDRED_MILLION) / HUNDRED_MILLION;
             Trade revisedTrade = new Trade(secondaryAmount, secondaryTrade.getRate(), secondaryTrade.getPair(), secondaryTrade.getType());
-            request = new TradeRequest(revisedTrade, 5, 5);
+            request = new TradeRequest(revisedTrade);
+            request.setPriority(5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
             ArbitrageUtils.logAtLevel("Placing alternate amount: " + filledAmount, 2);
@@ -286,7 +289,8 @@ class SlowArbitrageStrategy2 extends Strategy {
         if (filledAmount <= priorityTrade.getAmount()) {
             // The right amount was filled.
             ArbitrageUtils.logAtLevel("Correct (rounded) amount filled, placing amount on secondary: " + secondaryTrade.getAmount(), 2);
-            request = new TradeRequest(secondaryTrade, 5, 5);
+            request = new TradeRequest(secondaryTrade);
+            request.setPriority(5);
             request.setIsMarket(false);
             request.setIsPostOnly(false);
             response = secondary.market.processMarketRequest(request);

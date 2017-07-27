@@ -39,6 +39,8 @@ final class GdaxResponseParser {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
         } else if (request instanceof FeeRequest) {
             return createFeeResponse(jsonResponse, (FeeRequest) request, timestamp);
+        } else if (request instanceof AssetPairRequest) {
+            return createAssetPairResponse(jsonResponse, (AssetPairRequest) request, timestamp);
         }
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
@@ -102,7 +104,6 @@ final class GdaxResponseParser {
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
         Map<Currency, Double> exchangeBalances = new HashMap<>();
         Map<Currency, Double> marginBalances = new HashMap<>();
-//        System.out.println(jsonResponse);
         // TODO(stfinancial): Maybe make a Balance class that has available and total balances as well as other info.
         jsonResponse.forEach((balance) -> {
             if (balance.has("margin_enabled") && balance.get("margin_enabled").asBoolean()) {
@@ -118,25 +119,31 @@ final class GdaxResponseParser {
 
     private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
-
-//        System.out.println(jsonResponse);
         Map<CurrencyPair, FeeInfo> fees = new HashMap<>();
-        if (request.getCurrencyPair().isPresent()) {
+        if (!request.getPairs().isEmpty()) {
             for (JsonNode feeSet : jsonResponse) {
-                if (GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()) != request.getCurrencyPair().get()) {
+                if (!request.getPairs().contains(GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()))) {
                     continue;
                 }
-                fees.put(request.getCurrencyPair().get(), new FeeInfo(0, GdaxUtils.getTakerFeeFromVolumeFraction(feeSet.get("volume").asDouble() / feeSet.get("exchange_volume").asDouble()), feeSet.get("volume").asDouble()));
-                return new FeeResponse(fees, jsonResponse, request, timestamp, RequestStatus.success());
+                fees.put(GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()), new FeeInfo(0, GdaxUtils.getTakerFeeFromVolumeFraction(feeSet.get("volume").asDouble() / feeSet.get("exchange_volume").asDouble()), feeSet.get("volume").asDouble()));
             }
+            return new FeeResponse(fees, jsonResponse, request, timestamp, RequestStatus.success());
         } else {
             for (JsonNode feeSet : jsonResponse) {
                 fees.put(GdaxUtils.parseCurrencyPair(feeSet.get("product_id").asText()), new FeeInfo(0, GdaxUtils.getTakerFeeFromVolumeFraction(feeSet.get("volume").asDouble() / feeSet.get("exchange_volume").asDouble()), feeSet.get("volume").asDouble()));
             }
             return new FeeResponse(fees, jsonResponse, request, timestamp, RequestStatus.success());
         }
+    }
 
-        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR));
+    private static AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+        // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
+        // TODO(stfinancial): Create the map to market name.
+        List<CurrencyPair> assets = new ArrayList<>();
+        jsonResponse.forEach((assetPair) -> {
+            assets.add(CurrencyPair.of(Currency.getCanonicalRepresentation(assetPair.get("base_currency").asText()), Currency.getCanonicalRepresentation(assetPair.get("quote_currency").asText())));
+        });
+        return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
 }

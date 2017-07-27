@@ -1,13 +1,13 @@
 package api.poloniex;
 
 import api.*;
+import api.QueueStrategy;
 import api.request.*;
 import api.wamp.WampClientWrapper;
 import api.wamp.WampSubscription;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.NullNode;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -15,7 +15,6 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.util.EntityUtils;
 import rx.functions.Action1;
 import ws.wamp.jawampa.ApplicationError;
@@ -26,8 +25,6 @@ import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.concurrent.TimeUnit;
 
@@ -36,22 +33,17 @@ import java.util.concurrent.TimeUnit;
 // TODO(stfinancial): Consider factory for this. Depedency injection etc. etc.
 
 /**
- * Class representing the Poloniex market.
+ * Class representing the Poloniex {@code Market}.
  */
 public final class Poloniex extends Market { //implements Tradable {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.
 
     private static final String MARKET_NAME = "Poloniex";
     private static final String ENCODING = "UTF-8";
-    private static final String PUBLIC_URI = "https://poloniex.com/public";
-    private static final String PRIVATE_URI = "https://poloniex.com/tradingApi";
     private static final String WAMP_ENDPOINT = "wss://api.poloniex.com";
     // TODO(stfinancial): What about stuff to https://poloniex.com/private?
 
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
-    // TODO(stfinancial): Review the thread safety of this object.
-    private static final ObjectMapper mapper = new ObjectMapper();
-
 
     // TODO(stfinancial): Initialize in static block?
     // TODO(stfinancial): We should only need one of these per Market. Make this static?
@@ -60,20 +52,17 @@ public final class Poloniex extends Market { //implements Tradable {
 
     private static HashMap<String, PoloniexQueue> accountQueues = new HashMap<>();
 
-    private PriorityBlockingQueue<MarketRequest> requestQueue;
     //    private final PoloniexTrader trader;
     private final PoloniexQueue queue;
-
 
     // TODO(stfinancial): Switch to static factory method to avoid multiple instances with the same API keys.
     // Need to avoid IP bans by ensuring that a single IP can have a single market instance.
     public Poloniex(Credentials credentials) {
-        this.apiKey = credentials.getApiKey();
+        super(credentials);
         this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), false);
-        this.httpClient = HttpClients.createDefault();
 //        this.trader = new PoloniexTrader(this);
         if (!accountQueues.containsKey(apiKey)) {
-            queue = new PoloniexQueue(QueueStrategy.CONSTANT, 10000);
+            queue = new PoloniexQueue(this, QueueStrategy.STRICT, 5);
             accountQueues.put(apiKey, queue);
         } else {
             queue = accountQueues.get(apiKey);
@@ -133,7 +122,8 @@ public final class Poloniex extends Market { //implements Tradable {
         return tickerSubscription.registerCallback(callback);
     }
 
-    private MarketResponse sendRequest(MarketRequest request) {
+    @Override
+    protected MarketResponse sendRequest(MarketRequest request) {
         HttpUriRequest httpRequest;
         String responseString;
         JsonNode jsonResponse;
@@ -146,14 +136,16 @@ public final class Poloniex extends Market { //implements Tradable {
 
         if (!args.isPrivate()) {
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
-            httpRequest = new HttpGet(args.getUrl());
+            httpRequest = new HttpGet(args.asUrl(true));
+            System.out.println("URL: " + args.asUrl(true));
         } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
+            // TODO(stfinancial): Not sure this is threadsafe.
             String sign = signer.getHexDigest(args.getQueryString().getBytes());
 //            System.out.println(args.getUrl());
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
-            httpRequest = new HttpPost(PRIVATE_URI);
+            httpRequest = new HttpPost(args.getUri());
             httpRequest.addHeader("Key", apiKey);
             httpRequest.addHeader("Sign", sign);
             try {
@@ -165,7 +157,6 @@ public final class Poloniex extends Market { //implements Tradable {
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
             }
         }
-//        System.out.println("About to try");
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
             timestamp = System.currentTimeMillis();

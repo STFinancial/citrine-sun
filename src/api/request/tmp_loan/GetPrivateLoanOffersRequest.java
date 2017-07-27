@@ -8,7 +8,5 @@ import api.request.MarketRequest;
 public class GetPrivateLoanOffersRequest extends MarketRequest {
 
     // TODO(stfinancial): Potentially take a Currency here.
-    public GetPrivateLoanOffersRequest(int priority, long timestamp) {
-        super(priority, timestamp);
-    }
+    public GetPrivateLoanOffersRequest() {}
 }

@@ -38,6 +38,7 @@ public class RequestStatus {
 
     // TODO(stfinancial): Static factory methods for generic errors?
     public static RequestStatus success() { return EMPTY_SUCCESS; }
+    // TODO(stfinancial): Unspported request (though maybe not because it really should say what isn't supported).
 
     @Override
     public String toString() {

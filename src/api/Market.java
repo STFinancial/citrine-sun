@@ -2,7 +2,9 @@ package api;
 
 import api.request.MarketRequest;
 import api.request.MarketResponse;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 
 /**
  * Abstract class for
@@ -15,8 +17,16 @@ public abstract class Market {
     // TODO(stfinancial): Will there be one of these per thread? Do we need a different thing for multiple threads?
     protected CloseableHttpClient httpClient;
 
+
+    protected final ObjectMapper mapper;
     // TODO(stfinancial): Is this the correct visibility on this?
-    protected String apiKey;
+    protected final String apiKey;
+
+    public Market(Credentials credentials) {
+        this.apiKey = credentials.getApiKey();
+        this.mapper = new ObjectMapper();
+        this.httpClient = HttpClients.createDefault();
+    }
 
     // TODO(stfinancial): Constructor that takes in credentials (how do we handle public only interfaces)
 
@@ -25,6 +35,9 @@ public abstract class Market {
     public abstract String getName();
 
     public abstract MarketConstants getConstants();
+
+    // TODO(stfinancial): Does protected here make sense?
+    protected abstract MarketResponse sendRequest(MarketRequest request);
 
 //    public static Market getInstance();
 

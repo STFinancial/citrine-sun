@@ -7,18 +7,16 @@ import api.MarginType;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.sun.istack.internal.Nullable;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.regex.PatternSyntaxException;
 
-
+/**
+ * Useful helpful methods for {@link Poloniex}.
+ */
 final class PoloniexUtils {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.
     private static final String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
@@ -29,19 +27,13 @@ final class PoloniexUtils {
 
     private static final String SHORT_STRING = "short";
     private static final String LONG_STRING = "long";
-    // TODO(stfinancial): Eventually use this instead of reading the json directly.
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     static Trade getTradeFromJson(JsonNode json, CurrencyPair pair) {
+        // TODO(stfinancial): Unmarshall this directly to the object.
         // TODO(stfinancial): See if we can convert to using decimalValue in the future by searching for the proper decimal format.
         TradeType type = getTradeTypeFromString(json.get("type").asText());
         return new Trade(json.get("amount").asDouble(), json.get("rate").asDouble(), pair, type);
     }
-
-//    // TODO(stfinancial): See if there are any cases where we need to take in a Currency.
-//    static Loan getLoanFromJson(JsonNode json) {
-//        Loan loan =
-//    }
 
     // TODO(stfinancial): This is a bit confusing... maybe just simplify this?
     static String getCommandForTradeType(TradeType type, boolean capitalize) {
@@ -148,13 +140,15 @@ final class PoloniexUtils {
      * underscore between the two (i.e. XBT and XMR -> "XMR_BTC").
      */
     static String formatCurrencyPair(CurrencyPair pair) {
-        return String.format("%s_%s", getCurrencyString(pair.getQuote()), getCurrencyString(pair.getBase()));
+        return getCurrencyString(pair.getQuote()) + "_" + getCurrencyString(pair.getBase());
     }
 
-    // TODO(stfinancial): Could make this an abstract method for Market.
+    // TODO(stfinancial): Could make this an abstract method for Market. Seems like every market needs this, so it doesn't make a lot of sense to have the currency aliases
     static String getCurrencyString(Currency currency) {
         // TODO(stfinancial): There has to be a more elegant solution than a giant switch statement. Maybe an enummap or something.
         switch (currency) {
+            case XLM:
+                return "STR";
             default:
                 return currency.toString();
         }

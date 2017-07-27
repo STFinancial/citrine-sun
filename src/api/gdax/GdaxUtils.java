@@ -5,18 +5,18 @@ import api.CurrencyPair;
 import api.tmp_trade.TradeType;
 import com.sun.istack.internal.Nullable;
 
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+
 /**
- * Created by Timothy on 4/23/17.
+ * Useful helpful methods for {@link Gdax}.
  */
 final class GdaxUtils {
+    private static final String DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSSSSSX";
     private static final String BUY_STRING = "buy";
     private static final String SELL_STRING = "sell";
-
-    private static final String GTC = "GTC";
-    private static final String IOC = "IOC";
-    private static final String FOK = "FOK";
-
-    // TODO(stfinancial): Need a method to parse timestamps from GDAX... form of YYYY-mm-DDTHH:MM:SS.MSMSMSZ
 
     static double getTakerFeeFromVolumeFraction(double fraction) {
         if (fraction > 0.2) {
@@ -66,16 +66,14 @@ final class GdaxUtils {
     }
 
     static long getTimestampFromGdaxTimestamp(String gdaxTimestamp) {
-        // TODO(stfinancial): Implement... 2014-11-07T22:19:28.578544Z
-        return 0;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"));
+        LocalDateTime d = LocalDateTime.from(formatter.parse(gdaxTimestamp));
+        return d.atZone(ZoneOffset.UTC).toEpochSecond();
     }
-
-
-    // TODO(stfinancial): ****** NOTE ****** GDAX DOES CURRENCY PAIRS BACKWARDS FROM POLO... See if this is true in all cases on GDAX and POLO.
-    // See how this affects trades. See what is the canonical way on other exchanges.
 
     @Nullable
     static CurrencyPair parseCurrencyPair(String pair) {
+        // TODO(stfinancial): Is it faster to statically construct a mapping instead of splitting each time?
         // TODO(stfinancial): Convert this to optional?
 //        System.out.println(pair);
         String[] currencies = pair.split("-", 2);
@@ -94,8 +92,7 @@ final class GdaxUtils {
      * between the two (i.e. XBT and XMR -> "BTC-XMR").
      */
     static String formatCurrencyPair(CurrencyPair pair) {
-        // TODO(stfinancial): Need to get the "translated" version.
-        return String.format("%s-%s", getCurrencyString(pair.getBase()), getCurrencyString(pair.getQuote()));
+        return getCurrencyString(pair.getBase()) + "-" + getCurrencyString(pair.getQuote());
     }
 
     // TODO(stfinancial): Could make this an abstract method for Market.
