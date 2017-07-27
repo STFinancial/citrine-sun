@@ -7,6 +7,7 @@ import api.Ticker;
 import api.request.AssetPairRequest;
 import api.request.AssetPairResponse;
 import api.request.*;
+import api.tmp_trade.CompletedTrade;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,6 +19,8 @@ import java.util.*;
  * Created by Timothy on 6/3/17.
  */
 final class KrakenResponseParser {
+    // TODO(stfinancial): NOTE - Kraken treats order Ids and TxIds separately. Txids start with a T and Order Ids start with an O (so it appears).
+
     private final Kraken kraken;
 
     KrakenResponseParser(Kraken kraken) {
@@ -48,6 +51,8 @@ final class KrakenResponseParser {
             return createOpenOrderResponse(jsonResponse, (OpenOrderRequest) request, timestamp);
         } else if (request instanceof AccountBalanceRequest) {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
+        } else if (request instanceof TradeHistoryRequest) {
+            return createTradeHistoryResponse(jsonResponse, (TradeHistoryRequest) request, timestamp);
         } else if (request instanceof OrderTradesRequest) {
             return createOrderTradesResponse(jsonResponse, (OrderTradesRequest) request, timestamp);
         } else if (request instanceof TickerRequest) {
@@ -122,8 +127,28 @@ final class KrakenResponseParser {
         return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
+    private MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
+        Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
+        jsonResponse.get("result").get("trades").fields().forEachRemaining((trade) -> {
+            CurrencyPair pair = kraken.getData().getAssetPairNames().get(trade.getValue().get("pair").asText());
+            if (!completedTrades.containsKey(pair)) {
+                completedTrades.put(pair, new ArrayList<>());
+            }
+            // TODO(stfinancial): Ensure that "vol" is before fees.
+            CompletedTrade.Builder b = new CompletedTrade.Builder(new Trade(trade.getValue().get("vol").asDouble(), trade.getValue().get("price").asDouble(), pair, KrakenUtils.getTradeTypeFromString(trade.getValue().get("type").asText())), trade.getKey(), trade.getValue().get("time").asLong());
+            // TODO(stfinancial): Decide whether to convert the fee to quote or base currency.
+//            b.fee(trade.getValue().get("fee").asDouble()); // TODO(stfinancial): Confirm that this is in the correct denomination.
+            b.category(CompletedTrade.Category.EXCHANGE); // TODO(stfinancial): Is there a way we ccan actually infer this? Maybe from "margin"
+            b.total(trade.getValue().get("cost").asDouble());
+            completedTrades.get(pair).add(b.build());
+        });
+        // TODO(stfinancial): Do we actually care about restricting the results if they specified for in the request?
+        return new TradeHistoryResponse(completedTrades, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
     private MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
         // TODO(stfinancial): What should this actually contain?
+        // TODO(stfinancial): Implement this.
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 

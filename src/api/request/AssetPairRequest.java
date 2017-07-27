@@ -1,8 +1,9 @@
 package api.request;
 
 /**
- * Created by Timothy on 7/8/17.
+ * Returns all tradable {@link api.CurrencyPair CurrencyPairs} for a {@link api.Market Market}.
  */
 public class AssetPairRequest extends MarketRequest {
+    // TODO(stfinancial): Rename this to CurrencyPairRequest?
     public AssetPairRequest() {}
 }

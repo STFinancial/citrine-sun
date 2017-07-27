@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+// TODO(stfinancial): Rename to show that this is specific to trades.
 /**
- * TODO(stfinancial): Rename to show that this is specific to trades.
+ * {@code MarketResponse} containing the set of {@link TradeOrder TradeOrders}.
  */
 public class OpenOrderResponse extends MarketResponse {
     // TODO(stfinancial): This should be a map from currencypair to list of trade order, but how do we handle all

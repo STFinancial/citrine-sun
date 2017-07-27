@@ -31,7 +31,8 @@ public class KrakenTest {
 //        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.DASH, Currency.BTC), CurrencyPair.of(Currency.EOS, Currency.ETH)})));
 //        FeeRequest r = new FeeRequest(new HashSet<>(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.USD)})));
 
-        TradeRequest r = new TradeRequest(new Trade(0.01, 0.02, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY));
+//        TradeRequest r = new TradeRequest(new Trade(0.01, 0.01, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY));
+        TradeHistoryRequest r = new TradeHistoryRequest(0, System.currentTimeMillis());
 //        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.EXCHANGE);
 //        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.DASH, Currency.USD), 5);
 //        List<CurrencyPair> pairs = new ArrayList<>();
@@ -40,5 +41,8 @@ public class KrakenTest {
 //        TickerRequest r = new TickerRequest(pairs);
         MarketResponse resp = k.processMarketRequest(r);
         System.out.println(resp.getJsonResponse());
+//        CancelRequest can = new CancelRequest(((TradeResponse) resp).getOrderNumber(), CancelRequest.CancelType.TRADE);
+//        resp = k.processMarketRequest(can);
+//        System.out.println(resp.getJsonResponse());
     }
 }

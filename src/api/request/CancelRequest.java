@@ -7,6 +7,7 @@ import api.tmp_trade.TradeOrder;
  * A request to a market to cancel a given order, whether that be a {@link PrivateLoanOrder} or {@link TradeOrder}.
  */
 public final class CancelRequest extends MarketRequest {
+    // TODO(stfinancial): Add support for the ability to cancel all orders (available on some markets).
 
     // TODO(stfinancial): Where do we want to handle move requests?
 
@@ -25,6 +26,7 @@ public final class CancelRequest extends MarketRequest {
     private final String id;
     private final CancelType type;
 
+    // TODO(stfinancial): I feel like this should be TRADE by default or just have separate ?
     public CancelRequest(String id, CancelType type) {
         this.id = id;
         this.type = type;

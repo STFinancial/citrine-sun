@@ -12,7 +12,7 @@ import keys.KeyManager;
 import java.util.Arrays;
 
 /**
- * Created by Zarathustra on 4/26/2017.
+ * Test of various {@link MarketRequest} types on {@link Gdax}.
  */
 public class GdaxTest {
     public static void main(String[] args) {
@@ -25,7 +25,8 @@ public class GdaxTest {
         Gdax gdax = new Gdax(c);
 //        TradeRequest req = new TradeRequest(new Trade(1, 1500, CurrencyPair.of(Currency.BTC, Currency.USD), TradeType.BUY));
 //        req.setIsPostOnly(false);
-        AssetPairRequest req = new AssetPairRequest();
+//        AssetPairRequest req = new AssetPairRequest();
+        TradeHistoryRequest req = new TradeHistoryRequest(0, 0, CurrencyPair.of(Currency.LTC, Currency.BTC));
 //        TickerRequest req = new TickerRequest(Arrays.asList(new CurrencyPair[]{CurrencyPair.of(Currency.ETH, Currency.BTC)}));
         MarketResponse resp = gdax.processMarketRequest(req);
         System.out.println(resp.getJsonResponse());

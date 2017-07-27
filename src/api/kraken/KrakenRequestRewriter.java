@@ -30,7 +30,12 @@ final class KrakenRequestRewriter {
             return rewriteAccountBalanceRequest((AccountBalanceRequest) request);
         } else if (request instanceof OrderTradesRequest) {
             return rewriteOrderTradesRequest((OrderTradesRequest) request);
+        } else if (request instanceof CancelRequest) {
+            return rewriteCancelRequest((CancelRequest) request);
+        } else if (request instanceof TradeHistoryRequest) {
+            return rewriteTradeHistoryRequest((TradeHistoryRequest) request);
         } else if (request instanceof FeeRequest) {
+            // TODO(stfinancial): I don't think we ever programmed FeeResponse.
             return rewriteFeeRequest((FeeRequest) request);
         } else if (request instanceof AssetPairRequest) {
             return rewriteAssetPairRequest((AssetPairRequest) request);
@@ -95,6 +100,33 @@ final class KrakenRequestRewriter {
         builder.withResource("QueryOrders");
         // TODO(stfinancial): Support for multiple requests.
         builder.withParam("txid", request.getId());
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteCancelRequest(CancelRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        builder.withResource("0");
+        builder.withResource("private");
+        builder.withResource("CancelOrder");
+        builder.withParam("txid", request.getId());
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.isPrivate(true);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
+        builder.withResource("0");
+        builder.withResource("private");
+        builder.withResource("TradesHistory");
+        // TODO(stfinancial): Do we want to specify "all" or "closed" for type.
+        // TODO(stfinancial): What does the "trades" option do?
+        if (request.getEnd() != 0 || request.getStart() != 0) {
+            builder.withParam("start", String.valueOf(request.getStart()));
+            builder.withParam("end", String.valueOf(request.getEnd()));
+        }
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.isPrivate(true);
         return builder.build();

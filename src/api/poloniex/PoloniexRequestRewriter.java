@@ -53,6 +53,8 @@ final class PoloniexRequestRewriter {
             // TODO(stfinancial): Make sure to handle this differently because I don't think it counts towards the limit.
             // TODO(stfinancial): Look into using this for the candle catcher/bounce bot, freeing up a lot of resources.
             return rewriteMoveOrderRequest((MoveOrderRequest) request);
+        } else if (request instanceof TradeHistoryRequest) {
+            return rewriteTradeHistoryRequest((TradeHistoryRequest) request);
         } else if (request instanceof MarginPositionRequest) {
             return rewriteMarginPositionRequest((MarginPositionRequest) request);
         } else if (request instanceof MarginAccountSummaryRequest) {
@@ -238,6 +240,25 @@ final class PoloniexRequestRewriter {
         builder.withParam("postOnly", request.isPostOnly() ? "1" : "0");
         if (request.getAmount() != 0) {
             builder.withParam("amount", String.valueOf(request.getAmount()));
+        }
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));
+        return builder.build();
+    }
+
+    private static RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnTradeHistory");
+        if (request.getPair() != null) {
+            builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getPair()));
+        } else {
+            builder.withParam("currencyPair", "all");
+        }
+        if (request.getStart() != 0 || request.getEnd() != 0) {
+            // TODO(stfinancial): These are not exactly working right, but I think it is Poloniex's fault.
+            builder.withParam("start", String.valueOf(request.getStart()));
+            builder.withParam("end", String.valueOf(request.getEnd()));
         }
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);

@@ -37,6 +37,8 @@ final class GdaxResponseParser {
             return createOrderTradesResponse(jsonResponse, (OrderTradesRequest) request, timestamp);
         } else if (request instanceof AccountBalanceRequest) {
             return createAccountBalanceResponse(jsonResponse, (AccountBalanceRequest) request, timestamp);
+        } else if (request instanceof TradeHistoryRequest) {
+            return createTradeHistoryResponse(jsonResponse, (TradeHistoryRequest) request, timestamp);
         } else if (request instanceof FeeRequest) {
             return createFeeResponse(jsonResponse, (FeeRequest) request, timestamp);
         } else if (request instanceof AssetPairRequest) {
@@ -117,6 +119,26 @@ final class GdaxResponseParser {
         return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
+    private static MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
+        System.out.println(jsonResponse);
+        Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
+        jsonResponse.elements().forEachRemaining((trade) -> {
+            CurrencyPair pair = GdaxUtils.parseCurrencyPair(trade.get("product_id").asText());
+            if (!completedTrades.containsKey(pair)) {
+                completedTrades.put(pair, new ArrayList<>());
+            }
+            // TODO(stfinancial): I'm not sure that "created_at" is the same as what we want. Is this when the "fill" was created? or when the order was placed?
+            CompletedTrade.Builder b = new CompletedTrade.Builder(new Trade(trade.get("size").asDouble(), trade.get("price").asDouble(), pair, GdaxUtils.getTradeTypeFromString(trade.get("side").asText())), trade.get("trade_id").asText(), GdaxUtils.getTimestampFromGdaxTimestamp(trade.get("created_at").asText()));
+            b.fee(trade.get("fee").asDouble());
+            b.isMake(trade.get("liquidity").asText("").equals("M"));
+            // TODO(stfinancial): order_id?
+            completedTrades.get(pair).add(b.build());
+        });
+        System.out.println(jsonResponse);
+        // TODO(stfinancial): Implement this.
+        return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
+    }
+
     private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
         Map<CurrencyPair, FeeInfo> fees = new HashMap<>();
@@ -145,5 +167,4 @@ final class GdaxResponseParser {
         });
         return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }
-
 }

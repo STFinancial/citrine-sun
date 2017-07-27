@@ -4,7 +4,8 @@ import api.CurrencyPair;
 import com.sun.istack.internal.Nullable;
 
 /**
- * Created by Timothy on 12/27/16.
+ * Obtain the set of open {@link api.tmp_trade.TradeOrder TradeOrders}, potentially restricted to a {@link CurrencyPair}
+ * depending on what the specific {@link api.Market Market} allows.
  */
 public final class OpenOrderRequest extends MarketRequest {
     private CurrencyPair currencyPair;
