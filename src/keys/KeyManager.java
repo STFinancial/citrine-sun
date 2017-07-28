@@ -8,6 +8,7 @@ import java.util.Map;
  * A class for personal use that can easily obtain files for different markets.
  */
 public final class KeyManager {
+    // TODO(stfinancial): Why doesn't this return a Credentials instead of the file string?
     public enum Machine {
         LAPTOP("l"),
         DESKTOP("d");

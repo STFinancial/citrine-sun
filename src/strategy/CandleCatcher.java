@@ -20,6 +20,14 @@ import static api.Currency.*;
  * Created by Timothy on 2/12/17.
  */
 public class CandleCatcher extends Strategy {
+    // Construct Market and obtain account balances.
+    // Get Tickers for each currency pair
+    // Place trades below according to what fraction we're using.
+    // Sleep and move the trades as needed.
+    // Log the orderid of the trades we've made.
+
+
+
     // TODO(stfinancial): Not functional. Garbage code. Probably just rewrite this.
 
     private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
