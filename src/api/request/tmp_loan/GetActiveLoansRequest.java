@@ -7,5 +7,5 @@ import api.request.MarketRequest;
  */
 public class GetActiveLoansRequest extends MarketRequest {
     // TODO(stfinancial): Potentially take a currency here.
-    protected GetActiveLoansRequest() {}
+    public GetActiveLoansRequest() {}
 }

@@ -15,7 +15,7 @@ import java.util.Iterator;
 public class OrderSummer {
 //    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
-    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.DOGE, Currency.BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(Currency.LTC, Currency.BTC);
 
     public static void main(String[] args) {
         OrderSummer o = new OrderSummer();

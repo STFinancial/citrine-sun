@@ -22,7 +22,7 @@ public class TradeSpreader {
     // TODO(stfinancial): This needs to be looked at. It doesn't seem to be working correctly. (Still not working quite right. XLM 0.0000098 and 0.0000002)
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
-    private static final double PRIMARY_LIMIT = 50000;
+    private static final double PRIMARY_LIMIT = 22;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
     private static final boolean ALLOW_MARKET_TAKES = true;
@@ -42,10 +42,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 19388297;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
-//    private static final double PRICE = 0.0775;
-//    private static final double RANGE = 0.0025;
-//    private static final double AMOUNT = 50;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
+    private static final double PRICE = 0.0725;
+    private static final double RANGE = 0.0015;
+    private static final double AMOUNT = 48;
+    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
 
 //    private static final double PRICE = 2180;
 //    private static final double RANGE = 200;
@@ -57,29 +57,24 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 10.75;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTC, USD);
 
-//    private static final double PRICE = 0.017200;
-//    private static final double RANGE = 0.0003;
-//    private static final double AMOUNT = 1370;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
-
 //    private static final double PRICE = 242;
 //    private static final double RANGE = 50;
 //    private static final double AMOUNT = 200;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
 
-//    private static final double PRICE = 0.0000715;
-//    private static final double RANGE = 0.0000060;
-//    private static final double AMOUNT = 155194;
+//    private static final double PRICE = 0.0000655;
+//    private static final double RANGE = 0.0000015;
+//    private static final double AMOUNT = 70000;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-    private static final double PRICE = 0.0165;
-    private static final double RANGE = 0.0002;
-    private static final double AMOUNT = 10;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+//    private static final double PRICE = 0.0154;
+//    private static final double RANGE = 0.00015;
+//    private static final double AMOUNT = 460;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.073;
-//    private static final double RANGE = 0.008;
-//    private static final double AMOUNT = 105;
+//    private static final double PRICE = 0.077;
+//    private static final double RANGE = 0.002;
+//    private static final double AMOUNT = 68;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
@@ -112,7 +107,7 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 176282;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
 
-    private static final int BUCKETS = 25;
+    private static final int BUCKETS = 33;
     private static final TradeType TYPE = TradeType.SELL;
     private static final boolean IS_MARGIN = true;
 

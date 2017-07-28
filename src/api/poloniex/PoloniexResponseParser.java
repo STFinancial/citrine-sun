@@ -94,6 +94,8 @@ final class PoloniexResponseParser {
             return createGetLendingHistoryResponse(jsonResponse, (GetLendingHistoryRequest) request, timestamp);
         } else if (request instanceof FeeRequest) {
             return createFeeResponse(jsonResponse, (FeeRequest) request, timestamp);
+        } else if (request instanceof GetActiveLoansRequest) {
+            return createGetActiveLoansResponse(jsonResponse, (GetActiveLoansRequest) request, timestamp);
         }
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
@@ -394,5 +396,9 @@ final class PoloniexResponseParser {
             CurrencyPair.getCurrencyPairSet().forEach(pair -> infos.put(pair, info));
         }
         return new FeeResponse(infos, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private static MarketResponse createGetActiveLoansResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
+        return null;
     }
 }
