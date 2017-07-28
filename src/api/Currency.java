@@ -15,6 +15,7 @@ public enum Currency {
     AMP(Arrays.asList("AMP"), "X"), // Synereo AMP
     ARDR(Arrays.asList("ARDR"), "X"), // Ardor
     BBR(Arrays.asList("BBR"), "X"), // Boolberry
+    BCH(Arrays.asList("BCH"), "X"), // Bitcoin Cash
     BCN(Arrays.asList("BCN"), "X"), // Bytecoin
     BCY(Arrays.asList("BCY"), "X"),
     BELA(Arrays.asList("BELA"), "X"),
