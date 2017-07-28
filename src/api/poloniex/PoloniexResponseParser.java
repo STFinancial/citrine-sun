@@ -398,7 +398,7 @@ final class PoloniexResponseParser {
         return new FeeResponse(infos, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createGetActiveLoansResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
+    private static MarketResponse createGetActiveLoansResponse(JsonNode jsonResponse, GetActiveLoansRequest request, long timestamp) {
         return null;
     }
 }
