@@ -5,6 +5,7 @@ import api.tmp_trade.TradeOrder;
 import com.fasterxml.jackson.databind.JsonNode;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -15,8 +16,7 @@ import java.util.Map;
 public class OpenOrderResponse extends MarketResponse {
     // TODO(stfinancial): This should be a map from currencypair to list of trade order, but how do we handle all
     private Map<CurrencyPair, List<TradeOrder>> orders;
-
-    // TODO(stfinancial): Potentially key by orderNumber. Can make this a lazy getter and construct as needed.
+    private Map<String, TradeOrder> ordersByKey;
 
     // TODO(stfinancial): We need fields for limit, loansavailable(?) [this is probably stuff that happens when there are insufficient loans at our price], and stoplimit.
 
@@ -28,5 +28,18 @@ public class OpenOrderResponse extends MarketResponse {
 
     public Map<CurrencyPair, List<TradeOrder>> getOpenOrders() {
         return orders;
+    }
+
+    public Map<String, TradeOrder> getOpenOrdersById() {
+        if (ordersByKey == null) {
+            ordersByKey = new HashMap<>();
+            orders.forEach((pair, orderList) -> {
+                orderList.forEach((order) -> {
+                    ordersByKey.put(order.getOrderId(), order);
+                });
+            });
+        }
+        // TODO(stfinancial): Set it to be unmodifiable instead.
+        return Collections.unmodifiableMap(ordersByKey);
     }
 }

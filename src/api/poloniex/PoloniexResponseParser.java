@@ -145,7 +145,7 @@ final class PoloniexResponseParser {
             completedTradeMap.put(pair, completedTrades);
         });
         System.out.println(jsonResponse.toString());
-        return new MoveOrderResponse(jsonResponse.get("orderNumber").asLong(), completedTradeMap, jsonResponse, request, timestamp, RequestStatus.success());
+        return new MoveOrderResponse(jsonResponse.get("orderNumber").asText(), completedTradeMap, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
     private static MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
@@ -399,6 +399,25 @@ final class PoloniexResponseParser {
     }
 
     private static MarketResponse createGetActiveLoansResponse(JsonNode jsonResponse, GetActiveLoansRequest request, long timestamp) {
-        return null;
+        System.out.println(jsonResponse);
+        Map<Currency, List<ActiveLoan>> provided = new HashMap<>();
+        jsonResponse.get("provided").elements().forEachRemaining((loan) -> {
+            Currency c = Currency.getCanonicalRepresentation(loan.get("currency").asText());
+            if (!provided.containsKey(c)) {
+                provided.put(c, new ArrayList<>());
+            }
+            provided.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.OFFER), loan.get("duration").asInt(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("date").asText()), loan.get("id").asLong(), loan.get("autoRenew").asInt() == 1));
+        });
+        Map<Currency, List<ActiveLoan>> used = new HashMap<>();
+        jsonResponse.get("used").elements().forEachRemaining((loan) -> {
+            Currency c = Currency.getCanonicalRepresentation(loan.get("currency").asText());
+            if (!used.containsKey(c)) {
+                used.put(c, new ArrayList<>());
+            }
+            System.out.println(c);
+            System.out.println(loan);
+            used.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.DEMAND), loan.get("duration").asInt(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("date").asText()), loan.get("id").asLong(), false));
+        });
+        return new GetActiveLoansResponse(provided, used, jsonResponse, request, timestamp, RequestStatus.success());
     }
 }

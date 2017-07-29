@@ -21,9 +21,9 @@ import static api.Currency.*;
  * Cancels all orders for a given {@link CurrencyPair} on {@link Poloniex}.
  */
 class CancelOrders {
-    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
     private static final boolean RESTRICT_TO_TYPE = true;
-    private static final TradeType TYPE = TradeType.SELL;
+    private static final TradeType TYPE = TradeType.BUY;
     private static final boolean ENABLE_CANCEL_ABOVE = false;
     private static final double CANCEL_ABOVE_PRICE = 0.000101;
     private static final boolean ENABLE_CANCEL_BELOW = false;

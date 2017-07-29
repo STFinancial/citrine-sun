@@ -233,7 +233,7 @@ final class PoloniexRequestRewriter {
     private static RequestArgs rewriteMoveOrderRequest(MoveOrderRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "moveOrder");
-        builder.withParam("orderNumber", String.valueOf(request.getOrderNumber()));
+        builder.withParam("orderNumber", request.getOrderNumber());
         builder.withParam("rate", String.valueOf(request.getRate()));
         builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0");
         builder.withParam("postOnly", request.isPostOnly() ? "1" : "0");

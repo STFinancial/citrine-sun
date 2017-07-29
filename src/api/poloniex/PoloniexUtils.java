@@ -120,6 +120,7 @@ final class PoloniexUtils {
         }
     }
 
+    // TODO(stfinancial): Refactor this to be "convertTimestamp", write the javadoc.
     static long getTimestampFromPoloTimestamp(String poloTimestamp) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"));
 //        DateFormat format = new SimpleDateFormat(DATE_FORMAT);
