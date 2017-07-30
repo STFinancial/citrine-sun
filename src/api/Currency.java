@@ -141,6 +141,7 @@ public enum Currency {
         return isoNamespace;
     }
 
+    // TOOD(stfinancial): I'm not really certain this makes a lot of sense. Shouldn't this be done inside the market?
     // TODO(stfinancial): Shorter name to improve readability of entire program. Maybe fromString?
     /**
      * A {@link Currency} may have different representations on different {@link Market Markets}. For example,

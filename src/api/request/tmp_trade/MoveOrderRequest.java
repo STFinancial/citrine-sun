@@ -6,7 +6,7 @@ import api.request.MarketRequest;
  * Created by Timothy on 2/15/17.
  */
 public class MoveOrderRequest extends MarketRequest {
-    private final long orderNumber;
+    private final String orderNumber; // TODO(stfinancial): Rename to orderId? Decide canonical way to do this for various requests.
     private final double rate;
     private double amount; // Default is 0, make sure this doesn't screw us over.
     // TODO(stfinancial): Check if isFillOrKill actually works.
@@ -14,14 +14,12 @@ public class MoveOrderRequest extends MarketRequest {
     // TODO(stfinancial): What is behavior here if we set this true and move the order to be immediately filled?
     private boolean isPostOnly = false;
 
-
-    // TODO(stfinancial):
-    public MoveOrderRequest(long orderNumber, double rate) {
+    public MoveOrderRequest(String orderNumber, double rate) {
         this.orderNumber = orderNumber;
         this.rate = rate;
     }
 
-    public long getOrderNumber() { return orderNumber; }
+    public String getOrderNumber() { return orderNumber; }
     public double getRate() { return rate; }
     public double getAmount() { return amount; }
     public boolean isPostOnly() { return isPostOnly; }

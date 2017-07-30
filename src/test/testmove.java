@@ -38,6 +38,6 @@ public class testmove {
             e.printStackTrace();
         }
 
-        polo.processMarketRequest(new MoveOrderRequest(j.get("orderNumber").asLong(), 0.0001750));
+        polo.processMarketRequest(new MoveOrderRequest(j.get("orderNumber").asText(), 0.0001750));
     }
 }

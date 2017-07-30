@@ -3,10 +3,7 @@ package api.poloniex;
 import api.CurrencyPair;
 import api.RequestArgs;
 import api.request.*;
-import api.request.tmp_loan.CreateLoanOfferRequest;
-import api.request.tmp_loan.GetLendingHistoryRequest;
-import api.request.tmp_loan.GetPrivateLoanOffersRequest;
-import api.request.tmp_loan.GetPublicLoanOrdersRequest;
+import api.request.tmp_loan.*;
 import api.request.tmp_trade.MoveOrderRequest;
 import api.tmp_loan.LoanType;
 import api.tmp_loan.PrivateLoanOrder;
@@ -69,6 +66,8 @@ final class PoloniexRequestRewriter {
             return rewriteGetLendingHistoryRequest((GetLendingHistoryRequest) request);
         } else if (request instanceof FeeRequest) {
             return rewriteFeeRequest((FeeRequest) request);
+        } else if (request instanceof GetActiveLoansRequest) {
+            return rewriteGetActiveLoansRequest((GetActiveLoansRequest) request);
         }
         return RequestArgs.unsupported();
     }
@@ -234,7 +233,7 @@ final class PoloniexRequestRewriter {
     private static RequestArgs rewriteMoveOrderRequest(MoveOrderRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "moveOrder");
-        builder.withParam("orderNumber", String.valueOf(request.getOrderNumber()));
+        builder.withParam("orderNumber", request.getOrderNumber());
         builder.withParam("rate", String.valueOf(request.getRate()));
         builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0");
         builder.withParam("postOnly", request.isPostOnly() ? "1" : "0");
@@ -348,6 +347,15 @@ final class PoloniexRequestRewriter {
     private static RequestArgs rewriteFeeRequest(FeeRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnFeeInfo");
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));
+        return builder.build();
+    }
+
+    private static RequestArgs rewriteGetActiveLoansRequest(GetActiveLoansRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnActiveLoans");
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));

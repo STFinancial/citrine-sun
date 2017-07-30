@@ -22,7 +22,6 @@ import static api.Currency.*;
  */
 class CancelOrders {
     private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
-    private static final boolean RESTRICT_TO_TYPE = false;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean ENABLE_CANCEL_ABOVE = false;
     private static final double CANCEL_ABOVE_PRICE = 0.000101;
