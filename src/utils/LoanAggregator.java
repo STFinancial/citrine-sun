@@ -1,6 +1,5 @@
 package utils;
 
-import api.Credentials;
 import api.Currency;
 import api.poloniex.Poloniex;
 import api.request.tmp_loan.GetActiveLoansRequest;
@@ -22,7 +21,7 @@ public class LoanAggregator implements Runnable {
 
     @Override
     public void run() {
-        Poloniex p = new Poloniex(Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.DESKTOP)));
+        Poloniex p = new Poloniex(KeyManager.getCredentialsForMarket("Poloniex", KeyManager.Machine.DESKTOP));
         GetActiveLoansResponse r = (GetActiveLoansResponse) p.processMarketRequest(new GetActiveLoansRequest());
         Map<Currency, Double> usedTotals = new HashMap<>();
         r.getUsed().forEach((c, l) -> {

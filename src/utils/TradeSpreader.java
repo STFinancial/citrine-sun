@@ -42,10 +42,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 19388297;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
-    private static final double PRICE = 0.0725;
-    private static final double RANGE = 0.0015;
-    private static final double AMOUNT = 48;
-    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
+//    private static final double PRICE = 0.0725;
+//    private static final double RANGE = 0.0015;
+//    private static final double AMOUNT = 48;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(DASH, BTC);
 
 //    private static final double PRICE = 2180;
 //    private static final double RANGE = 200;
@@ -72,10 +72,10 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 460;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
-//    private static final double PRICE = 0.077;
-//    private static final double RANGE = 0.002;
-//    private static final double AMOUNT = 68;
-//    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
+    private static final double PRICE = 0.077;
+    private static final double RANGE = 0.002;
+    private static final double AMOUNT = 68;
+    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
 //    private static final double PRICE = 0.0026;
 //    private static final double RANGE = 0.0002;
