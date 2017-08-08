@@ -69,8 +69,9 @@ public class CandleCatcher extends Strategy {
             System.out.println("Running...");
             MarketResponse r;
 
-            balance = getQuoteBalance(p, PAIR);
-            quoteAmountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
+            // TODO(stfinancial): Need to account for the balances that are in trades as well.
+//            balance = getQuoteBalance(p, PAIR);
+//            quoteAmountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
             highestBid = getHighestBid(p, PAIR);
             System.out.println("New highest bid at: " + highestBid);
 
@@ -122,6 +123,7 @@ public class CandleCatcher extends Strategy {
                     m.setAmount(((quoteAmountPerFraction) / movePrice) - SATOSHI);
                     do {
                         r = p.processMarketRequest(m);
+                        System.out.println(r.getJsonResponse());
                         sleep(350);
                     } while (!r.isSuccess());
                     newOrders.put(((MoveOrderResponse) r).getOrderNumber(), order.getValue());
