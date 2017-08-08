@@ -68,16 +68,17 @@ public final class Poloniex extends Market { //implements Tradable {
             queue = accountQueues.get(apiKey);
         }
         try {
-            WampClientBuilder builder = new WampClientBuilder();
-            IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
-            builder.withConnectorProvider(connectorProvider)
-                    .withUri(WAMP_ENDPOINT)
-                    .withRealm("realm1")
-                    .withInfiniteReconnects()
-                    .withReconnectInterval(1, TimeUnit.SECONDS);
-            wampClientWrapper = new WampClientWrapper(builder.build());
-        } catch (ApplicationError e) {
-            e.printStackTrace();
+//            WampClientBuilder builder = new WampClientBuilder();
+//            IWampConnectorProvider connectorProvider = new NettyWampClientConnectorProvider();
+//            builder.withConnectorProvider(connectorProvider)
+//                    .withUri(WAMP_ENDPOINT)
+//                    .withRealm("realm1")
+//                    .withInfiniteReconnects()
+//                    .withReconnectInterval(1, TimeUnit.SECONDS);
+//            wampClientWrapper = new WampClientWrapper(builder.build());
+            wampClientWrapper = null;
+//        } catch (ApplicationError e) {
+//            e.printStackTrace();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -32,6 +32,7 @@ public final class TradeRequest extends MarketRequest {
 
     private boolean isStopLimit = false;
     private double stop;
+    private double maxRate;
 
     // TODO(stfinancial): Do we want a builder, a long constructor, some options, or just setters?
     // TODO(stfinancial): Go through and rename all of these timestamp to requestTimestamp
@@ -47,6 +48,7 @@ public final class TradeRequest extends MarketRequest {
     public boolean isMarket() { return isMarket; }
     public boolean isStopLimit() { return isStopLimit; }
     public double getStop() { return stop; }
+    public double getMaxRate() { return maxRate; }
 
     /* Delegation Methods */
     public double getAmount() { return trade.getAmount(); }
@@ -60,6 +62,8 @@ public final class TradeRequest extends MarketRequest {
     public void setIsMarket(boolean isMarket) { this.isMarket = isMarket; }
     public void setIsStopLimit(boolean isStopLimit) { this.isStopLimit = isStopLimit; }
     public void setStop(double stop) { isStopLimit = true; this.stop = stop; }
+    /** 0.05 for 5% lending rate */
+    public void setMaxRate(double maxRate) { this.maxRate = maxRate; }
 
     @Override
     public String toString() {

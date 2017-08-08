@@ -31,8 +31,16 @@ public class CandleCatcher2 extends Strategy {
     // TODO(stfinancial): Figure out a way to represent how much each currencypair gets.
 
     List<CurrencyPair> PAIRS = Collections.unmodifiableList(Arrays.asList(
-            CurrencyPair.of(LTC, BTC), CurrencyPair.of(XRP, BTC), CurrencyPair.of(ETH, BTC), CurrencyPair.of(DASH, BTC), CurrencyPair.of(XLM, BTC),
-            CurrencyPair.of(DOGE, BTC), CurrencyPair.of(GNT, BTC), CurrencyPair.of(BTS, BTC), CurrencyPair.of(MAID, BTC), CurrencyPair.of(CLAM, BTC)
+            CurrencyPair.of(LTC, BTC)
+            ,CurrencyPair.of(XRP, BTC)
+//            ,CurrencyPair.of(ETH, BTC)
+//            ,CurrencyPair.of(DASH, BTC)
+            ,CurrencyPair.of(XLM, BTC)
+//            ,CurrencyPair.of(DOGE, BTC)
+//            ,CurrencyPair.of(GNT, BTC)
+//            ,CurrencyPair.of(BTS, BTC)
+//            ,CurrencyPair.of(MAID, BTC)
+//            ,CurrencyPair.of(CLAM, BTC)
     ));
 
     public static void main(String[] args) {
@@ -49,6 +57,7 @@ public class CandleCatcher2 extends Strategy {
             response = p.processMarketRequest(accountBalanceRequest);
         } while (!response.isSuccess());
         Map<Currency, Double> balances = ((AccountBalanceResponse) response).getBalances().getOrDefault(ACCOUNT_TYPE, Collections.emptyMap());
+
 
     }
 }

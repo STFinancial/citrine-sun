@@ -22,17 +22,27 @@ public class LoanAggregator implements Runnable {
 
     @Override
     public void run() {
-        Poloniex p = new Poloniex(Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.DESKTOP)));
+        Poloniex p = new Poloniex(Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP)));
         GetActiveLoansResponse r = (GetActiveLoansResponse) p.processMarketRequest(new GetActiveLoansRequest());
-        Map<Currency, Double> usedTotals = new HashMap<>();
+        Map<Currency, LoanStats> usedTotals = new HashMap<>();
         r.getUsed().forEach((c, l) -> {
             l.forEach((loan) -> {
-                usedTotals.put(c, usedTotals.getOrDefault(c, 0.0) + loan.getLoan().getAmount());
+                LoanStats s = usedTotals.getOrDefault(c, new LoanStats());
+                s.num++;
+                s.total += loan.getLoan().getAmount();
+                s.weightedRate += loan.getLoan().getRate() * loan.getLoan().getAmount();
+                usedTotals.put(c, s);
             });
         });
         usedTotals.forEach((c, t) -> {
-            System.out.println(c + ": " + t);
+            System.out.println(c + ": total - " + t.total + " num - " + t.num + " avg - " + t.weightedRate / t.total);
         });
+    }
+
+    private class LoanStats {
+        private double total;
+        private double weightedRate;
+        private int num;
     }
 
 }

@@ -15,6 +15,7 @@ public enum Currency {
     AMP(Arrays.asList("AMP"), "X"), // Synereo AMP
     ARDR(Arrays.asList("ARDR"), "X"), // Ardor
     BBR(Arrays.asList("BBR"), "X"), // Boolberry
+    // TODO(stfinancial): BCC is both Bitconnect and Bitcoin Cash in some markets, need to find a way to handle this.
     BCH(Arrays.asList("BCH"), "X"), // Bitcoin Cash
     BCN(Arrays.asList("BCN"), "X"), // Bytecoin
     BCY(Arrays.asList("BCY"), "X"),

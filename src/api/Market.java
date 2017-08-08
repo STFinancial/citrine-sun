@@ -34,6 +34,7 @@ public abstract class Market {
 
     public abstract String getName();
 
+    // TODO(stfinancial): Handle this a little better.
     public abstract MarketConstants getConstants();
 
     // TODO(stfinancial): Does protected here make sense?

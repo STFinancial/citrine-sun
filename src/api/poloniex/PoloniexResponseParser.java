@@ -281,6 +281,7 @@ final class PoloniexResponseParser {
     private static MarketResponse createOpenOrderResponse(JsonNode jsonResponse, OpenOrderRequest request, long timestamp) {
         // TODO(stfinancial): Careful, this call doesn't actually seem to return stop limits...
 
+        System.out.println(jsonResponse);
 
         // TODO(stfinancial): Stop limit and loanavailable.
         Map<CurrencyPair, List<TradeOrder>> orders = new HashMap<>();

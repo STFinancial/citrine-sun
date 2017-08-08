@@ -316,6 +316,9 @@ final class PoloniexRequestRewriter {
         }
 //        builder.withParam("fillOrKill", request.isFillOrKill() ? "1" : "0");
 //        builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0");
+        if (request.isMargin() && request.getMaxRate() != 0) {
+            builder.withParam("lendingRate", String.valueOf(request.getMaxRate()));
+        }
         builder.withParam("postOnly", request.isPostOnly() ? "1" : "0");
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
