@@ -1,4 +1,4 @@
-package api.request.tmp_trade;
+package api.request;
 
 import api.request.MarketRequest;
 
@@ -9,6 +9,8 @@ public class MoveOrderRequest extends MarketRequest {
     private final String orderNumber; // TODO(stfinancial): Rename to orderId? Decide canonical way to do this for various requests.
     private final double rate;
     private double amount; // Default is 0, make sure this doesn't screw us over.
+
+    // TODO(stfinancial): Change this to the same structure as TradeRequest, setting timeInForce...
     // TODO(stfinancial): Check if isFillOrKill actually works.
     private boolean isImmediateOrCancel = false;
     // TODO(stfinancial): What is behavior here if we set this true and move the order to be immediately filled?

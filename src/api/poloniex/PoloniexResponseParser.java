@@ -11,7 +11,7 @@ import api.*;
 import api.Currency;
 import api.request.*;
 import api.request.tmp_loan.*;
-import api.request.tmp_trade.MoveOrderRequest;
+import api.request.MoveOrderRequest;
 import api.tmp_loan.*;
 import api.tmp_trade.CompletedTrade;
 import api.tmp_trade.Trade;
@@ -96,6 +96,8 @@ final class PoloniexResponseParser {
             return createFeeResponse(jsonResponse, (FeeRequest) request, timestamp);
         } else if (request instanceof GetActiveLoansRequest) {
             return createGetActiveLoansResponse(jsonResponse, (GetActiveLoansRequest) request, timestamp);
+        } else if (request instanceof OrderTradesRequest) {
+            return createOrderTradesResponse(jsonResponse, (OrderTradesRequest) request, timestamp);
         }
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
@@ -420,5 +422,18 @@ final class PoloniexResponseParser {
             used.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.DEMAND), loan.get("duration").asInt(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("date").asText()), loan.get("id").asLong(), false));
         });
         return new GetActiveLoansResponse(provided, used, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private static MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
+        List<CompletedTrade> trades = new ArrayList<>();
+        jsonResponse.elements().forEachRemaining((t) -> {
+            CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, PoloniexUtils.parseCurrencyPair(t.get("currencyPair").asText())), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
+//            b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
+            b.globalTradeId(t.get("globalTradeID").asText());
+//                b.fee(t.get("fee").asDouble()); // TODO(stfinancial): Decide whether to convert this to quote or base currency.
+            // TODO(stfinancial): Infer isMake from the fee and our fee rate.
+            trades.add(b.build());
+        });
+        return new OrderTradesResponse(trades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 }

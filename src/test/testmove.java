@@ -5,12 +5,10 @@ import api.Currency;
 import api.CurrencyPair;
 import api.poloniex.Poloniex;
 import api.request.TradeRequest;
-import api.request.tmp_trade.MoveOrderRequest;
+import api.request.MoveOrderRequest;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
-
-import java.math.BigDecimal;
 
 /**
  * Created by Timothy on 2/16/17.

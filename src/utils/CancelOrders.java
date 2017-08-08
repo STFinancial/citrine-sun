@@ -1,6 +1,5 @@
 package utils;
 
-import api.Credentials;
 import api.CurrencyPair;
 import api.poloniex.Poloniex;
 import api.request.CancelRequest;
@@ -21,7 +20,7 @@ import static api.Currency.*;
  * Cancels all orders for a given {@link CurrencyPair} on {@link Poloniex}.
  */
 class CancelOrders {
-    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
     private static final boolean RESTRICT_TO_TYPE = false;
     private static final TradeType TYPE = TradeType.BUY;
     private static final boolean ENABLE_CANCEL_ABOVE = false;
@@ -35,8 +34,7 @@ class CancelOrders {
     }
 
     private void run() {
-        Credentials c = Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP));
-        Poloniex p = new Poloniex(c);
+        Poloniex p = new Poloniex(KeyManager.getCredentialsForMarket("Poloniex", KeyManager.Machine.DESKTOP));
         MarketResponse r = p.processMarketRequest(new OpenOrderRequest(PAIR));
         if (!r.isSuccess()) {
             System.out.println("Failure to get Orders: " + r.getJsonResponse());

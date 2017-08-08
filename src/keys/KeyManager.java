@@ -1,5 +1,7 @@
 package keys;
 
+import api.Credentials;
+
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -32,5 +34,9 @@ public final class KeyManager {
     // TODO(stfinancial): Does it make sense to take in the market as a string or create an enum for it?
     public static String getKeyForMarket(String marketName, Machine machine) {
         return KEYS.getOrDefault(marketName + "_" + machine.suffix, "");
+    }
+
+    public static Credentials getCredentialsForMarket(String marketName, Machine machine) {
+        return Credentials.fromFileString(getKeyForMarket(marketName, machine));
     }
 }

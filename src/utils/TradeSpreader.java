@@ -42,7 +42,6 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 19388297;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(DOGE, BTC);
 
-
 //    private static final double PRICE = 2180;
 //    private static final double RANGE = 200;
 //    private static final double AMOUNT = 5.6;

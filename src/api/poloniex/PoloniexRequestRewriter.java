@@ -4,7 +4,7 @@ import api.CurrencyPair;
 import api.RequestArgs;
 import api.request.*;
 import api.request.tmp_loan.*;
-import api.request.tmp_trade.MoveOrderRequest;
+import api.request.MoveOrderRequest;
 import api.tmp_loan.LoanType;
 import api.tmp_loan.PrivateLoanOrder;
 
@@ -47,8 +47,6 @@ final class PoloniexRequestRewriter {
         } else if (request instanceof TickerRequest) {
             return rewriteTickerRequest((TickerRequest) request);
         } else if (request instanceof MoveOrderRequest) {
-            // TODO(stfinancial): Make sure to handle this differently because I don't think it counts towards the limit.
-            // TODO(stfinancial): Look into using this for the candle catcher/bounce bot, freeing up a lot of resources.
             return rewriteMoveOrderRequest((MoveOrderRequest) request);
         } else if (request instanceof TradeHistoryRequest) {
             return rewriteTradeHistoryRequest((TradeHistoryRequest) request);
@@ -68,6 +66,8 @@ final class PoloniexRequestRewriter {
             return rewriteFeeRequest((FeeRequest) request);
         } else if (request instanceof GetActiveLoansRequest) {
             return rewriteGetActiveLoansRequest((GetActiveLoansRequest) request);
+        } else if (request instanceof OrderTradesRequest) {
+            return rewriteOrderTradesRequest((OrderTradesRequest) request);
         }
         return RequestArgs.unsupported();
     }
@@ -359,6 +359,16 @@ final class PoloniexRequestRewriter {
     private static RequestArgs rewriteGetActiveLoansRequest(GetActiveLoansRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnActiveLoans");
+        builder.isPrivate(true);
+        builder.httpRequestType(RequestArgs.HttpRequestType.POST);
+        builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));
+        return builder.build();
+    }
+
+    private static RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
+        builder.withParam(COMMAND_STRING, "returnOrderTrades");
+        builder.withParam("orderNumber", request.getId());
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));

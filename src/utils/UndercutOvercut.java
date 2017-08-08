@@ -1,11 +1,10 @@
 package utils;
 
-import api.Credentials;
 import api.Currency;
 import api.CurrencyPair;
 import api.poloniex.Poloniex;
 import api.request.*;
-import api.request.tmp_trade.MoveOrderRequest;
+import api.request.MoveOrderRequest;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import keys.KeyManager;
@@ -14,6 +13,8 @@ import keys.KeyManager;
  * Created by Zarathustra on 7/28/2017.
  */
 public class UndercutOvercut implements Runnable {
+    // TODO(stfinancial): Need a way to handle when someone places an order really far away from the next lowest ask/highest bid.
+
     private static final CurrencyPair PAIR = CurrencyPair.of(Currency.XMR, Currency.BTC);
     private static final TradeType ORIENTATION = TradeType.SELL;
 //    private static final boolean IS_MARGIN = true;
@@ -26,7 +27,7 @@ public class UndercutOvercut implements Runnable {
     }
 
     public void run() {
-        Poloniex p = new Poloniex(Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.DESKTOP)));
+        Poloniex p = new Poloniex(KeyManager.getCredentialsForMarket("Poloniex", KeyManager.Machine.DESKTOP));
         OrderBookRequest o = new OrderBookRequest(PAIR, 1);
 
         MarketResponse resp;
