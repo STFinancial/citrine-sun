@@ -35,7 +35,6 @@ public class CandleCatcher extends Strategy {
 
 
     // TODO(stfinancial): Handle edge case where order fills immediately when we place it (this may be handled automatically).
-    // TODO(stfinancial): Update account balances every loop.
 
     public static void main(String[] args) {
         CandleCatcher c = new CandleCatcher();
@@ -44,30 +43,16 @@ public class CandleCatcher extends Strategy {
 
     @Override
     public void run() {
-        MarketResponse response;
-        Poloniex p = new Poloniex(KeyManager.getCredentialsForMarket("Poloniex", KeyManager.Machine.LAPTOP));
+        Poloniex p = new Poloniex(KeyManager.getCredentialsForMarket("Poloniex", KeyManager.Machine.DESKTOP));
 
         // Get account balances
-        AccountBalanceRequest accountBalanceRequest = new AccountBalanceRequest(ACCOUNT_TYPE);
-        do {
-            response = p.processMarketRequest(accountBalanceRequest);
-            sleep(350);
-        } while (!response.isSuccess());
-        double balance = ((AccountBalanceResponse) response).getBalances().getOrDefault(ACCOUNT_TYPE, Collections.emptyMap()).getOrDefault(PAIR.getQuote(), 0.0);
-
-
-//        double amountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
+        double balance = getQuoteBalance(p, PAIR);
+        double quoteAmountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
 
         // Get ticker and highest bid
-        TickerRequest tickerRequest = new TickerRequest(Arrays.asList(PAIR));
-        do {
-            response = p.processMarketRequest(tickerRequest);
-            sleep(350);
-        } while (!response.isSuccess());
-        double highestBid = ((TickerResponse) response).getTickers().get(PAIR).getHighestBid();
+        double highestBid = getHighestBid(p, PAIR);
 
         // Get trades and place them
-        double quoteAmountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
         for (double fraction : FRACTIONS) {
             Trade t = getTradeForFraction(highestBid, fraction, quoteAmountPerFraction);
             TradeRequest r = new TradeRequest(t);
@@ -83,11 +68,10 @@ public class CandleCatcher extends Strategy {
         while (true) {
             System.out.println("Running...");
             MarketResponse r;
-            do {
-                r = p.processMarketRequest(tickerRequest);
-                sleep(350);
-            } while (!r.isSuccess());
-            highestBid = ((TickerResponse) r).getTickers().get(PAIR).getHighestBid();
+
+            balance = getQuoteBalance(p, PAIR);
+            quoteAmountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
+            highestBid = getHighestBid(p, PAIR);
             System.out.println("New highest bid at: " + highestBid);
 
             // Check that none of our orders got filled.
@@ -148,10 +132,33 @@ public class CandleCatcher extends Strategy {
         }
     }
 
+//    private MarketResponse retryWithDelay
+
     private Trade getTradeForFraction(double highestBid, double fraction, double quoteAmountPerFraction) {
         double price = highestBid * (1 - fraction);
         double amount = (quoteAmountPerFraction / price) - SATOSHI;
         return new Trade(amount, price, PAIR, TradeType.BUY);
+    }
+
+    private double getQuoteBalance(Poloniex p, CurrencyPair pair) {
+        MarketResponse response;
+        AccountBalanceRequest accountBalanceRequest = new AccountBalanceRequest(ACCOUNT_TYPE);
+        do {
+            response = p.processMarketRequest(accountBalanceRequest);
+            sleep(350);
+        } while (!response.isSuccess());
+        return ((AccountBalanceResponse) response).getBalances().getOrDefault(ACCOUNT_TYPE, Collections.emptyMap()).getOrDefault(pair.getQuote(), 0.0);
+    }
+
+    private double getHighestBid(Poloniex p, CurrencyPair pair) {
+        TickerRequest tickerRequest = new TickerRequest(Arrays.asList(pair));
+        MarketResponse response;
+        do {
+            response = p.processMarketRequest(tickerRequest);
+            System.out.println(response.getJsonResponse());
+            sleep(350);
+        } while (!response.isSuccess());
+        return ((TickerResponse) response).getTickers().get(pair).getHighestBid();
     }
 
     private void sleep(long millis) {
