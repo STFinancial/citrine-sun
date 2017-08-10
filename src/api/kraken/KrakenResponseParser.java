@@ -16,7 +16,8 @@ import util.PriceUtil;
 import java.util.*;
 
 /**
- * Created by Timothy on 6/3/17.
+ * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Kraken} into a
+ * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
 final class KrakenResponseParser {
     // TODO(stfinancial): NOTE - Kraken treats order Ids and TxIds separately. Txids start with a T and Order Ids start with an O (so it appears).
@@ -28,16 +29,14 @@ final class KrakenResponseParser {
     }
 
     // TODO(stfinancial): Take in isError for now until we switch to using the http response.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
+    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         // TODO(stfinancial): Check "error" field to see if the result is an empty array.
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }
         // TODO(stfinancial): Get the request status here.
 
-        if (isError) {
-            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
-        }
+
         if (jsonResponse.get("error").has(0) && !jsonResponse.get("error").get(0).asText().isEmpty()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("error").get(0).asText()));
         }
@@ -81,7 +80,7 @@ final class KrakenResponseParser {
 
     private OrderBookResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
         System.out.println(jsonResponse);
-        CurrencyPair pair = request.getCurrencyPair().get();
+        CurrencyPair pair = request.getCurrencyPair();
         // TODO(stfinancial): We check that there is a currency pair in the request, does it make sense to be defensive and check here as well?
         JsonNode j = jsonResponse.get("result").get(KrakenUtils.formatCurrencyPair(pair, true));
         Map<CurrencyPair, List<Trade>> askMap = new HashMap<>();
@@ -89,7 +88,7 @@ final class KrakenResponseParser {
         j.get("asks").elements().forEachRemaining((order) -> {
             asks.add(new Trade(order.get(1).asDouble(), order.get(0).asDouble(), pair, TradeType.SELL));
         });
-        askMap.put(request.getCurrencyPair().get(), asks);
+        askMap.put(request.getCurrencyPair(), asks);
         Map<CurrencyPair, List<Trade>> bidMap = new HashMap<>();
         List<Trade> bids = new ArrayList<>();
         j.get("bids").elements().forEachRemaining((order) -> {

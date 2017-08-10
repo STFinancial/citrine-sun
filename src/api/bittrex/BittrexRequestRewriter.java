@@ -6,7 +6,7 @@ import api.request.*;
 import api.tmp_trade.TradeType;
 
 /**
- * Rewrites a {@link MarketRequest} into a {@link RequestArgs} usable by {@link Bittrex} to access the API of the website.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Bittrex} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
 final class BittrexRequestRewriter {
     private static final String API_ENDPOINT = "https://bittrex.com/api/v1.1";
@@ -71,13 +71,13 @@ final class BittrexRequestRewriter {
     }
 
     private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
-        if (!request.getCurrencyPair().isPresent()) {
+        if (request.getCurrencyPair() == null) {
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("public");
         builder.withResource("getorderbook");
-        builder.withParam("market", BittrexUtils.formatCurrencyPair(request.getCurrencyPair().get()));
+        builder.withParam("market", BittrexUtils.formatCurrencyPair(request.getCurrencyPair()));
         builder.withParam("type", "both");
         builder.isPrivate(false);
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);

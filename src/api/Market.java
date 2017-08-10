@@ -32,6 +32,10 @@ public abstract class Market {
 
     // TODO(stfinancial): Constructor that takes in credentials (how do we handle public only interfaces)
 
+//    public MarketResponse processMarketRequest(MarketRequest request) {
+//        sendRequest()
+//    }
+
     public abstract MarketResponse processMarketRequest(MarketRequest request);
 
     public abstract String getName();
@@ -49,5 +53,7 @@ public abstract class Market {
 
     // TODO(stfinancial): Do we want a separate method for creating a price alert? Does this at all break anything else we're doing?
     // TODO(stfinancial): It does perhaps mean we need a separate thread listening to this channel. I'm not sure though.
+
+
 
 }

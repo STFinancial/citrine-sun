@@ -137,9 +137,12 @@ public final class Bitfinex extends Market {
         }
         // TODO(stfinancial): Post-processing and add/convert timestamp.
         // TODO(stfinancial): More sophisticated handling of errors codes...
-        boolean isError = statusCode != HttpStatus.SC_OK;
 //        System.out.println(statusCode);
         System.out.println(jsonResponse);
-        return responseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
+        boolean isError = statusCode != HttpStatus.SC_OK;
+        if (isError) {
+            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
+        }
+        return responseParser.constructMarketResponse(jsonResponse, request, timestamp);
     }
 }

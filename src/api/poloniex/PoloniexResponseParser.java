@@ -186,8 +186,8 @@ final class PoloniexResponseParser {
         Map<CurrencyPair, List<Trade>> asksSet = new HashMap<>();
         Map<CurrencyPair, List<Trade>> bidsSet = new HashMap<>();
 
-        if (request.getCurrencyPair().isPresent()) {
-            CurrencyPair pair = request.getCurrencyPair().get();
+        if (request.getCurrencyPair() != null) {
+            CurrencyPair pair = request.getCurrencyPair();
             List<Trade> asks = new ArrayList<>();
             List<Trade> bids = new ArrayList<>();
             jsonResponse.get("asks").forEach((order) -> {

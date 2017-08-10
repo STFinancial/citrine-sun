@@ -11,20 +11,16 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 
 /**
- * Created by Timothy on 4/23/17.
+ * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Gdax} into a
+ * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
 final class GdaxResponseParser {
 
-    // TODO(stfinancial): Take in isError for now until we switch to using the http response.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
+    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }
         // TODO(stfinancial): Get the request status here.
-
-        if (isError) {
-            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
-        }
         if (request instanceof TradeRequest) {
             return createTradeResponse(jsonResponse, (TradeRequest) request, timestamp);
         } else if (request instanceof OrderBookRequest) {
@@ -65,7 +61,7 @@ final class GdaxResponseParser {
     }
 
     private MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
-        CurrencyPair pair = request.getCurrencyPair().get();
+        CurrencyPair pair = request.getCurrencyPair();
         Map<CurrencyPair, List<Trade>> asksSet = new HashMap<>();
         Map<CurrencyPair, List<Trade>> bidsSet = new HashMap<>();
         List<Trade> asks = new ArrayList<>();
@@ -158,7 +154,7 @@ final class GdaxResponseParser {
         }
     }
 
-    private AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+    private MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
         // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
         // TODO(stfinancial): Create the map to market name.
         List<CurrencyPair> assets = new ArrayList<>();

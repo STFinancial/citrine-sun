@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Timothy on 8/3/17.
+ * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Bittrex} into a
+ * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
 final class BittrexResponseParser {
 
@@ -52,7 +53,7 @@ final class BittrexResponseParser {
 
     private MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
         System.out.println(jsonResponse);
-        CurrencyPair pair = request.getCurrencyPair().get();
+        CurrencyPair pair = request.getCurrencyPair();
         List<Trade> asks = new ArrayList<>();
         List<Trade> bids = new ArrayList<>();
         JsonNode askBook = jsonResponse.get("result").get("sell");
@@ -66,7 +67,7 @@ final class BittrexResponseParser {
                 bids.add(new Trade(bidBook.get(depth).get("Quantity").asDouble(), bidBook.get(depth).get("Rate").asDouble(), pair, TradeType.BUY));
             }
         }
-        return new OrderBookResponse(new HashMap<CurrencyPair, List<Trade>>(){{ put(request.getCurrencyPair().get(), asks); }}, new HashMap<CurrencyPair, List<Trade>>(){{ put(request.getCurrencyPair().get(), bids); }}, jsonResponse, request, timestamp, RequestStatus.success());
+        return new OrderBookResponse(new HashMap<CurrencyPair, List<Trade>>(){{ put(request.getCurrencyPair(), asks); }}, new HashMap<CurrencyPair, List<Trade>>(){{ put(request.getCurrencyPair(), bids); }}, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
     private MarketResponse createOpenOrderResponse(JsonNode jsonResponse, OpenOrderRequest request, long timestamp) {

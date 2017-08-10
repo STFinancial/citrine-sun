@@ -9,8 +9,7 @@ import api.tmp_loan.LoanType;
 import api.tmp_loan.PrivateLoanOrder;
 
 /**
- * Converts a {@link MarketRequest} into {@link RequestArgs} which can be used to construct an encoded URL and signed
- * data object used to send a request to Poloniex.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Poloniex} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
 final class PoloniexRequestRewriter {
     // TODO(stfinancial): Separate into public and private method sections. Easier to debug then.
@@ -95,8 +94,8 @@ final class PoloniexRequestRewriter {
     private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
         builder.withParam(COMMAND_STRING, "returnOrderBook");
-        if (request.getCurrencyPair().isPresent()) {
-            builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getCurrencyPair().get()));
+        if (request.getCurrencyPair() != null) {
+            builder.withParam("currencyPair", PoloniexUtils.formatCurrencyPair(request.getCurrencyPair()));
         } else {
             builder.withParam("currencyPair", "all");
         }
@@ -191,7 +190,7 @@ final class PoloniexRequestRewriter {
     private RequestArgs rewriteOpenOrderRequest(OpenOrderRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnOpenOrders");
-        // TODO(stfinancial): Replace with returnAllOpenOrders, but check that this works with currencyPair?
+        // TODO(stfinancial): This doesn't return loansAvailable and stopLimit
 
         CurrencyPair pair = request.getCurrencyPair();
         if (pair == null) {
@@ -208,7 +207,6 @@ final class PoloniexRequestRewriter {
     private RequestArgs rewriteTickerRequest(TickerRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
         builder.withParam(COMMAND_STRING, "returnTicker");
-        // TODO(stfinancial): Optional pairs from request?
         builder.isPrivate(false);
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         return builder.build();
@@ -265,6 +263,9 @@ final class PoloniexRequestRewriter {
     private RequestArgs rewriteTradeRequest(TradeRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         // TODO(stfinancial): Handle market type requests somehow.
+        if (request.isMarket()) {
+            return RequestArgs.unsupported();
+        }
         if (!request.isStopLimit()) {
             switch (request.getTrade().getType()) {
                 case BUY:
@@ -307,12 +308,9 @@ final class PoloniexRequestRewriter {
                 builder.withParam("fillOrKill", "1");
                 break;
             default:
-                // TODO(stfinancial): Use market name here.
                 System.out.println("Unsupported TimeInForce on Poloniex: " + request.getTimeInForce().toString());
                 return RequestArgs.unsupported();
         }
-//        builder.withParam("fillOrKill", request.isFillOrKill() ? "1" : "0");
-//        builder.withParam("immediateOrCancel", request.isImmediateOrCancel() ? "1" : "0");
         if (request.isMargin() && request.getMaxRate() != 0) {
             builder.withParam("lendingRate", String.valueOf(request.getMaxRate()));
         }

@@ -9,7 +9,6 @@ public class AccountBalanceRequest extends MarketRequest {
     // TODO(stfinancial): Do we want to bother with this when we can just fetch all information, see returnCompleteBalances
 
     private final AccountType type;
-    // TODO(stfinancial): Allow optional account specifying.
 
     public AccountBalanceRequest() { this.type = null; }
     public AccountBalanceRequest(AccountType type) {

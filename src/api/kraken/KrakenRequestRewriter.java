@@ -6,7 +6,7 @@ import api.request.AssetPairRequest;
 import api.request.*;
 
 /**
- * Created by Timothy on 3/7/17.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Kraken} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
 final class KrakenRequestRewriter {
     private static final String API_ENDPOINT = "https://api.kraken.com";
@@ -67,11 +67,11 @@ final class KrakenRequestRewriter {
     }
 
     private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
-        if (!request.getCurrencyPair().isPresent()) {
+        if (request.getCurrencyPair() == null) {
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
-        builder.withParam("pair", KrakenUtils.formatCurrencyPair(request.getCurrencyPair().get(), true));
+        builder.withParam("pair", KrakenUtils.formatCurrencyPair(request.getCurrencyPair(), true));
         builder.withParam("count", String.valueOf(request.getDepth()));
         builder.withResource("0");
         builder.withResource("public");

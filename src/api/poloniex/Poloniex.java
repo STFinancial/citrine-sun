@@ -41,7 +41,6 @@ public final class Poloniex extends Market { //implements Tradable {
     private static final String MARKET_NAME = "Poloniex";
     private static final String ENCODING = "UTF-8";
     private static final String WAMP_ENDPOINT = "wss://api.poloniex.com";
-    // TODO(stfinancial): What about stuff to https://poloniex.com/private?
 
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
 

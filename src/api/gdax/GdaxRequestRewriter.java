@@ -5,7 +5,7 @@ import api.RequestArgs;
 import api.request.*;
 
 /**
- * Converts a {@link MarketRequest} into a {@link api.RequestArgs} which can be used to construct an {@link org.apache.http.HttpRequest}.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Gdax} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
 final class GdaxRequestRewriter {
     private static final String API_ENDPOINT = "https://api.gdax.com";
@@ -59,13 +59,12 @@ final class GdaxRequestRewriter {
     }
 
     private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
-        if (!request.getCurrencyPair().isPresent()) {
+        if (request.getCurrencyPair() == null) {
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("products");
-        // TODO(stfinancial): Also awful.
-        builder.withResource(GdaxUtils.formatCurrencyPair(request.getCurrencyPair().get()));
+        builder.withResource(GdaxUtils.formatCurrencyPair(request.getCurrencyPair()));
         builder.withResource("book");
         if (request.getDepth() == 1) {
             builder.withParam("level", "1", true, true);
@@ -86,7 +85,6 @@ final class GdaxRequestRewriter {
             // TODO(stfinancial): Implement these, along with fill or kill, post only, immediate or cancel.
             return RequestArgs.unsupported();
         }
-        // TODO(stfinancial): This is currently only valid for limit orders.
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("orders");
         // TODO(stfinancial): Add support for this.
