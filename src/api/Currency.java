@@ -16,7 +16,7 @@ public enum Currency {
     ARDR(Arrays.asList("ARDR"), "X"), // Ardor
     BBR(Arrays.asList("BBR"), "X"), // Boolberry
     // TODO(stfinancial): BCC is both Bitconnect and Bitcoin Cash in some markets, need to find a way to handle this.
-    BCH(Arrays.asList("BCH"), "X"), // Bitcoin Cash
+    BCH(Arrays.asList("BCH", "BCC"), "X"), // Bitcoin Cash
     BCN(Arrays.asList("BCN"), "X"), // Bytecoin
     BCY(Arrays.asList("BCY"), "X"),
     BELA(Arrays.asList("BELA"), "X"),
@@ -48,6 +48,7 @@ public enum Currency {
     FLO(Arrays.asList("FLO"), "X"),
     GAME(Arrays.asList("GAME"), "X"), // Game Credits
     GBP(Arrays.asList("GBP"), "Z"), // British Pound
+    GBYTE(Arrays.asList("GBYTE"), "X"), // Byteball
     GNO(Arrays.asList("GNO"), "X"), // Gnosis
     GNT(Arrays.asList("GNT"), "X"), // Golem Network Token
     GRC(Arrays.asList("GRC"), "X"), // Gridcoin
@@ -65,6 +66,7 @@ public enum Currency {
     MYR(Arrays.asList("MYR"), "X"),
     NAUT(Arrays.asList("NAUT"), "X"),
     NAV(Arrays.asList("NAV"), "X"),
+    NEO(Arrays.asList("NEO", "ANS"), "X"), // NEO/Antshares
     NEOS(Arrays.asList("NEOS"), "X"),
     NMC(Arrays.asList("NMC"), "X"),
     NOBL(Arrays.asList("NOBL"), "X"),
@@ -72,6 +74,7 @@ public enum Currency {
     NSR(Arrays.asList("NSR"), "X"),
     NXC(Arrays.asList("NXC"), "X"),
     NXT(Arrays.asList("NXT"), "X"),
+    OMG(Arrays.asList("OMG"), "X"), // OmiseGO
     OMNI(Arrays.asList("OMNI"), "X"),
     PASC(Arrays.asList("PASC"), "X"), // Pascal
     PINK(Arrays.asList("PINK"), "X"),
@@ -81,6 +84,7 @@ public enum Currency {
     QBK(Arrays.asList("QBK"), "X"),
     QORA(Arrays.asList("QORA"), "X"),
     QTL(Arrays.asList("QTL"), "X"),
+    QTUM(Arrays.asList("QTUM"), "X"), // Qtum
     PIVX(Arrays.asList("PIVX"), "X"), // Pivx
     RADS(Arrays.asList("RADS"), "X"),
     RBY(Arrays.asList("RBY"), "X"),
@@ -93,7 +97,7 @@ public enum Currency {
     SJCX(Arrays.asList("SJCX"), "X"), // Storjcoin
     SNT(Arrays.asList("SNT"), "X"), // Status Network Token
     STEEM(Arrays.asList("STEEM"), "X"), // Steem
-    STRAT(Arrays.asList("STRAT"), "X"),
+    STRAT(Arrays.asList("STRAT"), "X"), // Stratis
     SYS(Arrays.asList("SYS"), "X"), // Syscoin
     UNITY(Arrays.asList("UNITY"), "X"),
     USDT(Arrays.asList("USDT"), "X"), // USD Tether
@@ -105,7 +109,7 @@ public enum Currency {
     WAVES(Arrays.asList("WAVES"), "X"), // Waves
     XBC(Arrays.asList("XBC"), "X"),
     XCP(Arrays.asList("XCP"), "X"), // Counterparty
-    XEM(Arrays.asList("XEM"), "X"),
+    XEM(Arrays.asList("XEM"), "X"), // New Economy Movement
     XLM(Arrays.asList("XLM","STR"), "X"), // Stellar Lumens // TODO(stfinancial): Rename this to XLM
     XMG(Arrays.asList("XMG"), "X"),
     XMR(Arrays.asList("XMR"), "X"), // Monero

@@ -41,8 +41,7 @@ public final class Bitfinex extends Market {
     public Bitfinex(Credentials credentials) {
         super(credentials);
         if (!credentials.isPublicOnly()) {
-            System.out.println(credentials.getSecretKey());
-            this.signer = new HmacSigner(algorithm, credentials.getSecretKey(), false);
+            this.signer = new HmacSigner(algorithm, credentials, false);
         }
         this.requestRewriter = new BitfinexRequestRewriter();
         this.responseParser = new BitfinexResponseParser();

@@ -32,7 +32,7 @@ public class Gdax extends Market {
     public Gdax(Credentials credentials) {
         super(credentials);
         this.passphrase = credentials.getPassphrase();
-        this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
+        this.signer = new HmacSigner(ALGORITHM, credentials, true);
     }
 
     @Override

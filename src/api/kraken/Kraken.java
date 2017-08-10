@@ -51,7 +51,7 @@ public class Kraken extends Market {
 
     public Kraken(Credentials credentials) {
         super(credentials);
-        this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), true);
+        this.signer = new HmacSigner(ALGORITHM, credentials, true);
         try {
             digest = MessageDigest.getInstance("SHA-256");
         } catch (NoSuchAlgorithmException e) {

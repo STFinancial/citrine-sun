@@ -9,8 +9,14 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.message.BasicHeader;
+import org.apache.http.util.EntityUtils;
 
 import java.io.IOException;
 
@@ -25,9 +31,9 @@ public class Bittrex extends Market {
 
     public Bittrex(Credentials credentials) {
         super(credentials);
-        this.requestRewriter = new BittrexRequestRewriter();
+        this.requestRewriter = new BittrexRequestRewriter(this);
         this.responseParser = new BittrexResponseParser();
-        this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), false);
+        this.signer = new HmacSigner(ALGORITHM, credentials, false);
     }
 
     @Override
@@ -57,7 +63,32 @@ public class Bittrex extends Market {
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }
-        String url;
+        String url = args.asUrl(true);
+        System.out.println("URL: " + url);
+        if (!args.isPrivate()) {
+            // TODO(stfinancial): Should we actually check the httprequesttype?
+            httpRequest = new HttpGet(url);
+        } else if (!credentials.isPublicOnly()) {
+            // TODO(stfinancial): Check the httprequesttype here as well? Get should only be allowed.
+            httpRequest = new HttpGet(url);
+            String sign = signer.getHexDigest(url.getBytes());
+            httpRequest.addHeader(new BasicHeader("apisign", sign));
+        } else {
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
+        }
+        try {
+            CloseableHttpResponse response = httpClient.execute(httpRequest);
+            timestamp = System.currentTimeMillis();
+            HttpEntity entity = response.getEntity();
+            responseString = EntityUtils.toString(entity);
+            EntityUtils.consume(entity);
+        } catch (IOException e) {
+            System.out.println("IOException occurred while executing HTTP request: " + httpRequest.toString());
+            e.printStackTrace();
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.CONNECTION_ERROR, e, "Request failed"));
+        }
+
+
         try {
             try {
                 jsonResponse = mapper.readTree(responseString);

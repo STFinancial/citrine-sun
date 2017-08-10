@@ -9,7 +9,8 @@ import api.CurrencyPair;
 final class BittrexUtils {
 
     static String formatCurrencyPair(CurrencyPair pair) {
-        return getCurrencyString(pair.getBase()) + "-" + getCurrencyString(pair.getQuote());
+        // Bittrex does this backwards.
+        return getCurrencyString(pair.getQuote()) + "-" + getCurrencyString(pair.getBase());
     }
 
     static String getCurrencyString(Currency c) {

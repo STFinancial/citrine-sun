@@ -59,7 +59,7 @@ public final class Poloniex extends Market { //implements Tradable {
     // Need to avoid IP bans by ensuring that a single IP can have a single market instance.
     public Poloniex(Credentials credentials) {
         super(credentials);
-        this.signer = new HmacSigner(ALGORITHM, credentials.getSecretKey(), false);
+        this.signer = new HmacSigner(ALGORITHM, credentials, false);
 //        this.trader = new PoloniexTrader(this);
         if (!accountQueues.containsKey(apiKey)) {
             queue = new PoloniexQueue(this, QueueStrategy.STRICT, 5);

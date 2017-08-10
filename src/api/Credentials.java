@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 
-// TODO(stfinancial): How do we support API keys with restricted access to certain methods?
+// TODO(stfinancial): How do we support API keys with restricted access to certain methods? Decompose API calls into interfaces?
 /**
  * Contains the API key, Secret key, and maybe password for accessing a {@link Market Market's} API.
  */
@@ -36,7 +36,6 @@ public class Credentials {
     }
 
     @Nullable
-    // TODO(stfinancial): Potentially return Optional here.
     // TODO(stfinancial): Specify the structure that this file should have.
     public static Credentials fromFileString(String fileString) {
         BufferedReader r;
@@ -64,6 +63,7 @@ public class Credentials {
     }
 
     // TODO(stfinancial): Does this make sense or just having an empty market?
+    /** @return A {@code Credentials} object allowing access to only public methods of the {@link Market}. */
     public static Credentials publicOnly() {
         return PUBLIC_ONLY;
     }
@@ -78,9 +78,9 @@ public class Credentials {
 //    }
 
     // TODO(stfinancial): Remove these, or significantly reduce access.
-    public String getApiKey() { return apiKey; }
-    public String getSecretKey() { return secretKey; }
+    String getApiKey() { return apiKey; }
+    String getSecretKey() { return secretKey; }
     public String getPassphrase() { return passphrase; }
+    /** @return {@code true} if this object was returned from {@link api.Credentials#publicOnly()}, false otherwise. */
     public boolean isPublicOnly() { return this == PUBLIC_ONLY; }
-
 }

@@ -21,8 +21,10 @@ public abstract class Market {
     protected final ObjectMapper mapper;
     // TODO(stfinancial): Is this the correct visibility on this?
     protected final String apiKey;
+    protected final Credentials credentials;
 
     public Market(Credentials credentials) {
+        this.credentials = credentials;
         this.apiKey = credentials.getApiKey();
         this.mapper = new ObjectMapper();
         this.httpClient = HttpClients.createDefault();
@@ -39,6 +41,9 @@ public abstract class Market {
 
     // TODO(stfinancial): Does protected here make sense?
     protected abstract MarketResponse sendRequest(MarketRequest request);
+
+    // TODO(stfinancial): Does this make sense?
+    public String getApiKey() { return apiKey; }
 
 //    public static Market getInstance();
 

@@ -29,6 +29,7 @@ public final class KeyManager {
         put("Gdax_l", "/Users/Timothy/Documents/Keys/gdax_key.txt");
         put("Kraken_l", "/Users/Timothy/Documents/Keys/kraken_key.txt");
         put("Bitfinex_l", "/Users/Timothy/Documents/Keys/bitfinex_key.txt");
+        put("Bittrex_l", "/Users/Timothy/Documents/Keys/bittrex_key.txt");
     }});
 
     // TODO(stfinancial): Does it make sense to take in the market as a string or create an enum for it?
