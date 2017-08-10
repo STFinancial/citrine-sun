@@ -26,9 +26,8 @@ public final class Kraken extends Market {
 
     private static final String NAME = "Kraken";
     private static final String ENCODING = "UTF-8";
-
-    // TODO(stfinancial): Make this into a superclass field?
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
+
     private MessageDigest digest;
     private final KrakenData data;
 

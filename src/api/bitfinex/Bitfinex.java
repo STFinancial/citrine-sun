@@ -43,7 +43,6 @@ public final class Bitfinex extends Market {
         long timestamp = System.currentTimeMillis();
         if (args.isPrivate()) {
             String url = args.asUrl(true);
-            System.out.println("Url: " + url);
             httpRequest = new HttpPost(url);
             httpRequest.addHeader("bfx-nonce", String.valueOf(timestamp));
             System.out.println("Nonce: " + String.valueOf(timestamp));

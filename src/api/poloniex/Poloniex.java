@@ -25,13 +25,12 @@ import java.util.HashMap;
 /**
  * Class representing the Poloniex {@code Market}.
  */
-public final class Poloniex extends Market { //implements Tradable {
+public final class Poloniex extends Market {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.
 
     private static final String NAME = "Poloniex";
     private static final String ENCODING = "UTF-8";
     private static final String WAMP_ENDPOINT = "wss://api.poloniex.com";
-
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
 
     // TODO(stfinancial): Initialize in static block?
@@ -41,7 +40,6 @@ public final class Poloniex extends Market { //implements Tradable {
 
     private static HashMap<String, PoloniexQueue> accountQueues = new HashMap<>();
 
-    //    private final PoloniexTrader trader;
     private final PoloniexQueue queue;
 
     // TODO(stfinancial): Switch to static factory method to avoid multiple instances with the same API keys.
@@ -108,17 +106,14 @@ public final class Poloniex extends Market { //implements Tradable {
     @Override
     protected HttpUriRequest constructHttpRequest(RequestArgs args) {
         HttpUriRequest httpRequest;
+        // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
         if (args.isPrivate()) {
-            // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
             httpRequest = new HttpGet(args.asUrl(true));
-            System.out.println("URL: " + args.asUrl(true));
         } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
             // TODO(stfinancial): Not sure this is threadsafe.
             String sign = signer.getHexDigest(args.getQueryString().getBytes());
-//            System.out.println(args.getUrl());
-            // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
             httpRequest = new HttpPost(args.getUri());
             httpRequest.addHeader("Key", apiKey);
             httpRequest.addHeader("Sign", sign);

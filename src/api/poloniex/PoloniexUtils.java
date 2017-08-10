@@ -103,7 +103,7 @@ final class PoloniexUtils {
 //            return TradeType.INVALID;
         }
     }
-    
+
     // TODO(stfinancial): Perhaps optimize by using MarginType.valueOf ... or making MarginType.LONG the else...?
     @Nullable
     static MarginType getMarginTypeFromString(String type) {

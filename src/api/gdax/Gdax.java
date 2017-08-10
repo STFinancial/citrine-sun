@@ -12,9 +12,8 @@ import org.apache.http.entity.StringEntity;
 public final class Gdax extends Market {
     private static final String NAME = "Gdax";
     private static final String WAMP_ENDPOINT = "wss://ws-feed.gdax.com";
-
-    // TODO(stfinancial): Make this into a superclass field?
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA256;
+
     private String passphrase;
 
     public Gdax(Credentials credentials) {
@@ -58,9 +57,7 @@ public final class Gdax extends Market {
                     System.out.println("(" + NAME + ")" + "Invalid HttpRequestType: " + args.getHttpRequestType());
                     return null;
             }
-            // TODO(stfinancial): Will change these names after getting a working implementation.
             String CB_ACCESS_TIMESTAMP = String.valueOf(System.currentTimeMillis() / 1000);
-//            System.out.println("Timestamp: " + CB_ACCESS_TIMESTAMP);
             JsonNode json = args.asJson(mapper);
             System.out.println(json);
             String what;

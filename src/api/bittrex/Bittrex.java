@@ -35,16 +35,13 @@ public final class Bittrex extends Market {
     @Override
     protected HttpUriRequest constructHttpRequest(RequestArgs args) {
         HttpUriRequest httpRequest;
-        System.out.println("Json: " + args.asJson(mapper).toString());
         String url = args.asUrl(true);
-        System.out.println("URL: " + url);
+        // TODO(stfinancial): Should we actually check the httprequesttype?
         if (args.isPrivate()) {
-            // TODO(stfinancial): Check the httprequesttype here as well? Get should only be allowed.
             httpRequest = new HttpGet(url);
             String sign = signer.getHexDigest(url.getBytes());
             httpRequest.addHeader(new BasicHeader("apisign", sign));
         } else {
-            // TODO(stfinancial): Should we actually check the httprequesttype?
             httpRequest = new HttpGet(url);
         }
         return httpRequest;

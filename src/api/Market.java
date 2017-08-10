@@ -20,7 +20,11 @@ import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 
 /**
- * Abstract class for
+ * Abstract class representing an exchange. A {@code Market} takes in a {@link MarketRequest} via {@link Market#processMarketRequest(MarketRequest) processMarketRequest}
+ * and returns a {@link MarketResponse}. The {@code Market} converts the {@code MarketRequest} to a {@link RequestArgs} object
+ * via a {@link RequestRewriter}, which is then converted by the instantiating class into an {@link HttpUriRequest} to interface with the
+ * {@code Market's} website API. The returned {@link JsonNode JsonNode} is then converted to a {@code MarketResponse} via
+ * a {@link ResponseParser} and returned to the client.
  */
 public abstract class Market {
     // TODO(stfinancial): Need to make these non-protected, these are too visible. How can we abstract this stuff away?
@@ -62,12 +66,14 @@ public abstract class Market {
         long timestamp = System.currentTimeMillis();
         String responseString;
         JsonNode jsonResponse;
-        int statusCode = -1; // TODO(stfinancial): Think about how to properly use this error code.
+        int statusCode; // TODO(stfinancial): Think about how to properly use this error code.
 
         final RequestArgs args = requestRewriter.rewriteRequest(request);
         if (credentials.isPublicOnly() && args.isPrivate()) {
+            System.out.println("Private methods cannot be accessed with public only Credentials.");
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
+        System.out.println("Json: " + args.asJson(mapper).toString());
 
         final HttpUriRequest httpRequest = constructHttpRequest(args);
         // TODO(stfinancial): Switch to throws instead, maybe. What do we throw for invalid http type... a general exception?
@@ -75,7 +81,7 @@ public abstract class Market {
         if (httpRequest == null) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST, "Invalid HttpRequestType: " + args.getHttpRequestType()));
         }
-        System.out.println(httpRequest.toString());
+        System.out.println("HttpRequest: " + httpRequest.toString());
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
             statusCode = response.getStatusLine().getStatusCode();
@@ -88,24 +94,20 @@ public abstract class Market {
             e.printStackTrace();
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.CONNECTION_ERROR, e, "Request failed"));
         }
-
         try {
-            try {
-                jsonResponse = mapper.readTree(responseString);
-            } catch (JsonMappingException e) {
-                // TODO(stfinancial): Put some return statements here instead of initializing to null node.
-                if (responseString == null) {
-                    System.out.println("JsonMappingException, null string.");
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse null response string."));
-                } else {
-                    System.out.println("JsonMappingException: " + responseString);
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
-                }
-            } catch (JsonParseException e) {
+            jsonResponse = mapper.readTree(responseString);
+        } catch (JsonMappingException e) {
+            // TODO(stfinancial): Put some return statements here instead of initializing to null node.
+            if (responseString == null) {
+                System.out.println("JsonMappingException, null string.");
+                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse null response string."));
+            } else {
                 System.out.println("JsonMappingException: " + responseString);
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
             }
-
+        } catch (JsonParseException e) {
+            System.out.println("JsonMappingException: " + responseString);
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
         } catch (IOException e) {
             System.out.println("Error occurred while parsing responseString to JsonNode: " + responseString);
             e.printStackTrace();
@@ -113,8 +115,7 @@ public abstract class Market {
         }
         // TODO(stfinancial): Post-processing and add/convert timestamp.
         // TODO(stfinancial): More sophisticated handling of errors codes...
-        boolean isError = statusCode != HttpStatus.SC_OK;
-        if (isError) {
+        if (statusCode != HttpStatus.SC_OK) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
         }
 //        System.out.println(statusCode);
