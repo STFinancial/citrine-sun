@@ -23,14 +23,12 @@ import java.util.*;
  * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Poloniex} into a
  * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class PoloniexResponseParser {
+final class PoloniexResponseParser implements ResponseParser {
     // TODO(stfinancial): We are currently not consistent about whether these methods return a MarketResponse or a specific type of response. Fix this.
 
 
     // TODO(stfinancial): Write a function that takes in a JSON node, and for each element in the node, maps to a list of resulting classes
     // e.g. List<T> mapJSon(JsonNode j, Mapper<JsonNode, T>)
-
-
 
     // TODO(stfinancial): Helper function to create trade from JsonNode.
     // TODO(stfinancial): If we're going to check for a jsonResponse error in every method, do it earlier. Maybe check for success instead?
@@ -41,7 +39,8 @@ final class PoloniexResponseParser {
 //    private static final BigDecimalStringConverter converter = new BigDecimalStringConverter();
 
     // TODO(stfinancial): We need to check to make sure we sent the right kind of command and arguments and make sure to fail on our side if that happens.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         // TODO(stfinancial): Is there a better way to do this, instead of checking the types repeatedly?
         // TODO(stfinancial): Potentially separate public and private methods.
         if (jsonResponse.isNull()) {

@@ -1,9 +1,7 @@
 package api.kraken;
 
-import api.AccountType;
+import api.*;
 import api.Currency;
-import api.CurrencyPair;
-import api.Ticker;
 import api.request.AssetPairRequest;
 import api.request.AssetPairResponse;
 import api.request.*;
@@ -19,7 +17,7 @@ import java.util.*;
  * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Kraken} into a
  * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class KrakenResponseParser {
+final class KrakenResponseParser implements ResponseParser {
     // TODO(stfinancial): NOTE - Kraken treats order Ids and TxIds separately. Txids start with a T and Order Ids start with an O (so it appears).
 
     private final Kraken kraken;
@@ -28,8 +26,8 @@ final class KrakenResponseParser {
         this.kraken = kraken;
     }
 
-    // TODO(stfinancial): Take in isError for now until we switch to using the http response.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         // TODO(stfinancial): Check "error" field to see if the result is an empty array.
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));

@@ -14,9 +14,10 @@ import java.util.*;
  * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Gdax} into a
  * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class GdaxResponseParser {
+final class GdaxResponseParser implements ResponseParser {
 
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }

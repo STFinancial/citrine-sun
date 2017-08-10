@@ -2,6 +2,7 @@ package api.poloniex;
 
 import api.CurrencyPair;
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.*;
 import api.request.tmp_loan.*;
 import api.request.MoveOrderRequest;
@@ -11,7 +12,7 @@ import api.tmp_loan.PrivateLoanOrder;
 /**
  * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Poloniex} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class PoloniexRequestRewriter {
+final class PoloniexRequestRewriter implements RequestRewriter {
     // TODO(stfinancial): Separate into public and private method sections. Easier to debug then.
     // TODO(stfinancial): Need a way to gracefully handle nonce here, probably will set request type and is private before calling the other functions... maybe, then we have a pass a Builder which I don't like.
     private static final String PUBLIC_URI = "https://poloniex.com/public";
@@ -26,7 +27,8 @@ final class PoloniexRequestRewriter {
      * object. Returns {@link RequestArgs#unsupported()} if the request is not supported or cannot be converted to a
      * valid command.
      */
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         // TODO(stfinancial): Could set request type and private in this function.
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);

@@ -1,22 +1,10 @@
 package api.gdax;
 
 import api.*;
-import api.request.MarketRequest;
-import api.request.MarketResponse;
-import api.request.RequestStatus;
-import api.request.StatusType;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
-import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
 
 /**
  * Class representing the Gdax {@code Market}.
@@ -27,45 +15,33 @@ public class Gdax extends Market {
 
     // TODO(stfinancial): Make this into a superclass field?
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA256;
-    private final String passphrase;
-
-    // TODO(stfinancial): Make this interface and move to superclass?
-    private final GdaxRequestRewriter requestRewriter;
-    private final GdaxResponseParser responseParser;
+    private String passphrase;
 
     public Gdax(Credentials credentials) {
         super(credentials);
-        this.passphrase = credentials.getPassphrase();
-        this.signer = new HmacSigner(ALGORITHM, credentials, true);
+        if (!credentials.isPublicOnly()) {
+            this.passphrase = credentials.getPassphrase();
+            this.signer = new HmacSigner(ALGORITHM, credentials, true);
+        }
         this.requestRewriter = new GdaxRequestRewriter();
         this.responseParser = new GdaxResponseParser();
     }
 
     @Override
-    public MarketResponse processMarketRequest(MarketRequest request) {
-        return sendRequest(request);
+    public String getName() {
+        return NAME;
     }
 
     @Override
-    protected MarketResponse sendRequest(MarketRequest request) {
+    public MarketConstants getConstants() {
+        return null;
+    }
+
+    @Override
+    protected HttpUriRequest constructHttpRequest(RequestArgs args) {
         HttpUriRequest httpRequest;
-        String responseString;
-        JsonNode jsonResponse;
-        long timestamp = System.currentTimeMillis();
-
-        RequestArgs args = requestRewriter.rewriteRequest(request);
-        if (args.isUnsupported()) {
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
-        }
-
-        int statusCode = -1;
         String url = args.asUrl(true);
-        if (!args.isPrivate()) {
-            if (args.getHttpRequestType() != RequestArgs.HttpRequestType.GET) {
-                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, "Public requests must use HttpGet. Type was: " + args.getHttpRequestType().toString().toUpperCase()));
-            }
-            httpRequest = new HttpGet(url);
-        } else if (!credentials.isPublicOnly()) {
+        if (args.isPrivate()) {
             switch (args.getHttpRequestType()) {
                 case GET:
                     httpRequest = new HttpGet(url);
@@ -80,7 +56,7 @@ public class Gdax extends Market {
                     break;
                 default:
                     System.out.println("(" + NAME + ")" + "Invalid HttpRequestType: " + args.getHttpRequestType());
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST,"Invalid HttpRequestType: " + args.getHttpRequestType()));
+                    return null;
             }
             // TODO(stfinancial): Will change these names after getting a working implementation.
             String CB_ACCESS_TIMESTAMP = String.valueOf(System.currentTimeMillis() / 1000);
@@ -103,58 +79,12 @@ public class Gdax extends Market {
             httpRequest.addHeader("CB-ACCESS-TIMESTAMP", CB_ACCESS_TIMESTAMP);
             httpRequest.addHeader("CB-ACCESS-PASSPHRASE", passphrase);
         } else {
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
-        }
-        try {
-            CloseableHttpResponse response = httpClient.execute(httpRequest);
-            statusCode = response.getStatusLine().getStatusCode();
-            timestamp = System.currentTimeMillis();
-            HttpEntity entity = response.getEntity();
-            responseString = EntityUtils.toString(entity);
-            EntityUtils.consume(entity);
-        } catch (IOException e) {
-            System.out.println("IOException occurred while executing HTTP request.");
-            e.printStackTrace();
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.CONNECTION_ERROR, e, "Request failed"));
-        }
-
-        try {
-            try {
-                jsonResponse = mapper.readTree(responseString);
-            } catch (JsonMappingException e) {
-                if (responseString == null) {
-                    System.out.println("JsonMappingException, null string.");
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse null response string."));
-                } else {
-                    System.out.println("JsonMappingException: " + responseString);
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
-                }
-            } catch (JsonParseException e) {
-                System.out.println("JsonMappingException: " + responseString);
-                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
+            if (args.getHttpRequestType() != RequestArgs.HttpRequestType.GET) {
+                System.out.println("Public requests must use HttpGet. Type was: " + args.getHttpRequestType().toString().toUpperCase());
+                return null;
             }
-        } catch (IOException e) {
-            System.out.println("Error occurred while parsing responseString to JsonNode: " + responseString);
-            e.printStackTrace();
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "Unable to parse response as JSON: " + responseString));
+            httpRequest = new HttpGet(url);
         }
-        // TODO(stfinancial): Post-processing and add/convert timestamp.
-        // TODO(stfinancial): More sophisticated handling of errors codes...
-        boolean isError = statusCode != HttpStatus.SC_OK;
-        if (isError) {
-            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
-        }
-//        System.out.println(statusCode);
-        return responseParser.constructMarketResponse(jsonResponse, request, timestamp);
-    }
-
-    @Override
-    public String getName() {
-        return NAME;
-    }
-
-    @Override
-    public MarketConstants getConstants() {
-        return null;
+        return httpRequest;
     }
 }

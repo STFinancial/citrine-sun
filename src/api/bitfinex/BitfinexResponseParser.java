@@ -1,9 +1,6 @@
 package api.bitfinex;
 
-import api.AccountType;
-import api.Currency;
-import api.CurrencyPair;
-import api.Ticker;
+import api.*;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
@@ -18,10 +15,11 @@ import java.util.Map;
  * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Bitfinex} into a
  * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class BitfinexResponseParser {
+final class BitfinexResponseParser implements ResponseParser {
     // TODO(stfinancial): This logic is basically shared with all other markets, maybe reuse it somehow.
     // TODO(stfinancial): Have constructMarketResponse in Market, and have ResponseParser be an interface, call the respective methods.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }

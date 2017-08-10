@@ -2,15 +2,17 @@ package api.gdax;
 
 import api.AccountType;
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.*;
 
 /**
  * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Gdax} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class GdaxRequestRewriter {
+final class GdaxRequestRewriter implements RequestRewriter {
     private static final String API_ENDPOINT = "https://api.gdax.com";
 
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof CancelRequest) {

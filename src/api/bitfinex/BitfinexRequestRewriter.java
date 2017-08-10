@@ -1,15 +1,17 @@
 package api.bitfinex;
 
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.*;
 
 /**
  * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Bitfinex} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class BitfinexRequestRewriter {
+final class BitfinexRequestRewriter implements RequestRewriter {
     private static final String API_ENDPOINT = "https://api.bitfinex.com";
 
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof OrderBookRequest) {

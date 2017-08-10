@@ -2,31 +2,21 @@ package api.poloniex;
 
 import api.*;
 import api.QueueStrategy;
-import api.request.*;
 import api.wamp.WampClientWrapper;
 import api.wamp.WampSubscription;
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.NullNode;
-import org.apache.http.HttpEntity;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.methods.HttpUriRequest;
-import org.apache.http.util.EntityUtils;
 import rx.functions.Action1;
 import ws.wamp.jawampa.ApplicationError;
 import ws.wamp.jawampa.WampClientBuilder;
 import ws.wamp.jawampa.connection.IWampConnectorProvider;
 import ws.wamp.jawampa.transport.netty.NettyWampClientConnectorProvider;
 
-import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
-import java.util.concurrent.PriorityBlockingQueue;
-import java.util.concurrent.TimeUnit;
 
 // TODO(stfinancial): Possible alternative way of defining this. Tradable, Lendable, etc. interfaces.
 
@@ -38,7 +28,7 @@ import java.util.concurrent.TimeUnit;
 public final class Poloniex extends Market { //implements Tradable {
     // TODO(stfinancial): THREAD LOCAL FOR THREAD SPECIFIC OBJECTS.
 
-    private static final String MARKET_NAME = "Poloniex";
+    private static final String NAME = "Poloniex";
     private static final String ENCODING = "UTF-8";
     private static final String WAMP_ENDPOINT = "wss://api.poloniex.com";
 
@@ -53,14 +43,14 @@ public final class Poloniex extends Market { //implements Tradable {
 
     //    private final PoloniexTrader trader;
     private final PoloniexQueue queue;
-    private final PoloniexRequestRewriter requestRewriter;
-    private final PoloniexResponseParser responseParser;
 
     // TODO(stfinancial): Switch to static factory method to avoid multiple instances with the same API keys.
     // Need to avoid IP bans by ensuring that a single IP can have a single market instance.
     public Poloniex(Credentials credentials) {
         super(credentials);
-        this.signer = new HmacSigner(ALGORITHM, credentials, false);
+        if (!credentials.isPublicOnly()) {
+            this.signer = new HmacSigner(ALGORITHM, credentials, false);
+        }
         this.requestRewriter = new PoloniexRequestRewriter();
         this.responseParser = new PoloniexResponseParser();
 //        this.trader = new PoloniexTrader(this);
@@ -87,20 +77,9 @@ public final class Poloniex extends Market { //implements Tradable {
         }
     }
 
-    // TODO(stfinancial): Need to at least specify that we will return MarketResponse on failure instead of the expected type.
-    @Override
-    public MarketResponse processMarketRequest(MarketRequest request) {
-        // TODO(stfinancial): How do we ensure that we return the correct result for this?
-        return sendRequest(request);
-//        queue.offer(action);
-//        if (action instanceof TradeRequest) {
-//            return trader.placeOrder((TradeRequest) action);
-//        }
-    }
-
     @Override
     public String getName() {
-        return MARKET_NAME;
+        return NAME;
     }
 
     // TODO(stfinancial): Why this method instead of a request?
@@ -127,22 +106,13 @@ public final class Poloniex extends Market { //implements Tradable {
     }
 
     @Override
-    protected MarketResponse sendRequest(MarketRequest request) {
+    protected HttpUriRequest constructHttpRequest(RequestArgs args) {
         HttpUriRequest httpRequest;
-        String responseString;
-        JsonNode jsonResponse;
-        long timestamp = System.currentTimeMillis();
-
-        RequestArgs args = requestRewriter.rewriteRequest(request);
-        if (args.isUnsupported()) {
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
-        }
-
-        if (!args.isPrivate()) {
+        if (args.isPrivate()) {
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
             httpRequest = new HttpGet(args.asUrl(true));
             System.out.println("URL: " + args.asUrl(true));
-        } else if (!credentials.isPublicOnly()) {
+        } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
             // TODO(stfinancial): Not sure this is threadsafe.
@@ -158,47 +128,11 @@ public final class Poloniex extends Market { //implements Tradable {
             } catch (UnsupportedEncodingException e) {
                 System.out.println("Unsupported encoding: " + ENCODING);
                 e.printStackTrace();
-                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
+                return null;
+                // TODO(stfinancial): Throw an exception instead.
+//                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
             }
-        } else {
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
-        try {
-            CloseableHttpResponse response = httpClient.execute(httpRequest);
-            timestamp = System.currentTimeMillis();
-            HttpEntity entity = response.getEntity();
-            responseString = EntityUtils.toString(entity);
-            EntityUtils.consume(entity);
-        } catch (IOException e) {
-            System.out.println("IOException occurred while executing HTTP request: " + httpRequest.toString());
-            e.printStackTrace();
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.CONNECTION_ERROR, e, "Request failed"));
-        }
-
-        try {
-            try {
-                jsonResponse = mapper.readTree(responseString);
-            } catch (JsonMappingException e) {
-                // TODO(stfinancial): Put some return statements here instead of initializing to null node.
-                if (responseString == null) {
-                    System.out.println("JsonMappingException, null string.");
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse null response string."));
-                } else {
-                    System.out.println("JsonMappingException: " + responseString);
-                    return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
-                }
-            } catch (JsonParseException e) {
-                System.out.println("JsonMappingException: " + responseString);
-                return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "JsonMappingException while trying to parse response string: " + responseString));
-            }
-
-        } catch (IOException e) {
-            System.out.println("Error occurred while parsing responseString to JsonNode: " + responseString);
-            e.printStackTrace();
-            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE, e, "Unable to parse response as JSON: " + responseString));
-        }
-        // TODO(stfinancial): Post-processing and add/convert timestamp.
-
-        return responseParser.constructMarketResponse(jsonResponse, request, timestamp);
+        return httpRequest;
     }
 }

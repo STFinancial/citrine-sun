@@ -2,13 +2,14 @@ package api.kraken;
 
 import api.CurrencyPair;
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.AssetPairRequest;
 import api.request.*;
 
 /**
  * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Kraken} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class KrakenRequestRewriter {
+final class KrakenRequestRewriter implements RequestRewriter {
     private static final String API_ENDPOINT = "https://api.kraken.com";
     private final Kraken kraken;
 
@@ -17,7 +18,8 @@ final class KrakenRequestRewriter {
         this.kraken = kraken;
     }
 
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof OrderBookRequest) {

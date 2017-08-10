@@ -2,13 +2,14 @@ package api.bittrex;
 
 import api.AccountType;
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.*;
 import api.tmp_trade.TradeType;
 
 /**
  * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Bittrex} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class BittrexRequestRewriter {
+final class BittrexRequestRewriter implements RequestRewriter {
     private static final String API_ENDPOINT = "https://bittrex.com/api/v1.1";
     private final Bittrex bittrex;
 
@@ -16,7 +17,8 @@ final class BittrexRequestRewriter {
         this.bittrex = bittrex;
     }
 
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         // TODO(stfinancial): For Ticker request, can call getmarketsummaries if more than 1 ticker is requested.
 
         if (request instanceof TradeRequest) {

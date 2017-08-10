@@ -1,9 +1,6 @@
 package api.bittrex;
 
-import api.AccountType;
-import api.Currency;
-import api.CurrencyPair;
-import api.Ticker;
+import api.*;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeOrder;
@@ -19,9 +16,10 @@ import java.util.Map;
  * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Bittrex} into a
  * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class BittrexResponseParser {
+final class BittrexResponseParser implements ResponseParser {
 
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (!jsonResponse.get("success").asBoolean()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("message").asText("")));
         }
