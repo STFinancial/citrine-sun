@@ -96,7 +96,7 @@ public final class Bitfinex extends Market {
 //            ((HttpPost) httpRequest).setEntity(new StringEntity("{}", ContentType.APPLICATION_JSON));
 //            try { ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(Arrays.asList(new NameValuePair[]{new BasicNameValuePair("json", "{}")}), "UTF-8")); } catch (Exception e) {};
 //            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
-            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_FORM_URLENCODED));
+            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson(mapper).toString(), ContentType.APPLICATION_FORM_URLENCODED));
         } else {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }

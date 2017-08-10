@@ -4,11 +4,9 @@ import api.AccountType;
 import api.Currency;
 
 /**
- * Created by Zarathustra on 3/24/2017.
+ * Transfer a {@link Currency} from one account to the other.
  */
 public final class TransferBalanceRequest extends MarketRequest {
-    // TODO(stfinancial): Check that this is not a poloniex specific thing.
-
     private final Currency currency;
     private final double amount;
     private final AccountType from;
@@ -25,16 +23,12 @@ public final class TransferBalanceRequest extends MarketRequest {
     public Currency getCurrency() {
         return currency;
     }
-
     public double getAmount() {
         return amount;
     }
-
-    // TODO(stfinancial): Does this naming make sense? Or is getFrom and getTo better ... ?
     public AccountType from() {
         return from;
     }
-
     public AccountType to() {
         return to;
     }

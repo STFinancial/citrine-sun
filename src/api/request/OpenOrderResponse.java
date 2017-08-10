@@ -34,12 +34,10 @@ public class OpenOrderResponse extends MarketResponse {
         if (ordersByKey == null) {
             ordersByKey = new HashMap<>();
             orders.forEach((pair, orderList) -> {
-                orderList.forEach((order) -> {
-                    ordersByKey.put(order.getOrderId(), order);
-                });
+                orderList.forEach((order) -> ordersByKey.put(order.getOrderId(), order));
             });
+            ordersByKey = Collections.unmodifiableMap(ordersByKey); // Does this make sense?
         }
-        // TODO(stfinancial): Set it to be unmodifiable instead.
-        return Collections.unmodifiableMap(ordersByKey);
+        return ordersByKey;
     }
 }

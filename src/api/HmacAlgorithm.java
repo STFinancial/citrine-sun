@@ -4,7 +4,6 @@ package api;
  * Specifies an HMAC algorithm for use with the Mac object.
  */
 public enum HmacAlgorithm {
-    // TODO(stfinancial): This bit of abstraction may be a bit much.
     HMACMD5("HmacMD5"),
     HMACSHA1("HmacSHA1"),
     HMACSHA256("HmacSHA256"),

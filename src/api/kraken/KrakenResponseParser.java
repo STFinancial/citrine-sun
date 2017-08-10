@@ -168,16 +168,16 @@ final class KrakenResponseParser {
         Map<String, CurrencyPair> assetPairNames = new HashMap<>();
         Map<CurrencyPair, String> assetPairKeys = new HashMap<>();
         jsonResponse.get("result").fields().forEachRemaining((assetPair)->{
-            Currency base = Currency.getCanonicalRepresentation(assetPair.getValue().get("base").asText());
+            Currency base = Currency.getCanonicalName(assetPair.getValue().get("base").asText());
             if (base == null) {
-                base = Currency.getCanonicalRepresentation(assetPair.getValue().get("base").asText().substring(1));
+                base = Currency.getCanonicalName(assetPair.getValue().get("base").asText().substring(1));
             }
             if (base == null) {
                 System.out.println("Could not find base currency for: " + assetPair.getValue().get("base").asText());
                 return;
             }
             // Remove the currency namespace
-            Currency quote = Currency.getCanonicalRepresentation(assetPair.getValue().get("quote").asText().substring(1));
+            Currency quote = Currency.getCanonicalName(assetPair.getValue().get("quote").asText().substring(1));
             if (quote == null) {
                 System.out.println("Could not find quote currency for: " + assetPair.getValue().get("quote").asText());
                 return;

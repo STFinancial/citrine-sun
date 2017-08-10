@@ -15,7 +15,7 @@ public final class FeeResponse extends MarketResponse {
 
     public FeeResponse(Map<CurrencyPair, FeeInfo> feeInfo, JsonNode jsonResponse, MarketRequest request, long timestamp, RequestStatus status) {
         super(jsonResponse, request, timestamp, status);
-        this.feeInfo = feeInfo;
+        this.feeInfo = Collections.unmodifiableMap(feeInfo);
     }
 
 //    // TODO(stfinancial): Need a better way to do this. Another option is forcing
@@ -27,8 +27,7 @@ public final class FeeResponse extends MarketResponse {
 //    // TODO(stfinancial): Come up with a better way.
 
     public Map<CurrencyPair, FeeInfo> getFeeInfo() {
-        // TODO(stfinancial): Make it an unmodifiable map in the constructor? And elsewhere..
-        return Collections.unmodifiableMap(feeInfo);
+        return feeInfo;
     }
 
     public FeeInfo getFeeInfo(CurrencyPair pair) {

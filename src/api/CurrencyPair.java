@@ -26,7 +26,6 @@ public final class CurrencyPair {
         }
     }
 
-    // TODO(stfinancial): Go through and rename all references of this to quote and base currency. This avoids ambiguity when markets have different styles (poloniex, bitfinex, gdax).S
     private final Currency base;
     private final Currency quote;
 
@@ -62,10 +61,6 @@ public final class CurrencyPair {
         return pairList;
     }
 
-//    /**
-//     * Constructs a string representation of this
-//     * @return
-//     */
     @Override
     public String toString() {
         return base.toString() + "-" + quote.toString();

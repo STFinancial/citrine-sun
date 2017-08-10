@@ -85,7 +85,7 @@ final class BitfinexResponseParser {
         accounts.put(AccountType.LOAN, new HashMap<>());
         accounts.put(AccountType.MARGIN, new HashMap<>());
         jsonResponse.forEach((b) -> {
-            accounts.get(BitfinexUtils.parseAccountType(b.get(0).asText())).put(Currency.getCanonicalRepresentation(b.get(1).asText()), b.get(4).asDouble(0.0));
+            accounts.get(BitfinexUtils.parseAccountType(b.get(0).asText())).put(Currency.getCanonicalName(b.get(1).asText()), b.get(4).asDouble(0.0));
         });
         return new AccountBalanceResponse(accounts, jsonResponse, request, timestamp, RequestStatus.success());
     }

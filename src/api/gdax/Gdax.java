@@ -73,7 +73,7 @@ public class Gdax extends Market {
                 case POST:
                     httpRequest = new HttpPost(url);
                     // TODO(stfinancial): Check that this is actually needed.
-                    ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
+                    ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson(mapper).toString(), ContentType.APPLICATION_JSON));
                     break;
                 case DELETE:
                     httpRequest = new HttpDelete(url);
@@ -85,7 +85,7 @@ public class Gdax extends Market {
             // TODO(stfinancial): Will change these names after getting a working implementation.
             String CB_ACCESS_TIMESTAMP = String.valueOf(System.currentTimeMillis() / 1000);
 //            System.out.println("Timestamp: " + CB_ACCESS_TIMESTAMP);
-            JsonNode json = args.asJson();
+            JsonNode json = args.asJson(mapper);
             System.out.println(json);
             String what;
             if (args.getHttpRequestType() != RequestArgs.HttpRequestType.POST || json.isNull()) {
@@ -95,7 +95,7 @@ public class Gdax extends Market {
                     what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath();
                 }
             } else {
-                what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + args.asJson().toString();
+                what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + args.asJson(mapper).toString();
             }
             System.out.println("what: " + what);
             httpRequest.addHeader("CB-ACCESS-KEY", apiKey);

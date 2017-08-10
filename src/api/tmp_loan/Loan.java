@@ -12,7 +12,6 @@ public final class Loan {
 
     // TODO(stfinancial): Another constructor/static factory method for double
 
-    // TODO(stfinancial): Consider if these actually should be final.
     private final double amount;
     private final double rate; // TODO(stfinancial): Will this continue to be rate per day, or normalized somehow?
     private final Currency currency;

@@ -69,7 +69,7 @@ final class KrakenUtils {
     }
 
     static Currency parseCurrencyString(String currency) {
-        return Currency.getCanonicalRepresentation(currency.substring(1));
+        return Currency.getCanonicalName(currency.substring(1));
     }
 
     // TODO(stfinancial): These should be created at compile time if possible.

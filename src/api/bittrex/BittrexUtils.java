@@ -42,7 +42,7 @@ final class BittrexUtils {
             return null;
         }
         // Bittrex API does not conform to the CurrencyPair representation standard.
-        return CurrencyPair.of(Currency.getCanonicalRepresentation(currencies[1]), Currency.getCanonicalRepresentation(currencies[0]));
+        return CurrencyPair.of(Currency.getCanonicalName(currencies[1]), Currency.getCanonicalName(currencies[0]));
     }
 
     static long getTimestampFromBittrexTimestamp(String bittrexTimestamp) {

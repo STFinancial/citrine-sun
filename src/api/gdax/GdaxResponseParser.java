@@ -105,9 +105,9 @@ final class GdaxResponseParser {
         // TODO(stfinancial): Maybe make a Balance class that has available and total balances as well as other info.
         jsonResponse.forEach((balance) -> {
             if (balance.has("margin_enabled") && balance.get("margin_enabled").asBoolean()) {
-                marginBalances.put(Currency.getCanonicalRepresentation(balance.get("currency").asText()), balance.get("available").asDouble());
+                marginBalances.put(Currency.getCanonicalName(balance.get("currency").asText()), balance.get("available").asDouble());
             } else {
-                exchangeBalances.put(Currency.getCanonicalRepresentation(balance.get("currency").asText()), balance.get("available").asDouble());
+                exchangeBalances.put(Currency.getCanonicalName(balance.get("currency").asText()), balance.get("available").asDouble());
             }
         });
         balances.put(AccountType.EXCHANGE, exchangeBalances);
@@ -159,7 +159,7 @@ final class GdaxResponseParser {
         // TODO(stfinancial): Create the map to market name.
         List<CurrencyPair> assets = new ArrayList<>();
         jsonResponse.forEach((assetPair) -> {
-            assets.add(CurrencyPair.of(Currency.getCanonicalRepresentation(assetPair.get("base_currency").asText()), Currency.getCanonicalRepresentation(assetPair.get("quote_currency").asText())));
+            assets.add(CurrencyPair.of(Currency.getCanonicalName(assetPair.get("base_currency").asText()), Currency.getCanonicalName(assetPair.get("quote_currency").asText())));
         });
         return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }

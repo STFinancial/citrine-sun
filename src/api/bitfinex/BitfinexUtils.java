@@ -17,7 +17,7 @@ final class BitfinexUtils {
         // TODO(stfinancial): Ignore the 'f' for now.
         String base = pair.substring(1, 4);
         String quote = pair.substring(4);
-        return CurrencyPair.of(Currency.getCanonicalRepresentation(base), Currency.getCanonicalRepresentation(quote));
+        return CurrencyPair.of(Currency.getCanonicalName(base), Currency.getCanonicalName(quote));
     }
 
     static String formatCurrencyPair(CurrencyPair pair) {

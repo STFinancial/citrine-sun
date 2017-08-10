@@ -61,7 +61,7 @@ public class Bittrex extends Market {
         JsonNode jsonResponse;
         int statusCode = -1; // TODO(stfinancial): Think about how to properly use this error code.
         final RequestArgs args = requestRewriter.rewriteRequest(request);
-        System.out.println("Json: " + args.asJson().toString());
+        System.out.println("Json: " + args.asJson(mapper).toString());
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }

@@ -16,7 +16,6 @@ import api.tmp_trade.Trade;
 import api.tmp_trade.TradeOrder;
 import api.tmp_trade.TradeType;
 import com.fasterxml.jackson.databind.JsonNode;
-import javafx.util.converter.BigDecimalStringConverter;
 
 import java.util.*;
 
@@ -120,9 +119,9 @@ final class PoloniexResponseParser {
         jsonResponse.fields().forEachRemaining((offers) -> {
             List<PrivateLoanOrder> orders = new LinkedList<>();
             offers.getValue().forEach((offer) -> {
-                orders.add(new PrivateLoanOrder(new Loan(offer.get("amount").asDouble(), offer.get("rate").asDouble(), Currency.getCanonicalRepresentation(offers.getKey()), LoanType.OFFER), offer.get("id").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(offer.get("date").asText()), offer.get("duration").asInt(), offer.get("autoRenew").asBoolean()));
+                orders.add(new PrivateLoanOrder(new Loan(offer.get("amount").asDouble(), offer.get("rate").asDouble(), Currency.getCanonicalName(offers.getKey()), LoanType.OFFER), offer.get("id").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(offer.get("date").asText()), offer.get("duration").asInt(), offer.get("autoRenew").asBoolean()));
             });
-            offersMap.put(Currency.getCanonicalRepresentation(offers.getKey()), orders);
+            offersMap.put(Currency.getCanonicalName(offers.getKey()), orders);
         });
         return new GetPrivateLoanOffersResponse(offersMap, jsonResponse, request, timestamp, RequestStatus.success());
     }
@@ -248,14 +247,14 @@ final class PoloniexResponseParser {
         if (request.getType() == AccountType.MARGIN || request.getType() == null) {
             HashMap<Currency, Double> marginBalances = new HashMap<>();
             jsonResponse.get("margin").fields().forEachRemaining((entry)->{
-                marginBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
+                marginBalances.put(Currency.getCanonicalName(entry.getKey()), entry.getValue().asDouble());
             });
             balances.put(AccountType.MARGIN, marginBalances);
         }
         if (request.getType() == AccountType.EXCHANGE || request.getType() == null) {
             HashMap<Currency, Double> exchangeBalances = new HashMap<>();
             jsonResponse.get("exchange").fields().forEachRemaining((entry)->{
-                exchangeBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
+                exchangeBalances.put(Currency.getCanonicalName(entry.getKey()), entry.getValue().asDouble());
             });
             balances.put(AccountType.EXCHANGE, exchangeBalances);
         }
@@ -264,7 +263,7 @@ final class PoloniexResponseParser {
             HashMap<Currency, Double> loanBalances = new HashMap<>();
             jsonResponse.get("lending").fields().forEachRemaining((entry)->{
 //                System.out.println(entry.toString());
-                loanBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
+                loanBalances.put(Currency.getCanonicalName(entry.getKey()), entry.getValue().asDouble());
             });
             balances.put(AccountType.LOAN, loanBalances);
 //            for (Map.Entry<Currency, Double> e : loanBalances.entrySet()) {
@@ -357,8 +356,8 @@ final class PoloniexResponseParser {
             }
 //            System.out.println(pair.toString());
 
-            String primaryString = PoloniexUtils.getCurrencyString(pair.getBase());
-            double baseVolume = volume.getValue().get(primaryString).asDouble();
+            String baseString = PoloniexUtils.getCurrencyString(pair.getBase());
+            double baseVolume = volume.getValue().get(baseString).asDouble();
             String quoteString = PoloniexUtils.getCurrencyString(pair.getQuote());
             double quoteVolume = volume.getValue().get(quoteString).asDouble();
 
@@ -379,7 +378,7 @@ final class PoloniexResponseParser {
         // TODO(stfinancial): Implement this.
         List<CompletedLoan> completedLoans = new LinkedList<>();
         jsonResponse.forEach((loan) -> {
-            CompletedLoan.Builder builder = new CompletedLoan.Builder(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), Currency.getCanonicalRepresentation(loan.get("currency").asText()), LoanType.OFFER), loan.get("id").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("open").asText()), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("close").asText()), loan.get("fee").asDouble());
+            CompletedLoan.Builder builder = new CompletedLoan.Builder(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), Currency.getCanonicalName(loan.get("currency").asText()), LoanType.OFFER), loan.get("id").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("open").asText()), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("close").asText()), loan.get("fee").asDouble());
             builder.duration(loan.get("duration").asDouble()).earned(loan.get("earned").asDouble()).interest(loan.get("interest").asDouble());
             completedLoans.add(builder.build());
         });
@@ -401,7 +400,7 @@ final class PoloniexResponseParser {
         System.out.println(jsonResponse);
         Map<Currency, List<ActiveLoan>> provided = new HashMap<>();
         jsonResponse.get("provided").elements().forEachRemaining((loan) -> {
-            Currency c = Currency.getCanonicalRepresentation(loan.get("currency").asText());
+            Currency c = Currency.getCanonicalName(loan.get("currency").asText());
             if (!provided.containsKey(c)) {
                 provided.put(c, new ArrayList<>());
             }
@@ -409,7 +408,7 @@ final class PoloniexResponseParser {
         });
         Map<Currency, List<ActiveLoan>> used = new HashMap<>();
         jsonResponse.get("used").elements().forEachRemaining((loan) -> {
-            Currency c = Currency.getCanonicalRepresentation(loan.get("currency").asText());
+            Currency c = Currency.getCanonicalName(loan.get("currency").asText());
             if (!used.containsKey(c)) {
                 used.put(c, new ArrayList<>());
             }

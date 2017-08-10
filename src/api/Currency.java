@@ -147,7 +147,7 @@ public enum Currency {
     }
 
     // TOOD(stfinancial): I'm not really certain this makes a lot of sense. Shouldn't this be done inside the market?
-    // TODO(stfinancial): Shorter name to improve readability of entire program. Maybe fromString?
+    // TODO(stfinancial): Maybe fromString?
     /**
      * A {@link Currency} may have different representations on different {@link Market Markets}. For example,
      * some sites use "XBT" for Bitcoin while others use "BTC". To maintain market agnostic currency representations,
@@ -156,8 +156,7 @@ public enum Currency {
      * @return The Currency enum corresponding to this alias name, null if the name does not correspond to a Currency.
      */
     @Nullable
-    public static Currency getCanonicalRepresentation(String alias) {
-        // TODO(stfinancial): Does this make sense, or should this be moved to a Market level thing?
+    public static Currency getCanonicalName(String alias) {
 //        System.out.println(alias);
         return ALIAS_MAP.get(alias);
     }

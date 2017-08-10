@@ -12,9 +12,9 @@ import java.io.IOException;
  * Contains the API key, Secret key, and maybe password for accessing a {@link Market Market's} API.
  */
 public class Credentials {
-    // TODO(stfinancial): How is this actually going to be checked in the Market class?
     private static final Credentials PUBLIC_ONLY = new Credentials("", "");
     // TODO(stfinancial): Support for separate market credentials (maybe)... this may clash with having multiple accounts per exchange.
+    // TODO(stfinancial): Support for multiple Credentials per single Market account.
 
     // TODO(stfinancial): Likely move this into a separate package with the signer interface (?) at which point we can perhaps better encapsulate.
     private final String apiKey;

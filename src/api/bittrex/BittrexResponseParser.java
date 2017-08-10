@@ -93,7 +93,7 @@ final class BittrexResponseParser {
     private MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         Map<Currency, Double> exchangeBalances = new HashMap<>();
         jsonResponse.get("result").elements().forEachRemaining((balance) -> {
-            exchangeBalances.put(Currency.getCanonicalRepresentation(balance.get("Currency").asText()), balance.get("Balance").asDouble(0.0));
+            exchangeBalances.put(Currency.getCanonicalName(balance.get("Currency").asText()), balance.get("Balance").asDouble(0.0));
         });
         return new AccountBalanceResponse(new HashMap<AccountType, Map<Currency, Double>>(){{ put(AccountType.EXCHANGE, exchangeBalances); }}, jsonResponse, request, timestamp, RequestStatus.success());
     }

@@ -83,7 +83,7 @@ final class GdaxUtils {
             return null;
         }
         // TODO(stfinancial): Make sure that this is right.
-        return CurrencyPair.of(Currency.getCanonicalRepresentation(currencies[0]), Currency.getCanonicalRepresentation(currencies[1]));
+        return CurrencyPair.of(Currency.getCanonicalName(currencies[0]), Currency.getCanonicalName(currencies[1]));
     }
 
     /**
