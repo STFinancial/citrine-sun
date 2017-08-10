@@ -20,6 +20,9 @@ final class BittrexResponseParser implements ResponseParser {
 
     @Override
     public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+        if (jsonResponse.isNull()) {
+            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
+        }
         if (!jsonResponse.get("success").asBoolean()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("message").asText("")));
         }
@@ -75,7 +78,7 @@ final class BittrexResponseParser implements ResponseParser {
             if (!orders.containsKey(pair)) {
                 orders.put(pair, new ArrayList<>());
             }
-            orders.get(pair).add(new TradeOrder(new Trade(order.get("Quantity").asDouble(), order.get("Limit").asDouble(), pair, BittrexUtils.getTradeTypeFromString(order.get("OrderType").asText())), order.get("OrderUuid").asText(), BittrexUtils.getTimestampFromBittrexTimestamp(order.get("Opened").asText()), false));
+            orders.get(pair).add(new TradeOrder(new Trade(order.get("Quantity").asDouble(), order.get("Limit").asDouble(), pair, BittrexUtils.getTradeTypeFromString(order.get("OrderType").asText())), order.get("OrderUuid").asText(), BittrexUtils.convertTimestamp(order.get("Opened").asText()), false));
         });
         return new OpenOrderResponse(orders, jsonResponse, request, timestamp, RequestStatus.success());
     }

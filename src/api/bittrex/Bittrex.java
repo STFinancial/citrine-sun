@@ -8,7 +8,7 @@ import org.apache.http.message.BasicHeader;
 /**
  *  Class representing the Bittrex {@code Market}.
  */
-public class Bittrex extends Market {
+public final class Bittrex extends Market {
     private static final String NAME = "Bittrex";
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA512;
 

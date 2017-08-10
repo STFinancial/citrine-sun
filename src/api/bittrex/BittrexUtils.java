@@ -45,7 +45,12 @@ final class BittrexUtils {
         return CurrencyPair.of(Currency.getCanonicalName(currencies[1]), Currency.getCanonicalName(currencies[0]));
     }
 
-    static long getTimestampFromBittrexTimestamp(String bittrexTimestamp) {
+    /**
+     * Converts a timestamp {@code String} as returned by {@link Bittrex} into a UNIX timestamp.
+     * @param bittrexTimestamp The timestamp {@code String} as returned by {@code Bittrex}.
+     * @return The equivalent UNIX timestamp.
+     */
+    static long convertTimestamp(String bittrexTimestamp) {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().append(DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"))).appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true).toFormatter();
         LocalDateTime d = LocalDateTime.from(formatter.parse(bittrexTimestamp));
         return d.atZone(ZoneOffset.UTC).toEpochSecond();

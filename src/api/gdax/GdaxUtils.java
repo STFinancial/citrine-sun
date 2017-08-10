@@ -67,7 +67,12 @@ final class GdaxUtils {
         }
     }
 
-    static long getTimestampFromGdaxTimestamp(String gdaxTimestamp) {
+    /**
+     * Converts a timestamp {@code String} as returned by {@link Gdax} into a UNIX timestamp.
+     * @param gdaxTimestamp The timestamp {@code String} as returned by {@code Gdax}.
+     * @return The equivalent UNIX timestamp.
+     */
+    static long convertTimestamp(String gdaxTimestamp) {
         DateTimeFormatter formatter = new DateTimeFormatterBuilder().append(DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"))).appendFraction(ChronoField.MICRO_OF_SECOND, 0, 6, true).append(DateTimeFormatter.ofPattern("X").withZone(ZoneId.of("UTC"))).toFormatter();
         LocalDateTime d = LocalDateTime.from(formatter.parse(gdaxTimestamp));
         return d.atZone(ZoneOffset.UTC).toEpochSecond();

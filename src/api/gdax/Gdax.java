@@ -9,7 +9,7 @@ import org.apache.http.entity.StringEntity;
 /**
  * Class representing the Gdax {@code Market}.
  */
-public class Gdax extends Market {
+public final class Gdax extends Market {
     private static final String NAME = "Gdax";
     private static final String WAMP_ENDPOINT = "wss://ws-feed.gdax.com";
 

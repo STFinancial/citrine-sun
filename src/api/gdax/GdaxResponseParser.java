@@ -85,7 +85,7 @@ final class GdaxResponseParser implements ResponseParser {
             // TODO(stfinancial): Clean this up, refactor to utils class for constructing trade from json
             // TODO(stfinancial): See if different markets need to have different interpretations of the fee parameter.
             // TODO(stfinancial): Make sure created_at means what we think it means.
-            trades.add(new CompletedTrade.Builder(new Trade(jsonResponse.get("amount").asDouble(), jsonResponse.get("price").asDouble(), GdaxUtils.parseCurrencyPair(jsonResponse.get("product_id").asText()), GdaxUtils.getTradeTypeFromString(jsonResponse.get("side").asText())), jsonResponse.get("trade_id").asText(), GdaxUtils.getTimestampFromGdaxTimestamp(jsonResponse.get("created_at").asText())).fee(jsonResponse.get("fee").asDouble()).build());
+            trades.add(new CompletedTrade.Builder(new Trade(jsonResponse.get("amount").asDouble(), jsonResponse.get("price").asDouble(), GdaxUtils.parseCurrencyPair(jsonResponse.get("product_id").asText()), GdaxUtils.getTradeTypeFromString(jsonResponse.get("side").asText())), jsonResponse.get("trade_id").asText(), GdaxUtils.convertTimestamp(jsonResponse.get("created_at").asText())).fee(jsonResponse.get("fee").asDouble()).build());
         });
         return new OrderTradesResponse(trades, jsonResponse, request, timestamp, RequestStatus.success());
     }
@@ -125,7 +125,7 @@ final class GdaxResponseParser implements ResponseParser {
                 completedTrades.put(pair, new ArrayList<>());
             }
             // TODO(stfinancial): I'm not sure that "created_at" is the same as what we want. Is this when the "fill" was created? or when the order was placed?
-            CompletedTrade.Builder b = new CompletedTrade.Builder(new Trade(trade.get("size").asDouble(), trade.get("price").asDouble(), pair, GdaxUtils.getTradeTypeFromString(trade.get("side").asText())), trade.get("trade_id").asText(), GdaxUtils.getTimestampFromGdaxTimestamp(trade.get("created_at").asText()));
+            CompletedTrade.Builder b = new CompletedTrade.Builder(new Trade(trade.get("size").asDouble(), trade.get("price").asDouble(), pair, GdaxUtils.getTradeTypeFromString(trade.get("side").asText())), trade.get("trade_id").asText(), GdaxUtils.convertTimestamp(trade.get("created_at").asText()));
             b.fee(trade.get("fee").asDouble());
             b.isMake(trade.get("liquidity").asText("").equals("M"));
             // TODO(stfinancial): order_id?

@@ -16,8 +16,6 @@ import java.util.Map;
  * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
 final class BitfinexResponseParser implements ResponseParser {
-    // TODO(stfinancial): This logic is basically shared with all other markets, maybe reuse it somehow.
-    // TODO(stfinancial): Have constructMarketResponse in Market, and have ResponseParser be an interface, call the respective methods.
     @Override
     public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (jsonResponse.isNull()) {

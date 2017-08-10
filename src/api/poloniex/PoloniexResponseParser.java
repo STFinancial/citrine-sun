@@ -118,7 +118,7 @@ final class PoloniexResponseParser implements ResponseParser {
         jsonResponse.fields().forEachRemaining((offers) -> {
             List<PrivateLoanOrder> orders = new LinkedList<>();
             offers.getValue().forEach((offer) -> {
-                orders.add(new PrivateLoanOrder(new Loan(offer.get("amount").asDouble(), offer.get("rate").asDouble(), Currency.getCanonicalName(offers.getKey()), LoanType.OFFER), offer.get("id").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(offer.get("date").asText()), offer.get("duration").asInt(), offer.get("autoRenew").asBoolean()));
+                orders.add(new PrivateLoanOrder(new Loan(offer.get("amount").asDouble(), offer.get("rate").asDouble(), Currency.getCanonicalName(offers.getKey()), LoanType.OFFER), offer.get("id").asText(), PoloniexUtils.convertTimestamp(offer.get("date").asText()), offer.get("duration").asInt(), offer.get("autoRenew").asBoolean()));
             });
             offersMap.put(Currency.getCanonicalName(offers.getKey()), orders);
         });
@@ -138,7 +138,7 @@ final class PoloniexResponseParser implements ResponseParser {
             List<CompletedTrade> completedTrades = new LinkedList<>();
             resultingTradeList.getValue().forEach((completedTrade)->{
                 // TODO(stfinancial): Once this shit is under control (maybe don't use lambda function). Fill in the other fields.
-                completedTrades.add((new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(completedTrade, pair), completedTrade.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(completedTrade.get("date").asText())).build()));
+                completedTrades.add((new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(completedTrade, pair), completedTrade.get("tradeID").asText(), PoloniexUtils.convertTimestamp(completedTrade.get("date").asText())).build()));
             });
             completedTradeMap.put(pair, completedTrades);
         });
@@ -152,7 +152,7 @@ final class PoloniexResponseParser implements ResponseParser {
         if (request.getPair() != null) {
             List<CompletedTrade> trades = new ArrayList<>();
             jsonResponse.elements().forEachRemaining((t) -> {
-                CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, request.getPair()), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
+                CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, request.getPair()), t.get("tradeID").asText(), PoloniexUtils.convertTimestamp(t.get("date").asText()));
                 b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
                 b.globalTradeId(t.get("globalTradeID").asText());
 //                b.fee(t.get("fee").asDouble()); // TODO(stfinancial): Decide whether to convert this to quote or base currency.
@@ -167,7 +167,7 @@ final class PoloniexResponseParser implements ResponseParser {
                 List<CompletedTrade> trades = new ArrayList<>();
                 tradesForPairs.getValue().elements().forEachRemaining((t) -> {
                     // TODO(stfinancial): Ensure that "amount" is before fees.
-                    CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, pair), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
+                    CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, pair), t.get("tradeID").asText(), PoloniexUtils.convertTimestamp(t.get("date").asText()));
                     b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
                     b.globalTradeId(t.get("globalTradeID").asText());
                     b.fee(t.get("fee").asDouble());
@@ -284,7 +284,7 @@ final class PoloniexResponseParser implements ResponseParser {
         if (request.getCurrencyPair() != null) {
             LinkedList<TradeOrder> openOrders = new LinkedList<>();
             jsonResponse.elements().forEachRemaining((openOrder) -> {
-                openOrders.add(new TradeOrder(PoloniexUtils.getTradeFromJson(openOrder, request.getCurrencyPair()), openOrder.get("orderNumber").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(openOrder.get("date").asText()), openOrder.get("margin").asBoolean()));
+                openOrders.add(new TradeOrder(PoloniexUtils.getTradeFromJson(openOrder, request.getCurrencyPair()), openOrder.get("orderNumber").asText(), PoloniexUtils.convertTimestamp(openOrder.get("date").asText()), openOrder.get("margin").asBoolean()));
             });
             orders.put(request.getCurrencyPair(), openOrders);
         } else {
@@ -293,7 +293,7 @@ final class PoloniexResponseParser implements ResponseParser {
                 LinkedList<TradeOrder> openOrders = new LinkedList<>();
                 openOrderSet.getValue().elements().forEachRemaining((openOrder) -> {
                     // TODO(stfinancial): Figure out what the starting amount field actually does. Is this related to a half filled trade?
-                    openOrders.add(new TradeOrder(PoloniexUtils.getTradeFromJson(openOrder, pair), openOrder.get("orderNumber").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(openOrder.get("date").asText()), openOrder.get("margin").asBoolean()));
+                    openOrders.add(new TradeOrder(PoloniexUtils.getTradeFromJson(openOrder, pair), openOrder.get("orderNumber").asText(), PoloniexUtils.convertTimestamp(openOrder.get("date").asText()), openOrder.get("margin").asBoolean()));
                 });
                 orders.put(pair, openOrders);
             });
@@ -310,7 +310,7 @@ final class PoloniexResponseParser implements ResponseParser {
         List<CompletedTrade> resultingTrades = new LinkedList<>();
         CurrencyPair pair = request.getTrade().getPair();
         jsonResponse.get("resultingTrades").elements().forEachRemaining((completedTrade) -> {
-            CompletedTrade.Builder builder = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(completedTrade, pair), completedTrade.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(completedTrade.get("date").asText()));
+            CompletedTrade.Builder builder = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(completedTrade, pair), completedTrade.get("tradeID").asText(), PoloniexUtils.convertTimestamp(completedTrade.get("date").asText()));
             builder.total(completedTrade.get("total").asDouble());
             // TODO(stfinancial): Really, we should be able to just calculate the fee field if it wasn't populated.
             // TODO(stfinancial): Check to see if we should set the fee field as well.
@@ -377,7 +377,7 @@ final class PoloniexResponseParser implements ResponseParser {
         // TODO(stfinancial): Implement this.
         List<CompletedLoan> completedLoans = new LinkedList<>();
         jsonResponse.forEach((loan) -> {
-            CompletedLoan.Builder builder = new CompletedLoan.Builder(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), Currency.getCanonicalName(loan.get("currency").asText()), LoanType.OFFER), loan.get("id").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("open").asText()), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("close").asText()), loan.get("fee").asDouble());
+            CompletedLoan.Builder builder = new CompletedLoan.Builder(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), Currency.getCanonicalName(loan.get("currency").asText()), LoanType.OFFER), loan.get("id").asText(), PoloniexUtils.convertTimestamp(loan.get("open").asText()), PoloniexUtils.convertTimestamp(loan.get("close").asText()), loan.get("fee").asDouble());
             builder.duration(loan.get("duration").asDouble()).earned(loan.get("earned").asDouble()).interest(loan.get("interest").asDouble());
             completedLoans.add(builder.build());
         });
@@ -403,7 +403,7 @@ final class PoloniexResponseParser implements ResponseParser {
             if (!provided.containsKey(c)) {
                 provided.put(c, new ArrayList<>());
             }
-            provided.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.OFFER), loan.get("duration").asInt(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("date").asText()), loan.get("id").asLong(), loan.get("autoRenew").asInt() == 1));
+            provided.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.OFFER), loan.get("duration").asInt(), PoloniexUtils.convertTimestamp(loan.get("date").asText()), loan.get("id").asLong(), loan.get("autoRenew").asInt() == 1));
         });
         Map<Currency, List<ActiveLoan>> used = new HashMap<>();
         jsonResponse.get("used").elements().forEachRemaining((loan) -> {
@@ -413,7 +413,7 @@ final class PoloniexResponseParser implements ResponseParser {
             }
             System.out.println(c);
             System.out.println(loan);
-            used.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.DEMAND), loan.get("duration").asInt(), PoloniexUtils.getTimestampFromPoloTimestamp(loan.get("date").asText()), loan.get("id").asLong(), false));
+            used.get(c).add(new ActiveLoan(new Loan(loan.get("amount").asDouble(), loan.get("rate").asDouble(), c, LoanType.DEMAND), loan.get("duration").asInt(), PoloniexUtils.convertTimestamp(loan.get("date").asText()), loan.get("id").asLong(), false));
         });
         return new GetActiveLoansResponse(provided, used, jsonResponse, request, timestamp, RequestStatus.success());
     }
@@ -421,7 +421,7 @@ final class PoloniexResponseParser implements ResponseParser {
     private MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
         List<CompletedTrade> trades = new ArrayList<>();
         jsonResponse.elements().forEachRemaining((t) -> {
-            CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, PoloniexUtils.parseCurrencyPair(t.get("currencyPair").asText())), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
+            CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, PoloniexUtils.parseCurrencyPair(t.get("currencyPair").asText())), t.get("tradeID").asText(), PoloniexUtils.convertTimestamp(t.get("date").asText()));
 //            b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
             b.globalTradeId(t.get("globalTradeID").asText());
 //                b.fee(t.get("fee").asDouble()); // TODO(stfinancial): Decide whether to convert this to quote or base currency.

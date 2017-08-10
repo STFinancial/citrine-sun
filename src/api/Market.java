@@ -47,7 +47,18 @@ public abstract class Market {
         this.httpClient = HttpClients.createDefault();
     }
 
+    protected abstract HttpUriRequest constructHttpRequest(RequestArgs args);
+
+    public abstract String getName();
+
+    // TODO(stfinancial): Handle this a little better.
+    public abstract MarketConstants getConstants();
+
+    // TODO(stfinancial): Does this make sense?
+    public String getApiKey() { return apiKey; }
+
     public MarketResponse processMarketRequest(MarketRequest request) {
+        // TODO(stfinancial): Cleanup.
         long timestamp = System.currentTimeMillis();
         String responseString;
         JsonNode jsonResponse;
@@ -110,16 +121,6 @@ public abstract class Market {
 //        System.out.println(jsonResponse);
         return responseParser.constructMarketResponse(jsonResponse, request, timestamp);
     }
-
-    protected abstract HttpUriRequest constructHttpRequest(RequestArgs args);
-
-    public abstract String getName();
-
-    // TODO(stfinancial): Handle this a little better.
-    public abstract MarketConstants getConstants();
-
-    // TODO(stfinancial): Does this make sense?
-    public String getApiKey() { return apiKey; }
 
     // TODO(stfinancial): Do we want a separate method for creating a price alert? Does this at all break anything else we're doing?
     // TODO(stfinancial): It does perhaps mean we need a separate thread listening to this channel. I'm not sure though.
