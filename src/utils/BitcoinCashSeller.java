@@ -30,7 +30,7 @@ public class BitcoinCashSeller implements Runnable {
     @Override
     public void run() {
         Poloniex p = new Poloniex(Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.DESKTOP)));
-        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.ALL);
+        AccountBalanceRequest r = new AccountBalanceRequest();
         MarketResponse resp;
         AccountBalanceResponse abr;
         Map<AccountType, Map<Currency, Double>> balances;

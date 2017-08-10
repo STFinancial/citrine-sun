@@ -23,7 +23,7 @@ public class BitfinexTest {
         Bitfinex b = new Bitfinex(Credentials.fromFileString(KeyManager.getKeyForMarket("Bitfinex", KeyManager.Machine.LAPTOP)));
 //        TickerRequest r = new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.BTC, Currency.USD), CurrencyPair.of(Currency.ETH, Currency.BTC)));
 //        OrderBookRequest r = new OrderBookRequest(CurrencyPair.of(Currency.ETH, Currency.BTC), 30);
-        AccountBalanceRequest r = new AccountBalanceRequest(AccountType.ALL);
+        AccountBalanceRequest r = new AccountBalanceRequest();
 
         MarketResponse resp = b.processMarketRequest(r);
         System.out.println(resp.getJsonResponse());

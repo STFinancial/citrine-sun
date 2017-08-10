@@ -134,7 +134,7 @@ final class KrakenRequestRewriter {
 
     private RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
-        // TODO(stfinancial): Check account types.
+        // TODO(stfinancial): Check account types. How do we handle MARGIN when margin and exchange balances are shared?
         builder.withResource("0");
         builder.withResource("private");
         builder.withResource("Balance");

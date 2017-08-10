@@ -3,7 +3,7 @@ package api.request;
 import api.AccountType;
 
 /**
- * Created by Timothy on 1/30/17.
+ * Fetch balances for each {@link api.Currency Currency}.
  */
 public class AccountBalanceRequest extends MarketRequest {
     // TODO(stfinancial): Do we want to bother with this when we can just fetch all information, see returnCompleteBalances
@@ -11,6 +11,7 @@ public class AccountBalanceRequest extends MarketRequest {
     private final AccountType type;
     // TODO(stfinancial): Allow optional account specifying.
 
+    public AccountBalanceRequest() { this.type = null; }
     public AccountBalanceRequest(AccountType type) {
         this.type = type;
     }

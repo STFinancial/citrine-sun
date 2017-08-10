@@ -75,9 +75,6 @@ final class PoloniexUtils {
         // TODO(stfinancial): Enum map perhaps?
         String result;
         switch (type) {
-            case ALL:
-                result = "INVALID";
-                break;
             case LOAN:
                 result = "lending";
                 break;

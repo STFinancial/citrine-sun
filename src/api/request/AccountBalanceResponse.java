@@ -31,10 +31,6 @@ public class AccountBalanceResponse extends MarketResponse {
     // TODO(pallarino): Maybe allow specifying account type or account type/currency as getters.
 
     public Double getBalance(AccountType type, Currency c) {
-        if (type == AccountType.ALL) {
-            return 0.0;
-        } else {
-            return balances.getOrDefault(type, Collections.emptyMap()).getOrDefault(c, 0.0);
-        }
+        return balances.getOrDefault(type, Collections.emptyMap()).getOrDefault(c, 0.0);
     }
 }

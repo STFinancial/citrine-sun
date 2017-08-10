@@ -178,9 +178,6 @@ final class PoloniexRequestRewriter {
             case LOAN:
                 builder.withParam("account", "lending");
                 break;
-            case ALL:
-                builder.withParam("account", "all");
-                break;
             default:
                 builder.withParam("account", "all");
                 break;

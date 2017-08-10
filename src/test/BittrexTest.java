@@ -25,11 +25,11 @@ public class BittrexTest {
         MarketRequest r;
         MarketResponse response;
         Bittrex b = new Bittrex(KeyManager.getCredentialsForMarket("Bittrex", KeyManager.Machine.LAPTOP));
-        r = new TradeRequest(new Trade(1, 0.01, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY));
-        response = b.processMarketRequest(r);
-        r = new OpenOrderRequest();
+//        r = new TradeRequest(new Trade(1, 0.01, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY));
+//        response = b.processMarketRequest(r);
+//        r = new OpenOrderRequest();
 //        r = new OrderBookRequest(CurrencyPair.of(Currency.LTC, Currency.BTC), 50);
-//        r = new AccountBalanceRequest(AccountType.EXCHANGE);
+        r = new AccountBalanceRequest(AccountType.EXCHANGE);
 //        r = new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.NEO, Currency.BTC)));
 //
 //        response = b.processMarketRequest(r);

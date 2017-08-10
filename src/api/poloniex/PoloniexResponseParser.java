@@ -247,8 +247,21 @@ final class PoloniexResponseParser {
     private static MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         // TODO(stfinancial): May consider optimizing this.
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
-        // We are more likely to want speed when we specify LOAN, so we'll put that first.
-        if (request.getType() == AccountType.LOAN || request.getType() == AccountType.ALL) {
+        if (request.getType() == AccountType.MARGIN || request.getType() == null) {
+            HashMap<Currency, Double> marginBalances = new HashMap<>();
+            jsonResponse.get("margin").fields().forEachRemaining((entry)->{
+                marginBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
+            });
+            balances.put(AccountType.MARGIN, marginBalances);
+        }
+        if (request.getType() == AccountType.EXCHANGE || request.getType() == null) {
+            HashMap<Currency, Double> exchangeBalances = new HashMap<>();
+            jsonResponse.get("exchange").fields().forEachRemaining((entry)->{
+                exchangeBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
+            });
+            balances.put(AccountType.EXCHANGE, exchangeBalances);
+        }
+        if (request.getType() == AccountType.LOAN || request.getType() == null) {
 //            System.out.println("Loan balance request.");
             HashMap<Currency, Double> loanBalances = new HashMap<>();
             jsonResponse.get("lending").fields().forEachRemaining((entry)->{
@@ -260,21 +273,6 @@ final class PoloniexResponseParser {
 //                System.out.println(e.getKey().toString() + " : " + e.getValue());
 //            }
         }
-        if (request.getType() == AccountType.EXCHANGE || request.getType() == AccountType.ALL) {
-            HashMap<Currency, Double> exchangeBalances = new HashMap<>();
-            jsonResponse.get("exchange").fields().forEachRemaining((entry)->{
-                exchangeBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
-            });
-            balances.put(AccountType.EXCHANGE, exchangeBalances);
-        }
-        if (request.getType() == AccountType.MARGIN || request.getType() == AccountType.ALL) {
-            HashMap<Currency, Double> marginBalances = new HashMap<>();
-            jsonResponse.get("margin").fields().forEachRemaining((entry)->{
-                marginBalances.put(Currency.getCanonicalRepresentation(entry.getKey()), entry.getValue().asDouble());
-            });
-            balances.put(AccountType.MARGIN, marginBalances);
-        }
-
         // TODO(stfinancial): Need to think carefully about whether we want to set the timestamp as current time at the end of this function.
         return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, new RequestStatus(StatusType.SUCCESS));
     }
