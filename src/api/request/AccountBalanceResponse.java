@@ -23,9 +23,18 @@ public class AccountBalanceResponse extends MarketResponse {
         this.balances = Collections.unmodifiableMap(balances);
     }
 
+    // TODO(stfinancial): Should they even have access to this directly?
     public Map<AccountType, Map<Currency, Double>> getBalances() {
         return balances;
     }
 
     // TODO(pallarino): Maybe allow specifying account type or account type/currency as getters.
+
+    public Double getBalance(AccountType type, Currency c) {
+        if (type == AccountType.ALL) {
+            return 0.0;
+        } else {
+            return balances.getOrDefault(type, Collections.emptyMap()).getOrDefault(c, 0.0);
+        }
+    }
 }

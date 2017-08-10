@@ -1,11 +1,10 @@
 package test;
 
+import api.AccountType;
 import api.Currency;
 import api.CurrencyPair;
 import api.bittrex.Bittrex;
-import api.request.MarketResponse;
-import api.request.TickerRequest;
-import api.request.TradeRequest;
+import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
 import keys.KeyManager;
@@ -23,11 +22,24 @@ public class BittrexTest {
     }
 
     private void test() {
+        MarketRequest r;
+        MarketResponse response;
         Bittrex b = new Bittrex(KeyManager.getCredentialsForMarket("Bittrex", KeyManager.Machine.LAPTOP));
-//        TickerRequest r = new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.NEO, Currency.BTC)));
-        TradeRequest r = new TradeRequest(new Trade(50, 0.00001, CurrencyPair.of(Currency.GNT, Currency.BTC), TradeType.BUY));
+        r = new TradeRequest(new Trade(1, 0.01, CurrencyPair.of(Currency.LTC, Currency.BTC), TradeType.BUY));
+        response = b.processMarketRequest(r);
+        r = new OpenOrderRequest();
+//        r = new OrderBookRequest(CurrencyPair.of(Currency.LTC, Currency.BTC), 50);
+//        r = new AccountBalanceRequest(AccountType.EXCHANGE);
+//        r = new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.NEO, Currency.BTC)));
+//
+//        response = b.processMarketRequest(r);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {}
+//
+//        r = new CancelRequest(((TradeResponse) response).getOrderNumber(), CancelRequest.CancelType.TRADE);
+        response = b.processMarketRequest(r);
 
-        MarketResponse response = b.processMarketRequest(r);
         System.out.println(response.getJsonResponse());
     }
 }

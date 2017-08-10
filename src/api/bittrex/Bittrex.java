@@ -34,6 +34,8 @@ public class Bittrex extends Market {
         this.requestRewriter = new BittrexRequestRewriter(this);
         this.responseParser = new BittrexResponseParser();
         this.signer = new HmacSigner(ALGORITHM, credentials, false);
+
+        // TODO(stfinancial): Something similar to Kraken to get Currencies and markets available.
     }
 
     @Override
