@@ -54,12 +54,16 @@ public final class Poloniex extends Market { //implements Tradable {
 
     //    private final PoloniexTrader trader;
     private final PoloniexQueue queue;
+    private final PoloniexRequestRewriter requestRewriter;
+    private final PoloniexResponseParser responseParser;
 
     // TODO(stfinancial): Switch to static factory method to avoid multiple instances with the same API keys.
     // Need to avoid IP bans by ensuring that a single IP can have a single market instance.
     public Poloniex(Credentials credentials) {
         super(credentials);
         this.signer = new HmacSigner(ALGORITHM, credentials, false);
+        this.requestRewriter = new PoloniexRequestRewriter();
+        this.responseParser = new PoloniexResponseParser();
 //        this.trader = new PoloniexTrader(this);
         if (!accountQueues.containsKey(apiKey)) {
             queue = new PoloniexQueue(this, QueueStrategy.STRICT, 5);
@@ -130,7 +134,7 @@ public final class Poloniex extends Market { //implements Tradable {
         JsonNode jsonResponse;
         long timestamp = System.currentTimeMillis();
 
-        RequestArgs args = PoloniexRequestRewriter.rewriteRequest(request);
+        RequestArgs args = requestRewriter.rewriteRequest(request);
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }
@@ -139,7 +143,7 @@ public final class Poloniex extends Market { //implements Tradable {
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
             httpRequest = new HttpGet(args.asUrl(true));
             System.out.println("URL: " + args.asUrl(true));
-        } else {
+        } else if (!credentials.isPublicOnly()) {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
             // TODO(stfinancial): Not sure this is threadsafe.
@@ -157,6 +161,8 @@ public final class Poloniex extends Market { //implements Tradable {
                 e.printStackTrace();
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
             }
+        } else {
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
@@ -194,6 +200,6 @@ public final class Poloniex extends Market { //implements Tradable {
         }
         // TODO(stfinancial): Post-processing and add/convert timestamp.
 
-        return PoloniexResponseParser.constructMarketResponse(jsonResponse, request, timestamp);
+        return responseParser.constructMarketResponse(jsonResponse, request, timestamp);
     }
 }

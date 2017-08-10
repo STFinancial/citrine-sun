@@ -16,7 +16,7 @@ import java.util.*;
 final class GdaxResponseParser {
 
     // TODO(stfinancial): Take in isError for now until we switch to using the http response.
-    static MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
+    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }
@@ -49,7 +49,7 @@ final class GdaxResponseParser {
 
     // TODO(stfinancial): Think carefully about what is at stake for returning MarketResponse vs. the specific response type.
 
-    private static MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
+    private MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
         if (jsonResponse.has("status") && jsonResponse.get("status").asText().equals("rejected")) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("reject_reason").asText()));
         }
@@ -60,11 +60,11 @@ final class GdaxResponseParser {
         return new TradeResponse(jsonResponse.get("id").asText(), jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
+    private MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
         return new MarketResponse(jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
+    private MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
         CurrencyPair pair = request.getCurrencyPair().get();
         Map<CurrencyPair, List<Trade>> asksSet = new HashMap<>();
         Map<CurrencyPair, List<Trade>> bidsSet = new HashMap<>();
@@ -81,7 +81,7 @@ final class GdaxResponseParser {
         return new OrderBookResponse(asksSet, bidsSet, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
+    private MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
         List<CompletedTrade> trades = new ArrayList<>();
         System.out.println("CreateOrderTradesResponse - GDAX: " + jsonResponse);
         jsonResponse.forEach((trade) -> {
@@ -93,7 +93,7 @@ final class GdaxResponseParser {
         return new OrderTradesResponse(trades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
+    private MarketResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
         Ticker.Builder ticker = new Ticker.Builder(request.getPairs().get(0), jsonResponse.get("price").asDouble(), jsonResponse.get("ask").asDouble(), jsonResponse.get("bid").asDouble());
         ticker.baseVolume(jsonResponse.get("volume").asDouble());
         // TODO(stfinancial): Look at all the problems this stupid optional list is causing.
@@ -102,7 +102,7 @@ final class GdaxResponseParser {
         return new TickerResponse(tickers, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
+    private MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
         Map<Currency, Double> exchangeBalances = new HashMap<>();
         Map<Currency, Double> marginBalances = new HashMap<>();
@@ -119,7 +119,7 @@ final class GdaxResponseParser {
         return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
+    private MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
         System.out.println(jsonResponse);
         Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
         jsonResponse.elements().forEachRemaining((trade) -> {
@@ -139,7 +139,7 @@ final class GdaxResponseParser {
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 
-    private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
+    private MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
         Map<CurrencyPair, FeeInfo> fees = new HashMap<>();
         if (!request.getPairs().isEmpty()) {
@@ -158,7 +158,7 @@ final class GdaxResponseParser {
         }
     }
 
-    private static AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+    private AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
         // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
         // TODO(stfinancial): Create the map to market name.
         List<CurrencyPair> assets = new ArrayList<>();

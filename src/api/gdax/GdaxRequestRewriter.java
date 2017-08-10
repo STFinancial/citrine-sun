@@ -10,7 +10,7 @@ import api.request.*;
 final class GdaxRequestRewriter {
     private static final String API_ENDPOINT = "https://api.gdax.com";
 
-    static RequestArgs rewriteRequest(MarketRequest request) {
+    RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof CancelRequest) {
@@ -33,7 +33,7 @@ final class GdaxRequestRewriter {
         return RequestArgs.unsupported();
     }
 
-    private static RequestArgs rewriteTickerRequest(TickerRequest request) {
+    private RequestArgs rewriteTickerRequest(TickerRequest request) {
         // TODO(stfinancial): Does gdax really not support getting all the tickers?
         if (request.getPairs().size() != 1) {
             // TODO(stfinancial): Probably need to throw something here.
@@ -49,7 +49,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteCancelRequest(CancelRequest request) {
+    private RequestArgs rewriteCancelRequest(CancelRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("orders");
         builder.withResource(request.getId());
@@ -58,7 +58,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
+    private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
         if (!request.getCurrencyPair().isPresent()) {
             return RequestArgs.unsupported();
         }
@@ -80,7 +80,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteTradeRequest(TradeRequest request) {
+    private RequestArgs rewriteTradeRequest(TradeRequest request) {
         // TODO(stfinancial): Self trade prevention behavior.
         if (request.isMargin() || request.isStopLimit() || request.isMarket()) {
             // TODO(stfinancial): Implement these, along with fill or kill, post only, immediate or cancel.
@@ -117,7 +117,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
+    private RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("fills");
         // TODO(stfinancial): Support for product_id
@@ -127,7 +127,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
+    private RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
         if (request.getType() == AccountType.LOAN) {
             return RequestArgs.unsupported();
         }
@@ -138,7 +138,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
+    private RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
         // TODO(stfinancial): Make sure that this is actually what we want?
         // TODO(stfinancial): How do we get our complete trade history?
         // TODO(stfinancial): How do we inform that we cannot restrict to timestamps within the request?
@@ -153,7 +153,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteFeeRequest(FeeRequest request) {
+    private RequestArgs rewriteFeeRequest(FeeRequest request) {
         // TODO(stfinancial): Apparently this is a cached value that is calculated every night at midnight.
         // TODO(stfinancial): Does this mean that if we go over the next fee tier, it will have to wait?
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
@@ -165,7 +165,7 @@ final class GdaxRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteAssetPairRequest(AssetPairRequest request) {
+    private RequestArgs rewriteAssetPairRequest(AssetPairRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("products");
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);

@@ -29,10 +29,16 @@ public class Gdax extends Market {
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA256;
     private final String passphrase;
 
+    // TODO(stfinancial): Make this interface and move to superclass?
+    private final GdaxRequestRewriter requestRewriter;
+    private final GdaxResponseParser responseParser;
+
     public Gdax(Credentials credentials) {
         super(credentials);
         this.passphrase = credentials.getPassphrase();
         this.signer = new HmacSigner(ALGORITHM, credentials, true);
+        this.requestRewriter = new GdaxRequestRewriter();
+        this.responseParser = new GdaxResponseParser();
     }
 
     @Override

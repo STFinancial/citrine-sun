@@ -27,7 +27,7 @@ final class PoloniexRequestRewriter {
      * object. Returns {@link RequestArgs#unsupported()} if the request is not supported or cannot be converted to a
      * valid command.
      */
-    static RequestArgs rewriteRequest(MarketRequest request) {
+    RequestArgs rewriteRequest(MarketRequest request) {
         // TODO(stfinancial): Could set request type and private in this function.
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
@@ -72,7 +72,7 @@ final class PoloniexRequestRewriter {
         return RequestArgs.unsupported();
     }
 
-    private static RequestArgs rewriteCancelRequest(CancelRequest request) {
+    private RequestArgs rewriteCancelRequest(CancelRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         switch (request.getType()) {
             case TRADE:
@@ -92,7 +92,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
+    private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
         builder.withParam(COMMAND_STRING, "returnOrderBook");
         if (request.getCurrencyPair().isPresent()) {
@@ -106,7 +106,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteMarginPositionRequest(MarginPositionRequest request) {
+    private RequestArgs rewriteMarginPositionRequest(MarginPositionRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "getMarginPosition");
         // TODO(stfinancial): Potentially add support for "all" by making CurrencyPair optional field.
@@ -117,7 +117,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteMarginAccountSummaryRequest(MarginAccountSummaryRequest request) {
+    private RequestArgs rewriteMarginAccountSummaryRequest(MarginAccountSummaryRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnMarginAccountSummary");
         builder.isPrivate(true);
@@ -126,7 +126,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteGetPublicLoanOrdersRequest(GetPublicLoanOrdersRequest request) {
+    private RequestArgs rewriteGetPublicLoanOrdersRequest(GetPublicLoanOrdersRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
         builder.withParam(COMMAND_STRING, "returnLoanOrders");
         builder.withParam("currency", PoloniexUtils.getCurrencyString(request.getCurrency()));
@@ -137,7 +137,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteGetPrivateLoanOffersRequest(GetPrivateLoanOffersRequest request) {
+    private RequestArgs rewriteGetPrivateLoanOffersRequest(GetPrivateLoanOffersRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnOpenLoanOffers");
         builder.isPrivate(true);
@@ -146,7 +146,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteCreateLoanOfferRequest(CreateLoanOfferRequest request) {
+    private RequestArgs rewriteCreateLoanOfferRequest(CreateLoanOfferRequest request) {
         PrivateLoanOrder order = request.getOrder();
         if (order.getType() != LoanType.OFFER) {
             System.out.println("Cannot create a LoanOffer without a LoanType of OFFER: " + order.getType());
@@ -165,7 +165,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
+    private RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnAvailableAccountBalances");
         switch (request.getType()) {
@@ -188,7 +188,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteOpenOrderRequest(OpenOrderRequest request) {
+    private RequestArgs rewriteOpenOrderRequest(OpenOrderRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnOpenOrders");
         // TODO(stfinancial): Replace with returnAllOpenOrders, but check that this works with currencyPair?
@@ -205,7 +205,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteTickerRequest(TickerRequest request) {
+    private RequestArgs rewriteTickerRequest(TickerRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
         builder.withParam(COMMAND_STRING, "returnTicker");
         // TODO(stfinancial): Optional pairs from request?
@@ -214,7 +214,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteTransferBalanceRequest(TransferBalanceRequest request) {
+    private RequestArgs rewriteTransferBalanceRequest(TransferBalanceRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "transferBalance");
         builder.withParam("currency", PoloniexUtils.getCurrencyString(request.getCurrency()));
@@ -227,7 +227,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteMoveOrderRequest(MoveOrderRequest request) {
+    private RequestArgs rewriteMoveOrderRequest(MoveOrderRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "moveOrder");
         builder.withParam("orderNumber", request.getOrderNumber());
@@ -243,7 +243,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
+    private RequestArgs rewriteTradeHistoryRequest(TradeHistoryRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnTradeHistory");
         if (request.getPair() != null) {
@@ -262,7 +262,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteTradeRequest(TradeRequest request) {
+    private RequestArgs rewriteTradeRequest(TradeRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         // TODO(stfinancial): Handle market type requests somehow.
         if (!request.isStopLimit()) {
@@ -323,7 +323,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteVolumeRequest(VolumeRequest request) {
+    private RequestArgs rewriteVolumeRequest(VolumeRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
         builder.withParam(COMMAND_STRING, "return24hVolume");
         builder.isPrivate(false);
@@ -331,7 +331,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteGetLendingHistoryRequest(GetLendingHistoryRequest request) {
+    private RequestArgs rewriteGetLendingHistoryRequest(GetLendingHistoryRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnLendingHistory", true);
         System.out.println("Start: " + String.valueOf(request.getStart() / 1000L));
@@ -344,7 +344,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteFeeRequest(FeeRequest request) {
+    private RequestArgs rewriteFeeRequest(FeeRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnFeeInfo");
         builder.isPrivate(true);
@@ -353,7 +353,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteGetActiveLoansRequest(GetActiveLoansRequest request) {
+    private RequestArgs rewriteGetActiveLoansRequest(GetActiveLoansRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnActiveLoans");
         builder.isPrivate(true);
@@ -362,7 +362,7 @@ final class PoloniexRequestRewriter {
         return builder.build();
     }
 
-    private static RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
+    private RequestArgs rewriteOrderTradesRequest(OrderTradesRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnOrderTrades");
         builder.withParam("orderNumber", request.getId());

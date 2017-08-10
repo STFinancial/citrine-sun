@@ -5,8 +5,6 @@ package api.poloniex;
 // TODO(stfinancial): Consider refactoring lambda expressions to helper functions.
 // TODO(stfinancial): Instead of parsing JSON, do we want to use the object mapper to map to Poloniex internal classes, which are then mapped to the generics?
 
-
-
 import api.*;
 import api.Currency;
 import api.request.*;
@@ -41,10 +39,10 @@ final class PoloniexResponseParser {
     // TODO(stfinancial): Change the returnXResponse functions to return the specific type of MarketResponse?
 
     // TODO(stfinancial): Check this doesn't have the same issues as decimalValue.
-    private static final BigDecimalStringConverter converter = new BigDecimalStringConverter();
+//    private static final BigDecimalStringConverter converter = new BigDecimalStringConverter();
 
     // TODO(stfinancial): We need to check to make sure we sent the right kind of command and arguments and make sure to fail on our side if that happens.
-    static MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
+    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         // TODO(stfinancial): Is there a better way to do this, instead of checking the types repeatedly?
         // TODO(stfinancial): Potentially separate public and private methods.
         if (jsonResponse.isNull()) {
@@ -104,7 +102,7 @@ final class PoloniexResponseParser {
 
     // TODO(stfinancial): Why are these methods static? Will this cause error when we have multiple accounts?
 
-    private static MarketResponse createGetPublicLoanOrdersResponse(JsonNode jsonResponse, GetPublicLoanOrdersRequest request, long timestamp) {
+    private MarketResponse createGetPublicLoanOrdersResponse(JsonNode jsonResponse, GetPublicLoanOrdersRequest request, long timestamp) {
         // TODO(stfinanical): Optionally initialize this size to the size specified in the request.
         List<PublicLoanOrder> offers = new ArrayList<>();
         jsonResponse.get("offers").forEach((offer)->{
@@ -117,7 +115,7 @@ final class PoloniexResponseParser {
         return new GetPublicLoanOrdersResponse(offers, demands, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createGetPrivateLoanOffersResponse(JsonNode jsonResponse, GetPrivateLoanOffersRequest request, long timestamp) {
+    private MarketResponse createGetPrivateLoanOffersResponse(JsonNode jsonResponse, GetPrivateLoanOffersRequest request, long timestamp) {
         Map<Currency, List<PrivateLoanOrder>> offersMap = new HashMap<>();
         jsonResponse.fields().forEachRemaining((offers) -> {
             List<PrivateLoanOrder> orders = new LinkedList<>();
@@ -129,11 +127,11 @@ final class PoloniexResponseParser {
         return new GetPrivateLoanOffersResponse(offersMap, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createCreateLoanOfferResponse(JsonNode jsonResponse, CreateLoanOfferRequest request, long timestamp) {
+    private MarketResponse createCreateLoanOfferResponse(JsonNode jsonResponse, CreateLoanOfferRequest request, long timestamp) {
         return new CreateLoanOfferResponse(jsonResponse.get("orderID").asLong(), jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createMoveOrderResponse(JsonNode jsonResponse, MoveOrderRequest request, long timestamp) {
+    private MarketResponse createMoveOrderResponse(JsonNode jsonResponse, MoveOrderRequest request, long timestamp) {
         // TODO(stfinancial): Still not sure how this can result in trades of other currencies, but we will see.
         Map<CurrencyPair, List<CompletedTrade>> completedTradeMap = new HashMap<>();
         // TODO(stfinancial): This is where an object mapper would come in handy.
@@ -150,7 +148,7 @@ final class PoloniexResponseParser {
         return new MoveOrderResponse(jsonResponse.get("orderNumber").asText(), completedTradeMap, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
+    private MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
         // TODO(stfinancial): Test that this actually works.
         Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
         if (request.getPair() != null) {
@@ -184,7 +182,7 @@ final class PoloniexResponseParser {
         return new TradeHistoryResponse(completedTrades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
+    private MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
         Map<CurrencyPair, List<Trade>> asksSet = new HashMap<>();
         Map<CurrencyPair, List<Trade>> bidsSet = new HashMap<>();
 
@@ -218,7 +216,7 @@ final class PoloniexResponseParser {
         return new OrderBookResponse(asksSet, bidsSet, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createMarginPositionResponse(JsonNode jsonResponse, MarginPositionRequest request, long timestamp) {
+    private MarketResponse createMarginPositionResponse(JsonNode jsonResponse, MarginPositionRequest request, long timestamp) {
         MarginPosition position = new MarginPosition(
                 request.getPair(),
                 PoloniexUtils.getMarginTypeFromString(jsonResponse.get("type").asText()),
@@ -232,7 +230,7 @@ final class PoloniexResponseParser {
         return new MarginPositionResponse(position, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createMarginAccountSummaryResponse(JsonNode jsonResponse, MarginAccountSummaryRequest request, long timestamp) {
+    private MarketResponse createMarginAccountSummaryResponse(JsonNode jsonResponse, MarginAccountSummaryRequest request, long timestamp) {
         MarginAccountSummary summary = new MarginAccountSummary(
                 jsonResponse.get("totalValue").doubleValue(),
                 jsonResponse.get("pl").doubleValue(),
@@ -244,7 +242,7 @@ final class PoloniexResponseParser {
         return new MarginAccountSummaryResponse(summary, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
+    private MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         // TODO(stfinancial): May consider optimizing this.
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
         if (request.getType() == AccountType.MARGIN || request.getType() == null) {
@@ -278,7 +276,7 @@ final class PoloniexResponseParser {
     }
 
     // TODO(stfinancial): Deprecate in favor of returnPrivateInfo, which gives stops, loanavailable, and limit.
-    private static MarketResponse createOpenOrderResponse(JsonNode jsonResponse, OpenOrderRequest request, long timestamp) {
+    private MarketResponse createOpenOrderResponse(JsonNode jsonResponse, OpenOrderRequest request, long timestamp) {
         // TODO(stfinancial): Careful, this call doesn't actually seem to return stop limits...
 
         System.out.println(jsonResponse);
@@ -305,11 +303,11 @@ final class PoloniexResponseParser {
         return new OpenOrderResponse(orders, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
+    private MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
         return new MarketResponse(jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static TradeResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
+    private TradeResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
         System.out.println("Creating trade response for: \n" + jsonResponse.toString());
         List<CompletedTrade> resultingTrades = new LinkedList<>();
         CurrencyPair pair = request.getTrade().getPair();
@@ -324,7 +322,7 @@ final class PoloniexResponseParser {
         return new TradeResponse(jsonResponse.get("orderNumber").asText(), resultingTrades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static TickerResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
+    private TickerResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
         Map<CurrencyPair, Ticker> tickers = new HashMap<>();
         request.getPairs().forEach((pair)->{
             JsonNode j = jsonResponse.get(PoloniexUtils.formatCurrencyPair(pair));
@@ -338,13 +336,13 @@ final class PoloniexResponseParser {
     }
 
     // TODO(stfinancial): Could just return a MarketResponse instead since this doesn't really contain anything.
-    private static TransferBalanceResponse createTransferBalanceResponse(JsonNode jsonResponse, TransferBalanceRequest request, long timestamp) {
+    private TransferBalanceResponse createTransferBalanceResponse(JsonNode jsonResponse, TransferBalanceRequest request, long timestamp) {
         // TODO(stfinancial): May need to actually check that it was a success... What if we try to transfer out of margin when we can't
         // Will the request be a success but the withdrawal still won't occur?
         return new TransferBalanceResponse(jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static VolumeResponse createVolumeResponse(JsonNode jsonResponse, VolumeRequest request, long timestamp) {
+    private VolumeResponse createVolumeResponse(JsonNode jsonResponse, VolumeRequest request, long timestamp) {
         // TODO(stfinancial): Improve readability of this function a bit.
         Map<CurrencyPair, Double> baseVolumes =  new HashMap<>();
         Map<CurrencyPair, Double> quoteVolumes = new HashMap<>();
@@ -376,7 +374,7 @@ final class PoloniexResponseParser {
         return new VolumeResponse(baseVolumes, quoteVolumes, currencyVolumes, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static GetLendingHistoryResponse createGetLendingHistoryResponse(JsonNode jsonResponse, GetLendingHistoryRequest request, long timestamp) {
+    private GetLendingHistoryResponse createGetLendingHistoryResponse(JsonNode jsonResponse, GetLendingHistoryRequest request, long timestamp) {
 //        System.out.println(jsonResponse.toString());
         // TODO(stfinancial): Implement this.
         List<CompletedLoan> completedLoans = new LinkedList<>();
@@ -388,7 +386,7 @@ final class PoloniexResponseParser {
         return new GetLendingHistoryResponse(completedLoans, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static FeeResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
+    private FeeResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         FeeInfo info = new FeeInfo(jsonResponse.get("makerFee").asDouble(), jsonResponse.get("takerFee").asDouble(), jsonResponse.get("thirtyDayVolume").asDouble());
         Map<CurrencyPair, FeeInfo> infos = new HashMap<>();
         if (!request.getPairs().isEmpty()) {
@@ -399,7 +397,7 @@ final class PoloniexResponseParser {
         return new FeeResponse(infos, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createGetActiveLoansResponse(JsonNode jsonResponse, GetActiveLoansRequest request, long timestamp) {
+    private MarketResponse createGetActiveLoansResponse(JsonNode jsonResponse, GetActiveLoansRequest request, long timestamp) {
         System.out.println(jsonResponse);
         Map<Currency, List<ActiveLoan>> provided = new HashMap<>();
         jsonResponse.get("provided").elements().forEachRemaining((loan) -> {
@@ -422,7 +420,7 @@ final class PoloniexResponseParser {
         return new GetActiveLoansResponse(provided, used, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
+    private MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
         List<CompletedTrade> trades = new ArrayList<>();
         jsonResponse.elements().forEachRemaining((t) -> {
             CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, PoloniexUtils.parseCurrencyPair(t.get("currencyPair").asText())), t.get("tradeID").asText(), PoloniexUtils.getTimestampFromPoloTimestamp(t.get("date").asText()));
