@@ -53,7 +53,7 @@ public class Gdax extends Market {
         JsonNode jsonResponse;
         long timestamp = System.currentTimeMillis();
 
-        RequestArgs args = GdaxRequestRewriter.rewriteRequest(request);
+        RequestArgs args = requestRewriter.rewriteRequest(request);
         if (args.isUnsupported()) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request type is not supported or the request cannot be translated to a command."));
         }
@@ -65,7 +65,7 @@ public class Gdax extends Market {
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, "Public requests must use HttpGet. Type was: " + args.getHttpRequestType().toString().toUpperCase()));
             }
             httpRequest = new HttpGet(url);
-        } else {
+        } else if (!credentials.isPublicOnly()) {
             switch (args.getHttpRequestType()) {
                 case GET:
                     httpRequest = new HttpGet(url);
@@ -102,6 +102,8 @@ public class Gdax extends Market {
             httpRequest.addHeader("CB-ACCESS-SIGN", signer.getBase64Digest(what.getBytes()));
             httpRequest.addHeader("CB-ACCESS-TIMESTAMP", CB_ACCESS_TIMESTAMP);
             httpRequest.addHeader("CB-ACCESS-PASSPHRASE", passphrase);
+        } else {
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
@@ -140,7 +142,7 @@ public class Gdax extends Market {
         // TODO(stfinancial): More sophisticated handling of errors codes...
         boolean isError = statusCode != HttpStatus.SC_OK;
 //        System.out.println(statusCode);
-        return GdaxResponseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
+        return responseParser.constructMarketResponse(jsonResponse, request, timestamp, isError);
     }
 
     @Override

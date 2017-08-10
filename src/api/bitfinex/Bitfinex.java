@@ -79,7 +79,7 @@ public final class Bitfinex extends Market {
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, "Public requests must use HttpGet. Type was: " + args.getHttpRequestType().toString().toUpperCase()));
             }
             httpRequest = new HttpGet(args.asUrl(true));
-        } else {
+        } else if (!credentials.isPublicOnly()) {
             String url = args.asUrl(true);
             System.out.println("Url: " + url);
             httpRequest = new HttpPost(url);
@@ -90,7 +90,6 @@ public final class Bitfinex extends Market {
             String stuff = "/api" + args.getResourcePath() + String.valueOf(timestamp) + args.getQueryString();
 //            String stuff = "/api/" + url + String.valueOf(timestamp) + args.getQueryString();
             System.out.println("Body: " + stuff);
-            // TODO(stfinancial): Need to check that credentials aren't public only.
 //            String sign = signer.getHexDigest(stuff.getBytes());
             String sign = signer.getHexDigest(stuff.getBytes(Charset.forName("UTF-8")));
             httpRequest.addHeader("bfx-signature", sign);
@@ -98,6 +97,8 @@ public final class Bitfinex extends Market {
 //            try { ((HttpPost) httpRequest).setEntity(new UrlEncodedFormEntity(Arrays.asList(new NameValuePair[]{new BasicNameValuePair("json", "{}")}), "UTF-8")); } catch (Exception e) {};
 //            ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_JSON));
             ((HttpPost) httpRequest).setEntity(new StringEntity(args.asJson().toString(), ContentType.APPLICATION_FORM_URLENCODED));
+        } else {
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
 
         // TODO(stfinancial): This logic is duplicated everywhere, maybe move this to market?

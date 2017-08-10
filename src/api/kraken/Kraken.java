@@ -113,7 +113,9 @@ public class Kraken extends Market {
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST, "Invalid HttpRequestType: " + args.getHttpRequestType()));
         }
         System.out.println("URL: " + url);
-        if (args.isPrivate()) {
+        if (!args.isPrivate()) {
+
+        } else if (credentials.isPublicOnly()) {
             // TODO(stfinancial): Something here is not being encoded correctly, issues with commas and spaces.
             String baseQueryString = args.getQueryString();
             System.out.println("Base QueryString: " + baseQueryString);
@@ -160,6 +162,8 @@ public class Kraken extends Market {
                 e.printStackTrace();
                 return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_ENCODING));
             }
+        } else {
+            return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
         System.out.println(httpRequest.toString());
         try {
