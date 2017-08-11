@@ -1,17 +1,25 @@
 package api.gdax;
 
 import api.*;
+import api.bitfinex.BitfinexSocketClient;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.Charset;
 
 /**
  * Class representing the Gdax {@code Market}.
  */
 public final class Gdax extends Market {
     private static final String NAME = "Gdax";
-    private static final String WAMP_ENDPOINT = "wss://ws-feed.gdax.com";
+    private static final String WS_ENDPOINT = "wss://ws-feed.gdax.com";
     private static final HmacAlgorithm ALGORITHM = HmacAlgorithm.HMACSHA256;
 
     private String passphrase;
@@ -24,6 +32,27 @@ public final class Gdax extends Market {
         }
         this.requestRewriter = new GdaxRequestRewriter();
         this.responseParser = new GdaxResponseParser();
+        ObjectNode root = JsonNodeFactory.instance.objectNode();
+        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+        String payload = timestamp + "GET" + "/users/self";
+        root.put("type", "subscribe");
+        root.set("product_ids", JsonNodeFactory.instance.arrayNode().add("BTC-USD"));
+        root.put("signature", signer.getBase64Digest(payload.getBytes()));
+        root.put("key", getApiKey());
+        root.put("passphrase", passphrase);
+        root.put("timestamp", timestamp);
+//        root.put()
+        try {
+            BitfinexSocketClient socket = new BitfinexSocketClient(new URI(WS_ENDPOINT), root);
+//            socket.
+//            socket.connect();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            System.out.println(e.getMessage());
+        }
     }
 
     @Override
