@@ -12,7 +12,6 @@ import org.apache.http.entity.StringEntity;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.nio.charset.Charset;
 
 /**
  * Class representing the Gdax {@code Market}.
@@ -43,7 +42,7 @@ public final class Gdax extends Market {
         root.put("timestamp", timestamp);
 //        root.put()
         try {
-            BitfinexSocketClient socket = new BitfinexSocketClient(new URI(WS_ENDPOINT), root);
+            GdaxSocketClient socket = new GdaxSocketClient(new URI(WS_ENDPOINT), root);
 //            socket.
 //            socket.connect();
         } catch (URISyntaxException e) {

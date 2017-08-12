@@ -3,6 +3,7 @@ package api.poloniex;
 import api.CurrencyPair;
 import api.RequestArgs;
 import api.RequestRewriter;
+import api.poloniex.request.CurrencyRequest;
 import api.request.*;
 import api.request.tmp_loan.*;
 import api.request.MoveOrderRequest;
@@ -69,6 +70,10 @@ final class PoloniexRequestRewriter implements RequestRewriter {
             return rewriteGetActiveLoansRequest((GetActiveLoansRequest) request);
         } else if (request instanceof OrderTradesRequest) {
             return rewriteOrderTradesRequest((OrderTradesRequest) request);
+        } else if (request instanceof CurrencyRequest) {
+            return rewriteCurrencyRequest((CurrencyRequest) request);
+        } else if (request instanceof AssetPairRequest) {
+            return rewriteAssetPairRequest((AssetPairRequest) request);
         }
         return RequestArgs.unsupported();
     }
@@ -169,19 +174,24 @@ final class PoloniexRequestRewriter implements RequestRewriter {
     private RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(PRIVATE_URI);
         builder.withParam(COMMAND_STRING, "returnAvailableAccountBalances");
-        switch (request.getType()) {
-            case MARGIN:
-                builder.withParam("account", "margin");
-                break;
-            case EXCHANGE:
-                builder.withParam("account", "exchange");
-                break;
-            case LOAN:
-                builder.withParam("account", "lending");
-                break;
-            default:
-                builder.withParam("account", "all");
-                break;
+        // TODO(stfinancial): We could just ignore this completely and get all the balances.
+        if (request.getType() == null) {
+            builder.withParam("account", "all");
+        } else {
+            switch (request.getType()) {
+                case MARGIN:
+                    builder.withParam("account", "margin");
+                    break;
+                case EXCHANGE:
+                    builder.withParam("account", "exchange");
+                    break;
+                case LOAN:
+                    builder.withParam("account", "lending");
+                    break;
+                default:
+                    builder.withParam("account", "all");
+                    break;
+            }
         }
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
@@ -369,6 +379,22 @@ final class PoloniexRequestRewriter implements RequestRewriter {
         builder.isPrivate(true);
         builder.httpRequestType(RequestArgs.HttpRequestType.POST);
         builder.withParam("nonce", String.valueOf(System.currentTimeMillis()));
+        return builder.build();
+    }
+
+    private RequestArgs rewriteCurrencyRequest(CurrencyRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
+        builder.withParam(COMMAND_STRING, "returnCurrencies");
+        builder.isPrivate(false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
+        return builder.build();
+    }
+
+    private RequestArgs rewriteAssetPairRequest(AssetPairRequest request) {
+        RequestArgs.Builder builder = new RequestArgs.Builder(PUBLIC_URI);
+        builder.withParam(COMMAND_STRING, "returnTicker");
+        builder.isPrivate(false);
+        builder.httpRequestType(RequestArgs.HttpRequestType.GET);
         return builder.build();
     }
 }

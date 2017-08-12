@@ -7,6 +7,8 @@ package api.poloniex;
 
 import api.*;
 import api.Currency;
+import api.poloniex.request.CurrencyRequest;
+import api.poloniex.request.CurrencyResponse;
 import api.request.*;
 import api.request.tmp_loan.*;
 import api.request.MoveOrderRequest;
@@ -94,6 +96,10 @@ final class PoloniexResponseParser implements ResponseParser {
             return createGetActiveLoansResponse(jsonResponse, (GetActiveLoansRequest) request, timestamp);
         } else if (request instanceof OrderTradesRequest) {
             return createOrderTradesResponse(jsonResponse, (OrderTradesRequest) request, timestamp);
+        } else if (request instanceof CurrencyRequest) {
+            return createCurrencyResponse(jsonResponse, (CurrencyRequest) request, timestamp);
+        } else if (request instanceof AssetPairRequest) {
+            return createAssetPairResponse(jsonResponse, (AssetPairRequest) request, timestamp);
         }
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
@@ -243,21 +249,21 @@ final class PoloniexResponseParser implements ResponseParser {
     private MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         // TODO(stfinancial): May consider optimizing this.
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
-        if (request.getType() == AccountType.MARGIN || request.getType() == null) {
+        if ((request.getType() == AccountType.MARGIN || request.getType() == null) && jsonResponse.has("margin")) {
             HashMap<Currency, Double> marginBalances = new HashMap<>();
             jsonResponse.get("margin").fields().forEachRemaining((entry)->{
                 marginBalances.put(Currency.getCanonicalName(entry.getKey()), entry.getValue().asDouble());
             });
             balances.put(AccountType.MARGIN, marginBalances);
         }
-        if (request.getType() == AccountType.EXCHANGE || request.getType() == null) {
+        if ((request.getType() == AccountType.EXCHANGE || request.getType() == null) && jsonResponse.has("exchange")) {
             HashMap<Currency, Double> exchangeBalances = new HashMap<>();
             jsonResponse.get("exchange").fields().forEachRemaining((entry)->{
                 exchangeBalances.put(Currency.getCanonicalName(entry.getKey()), entry.getValue().asDouble());
             });
             balances.put(AccountType.EXCHANGE, exchangeBalances);
         }
-        if (request.getType() == AccountType.LOAN || request.getType() == null) {
+        if ((request.getType() == AccountType.LOAN || request.getType() == null) && jsonResponse.has("lending")) {
 //            System.out.println("Loan balance request.");
             HashMap<Currency, Double> loanBalances = new HashMap<>();
             jsonResponse.get("lending").fields().forEachRemaining((entry)->{
@@ -429,5 +435,33 @@ final class PoloniexResponseParser implements ResponseParser {
             trades.add(b.build());
         });
         return new OrderTradesResponse(trades, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private MarketResponse createCurrencyResponse(JsonNode jsonResponse, CurrencyRequest request, long timestamp) {
+        Map<Currency, Integer> currencyLabels = new HashMap<>();
+        Map<Integer, Currency> labelMap = new HashMap<>();
+        jsonResponse.fields().forEachRemaining((c) -> {
+            if (!c.getValue().get("delisted").asBoolean()) {
+                Currency currency = Currency.getCanonicalName(c.getKey());
+                int id = c.getValue().get("id").asInt();
+                currencyLabels.put(currency, id);
+                labelMap.put(id, currency);
+            }
+        });
+        return new CurrencyResponse(currencyLabels, labelMap, jsonResponse, request, timestamp, RequestStatus.success());
+    }
+
+    private MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+        Map<CurrencyPair, Integer> assetIds = new HashMap<>();
+        Map<Integer, CurrencyPair> idAssets = new HashMap<>();
+        List<CurrencyPair> assets = new ArrayList<>();
+        jsonResponse.fields().forEachRemaining((cp) -> {
+            CurrencyPair pair = PoloniexUtils.parseCurrencyPair(cp.getKey());
+            int id = cp.getValue().get("id").asInt();
+            assetIds.put(pair, id);
+            idAssets.put(id, pair);
+            assets.add(pair);
+        });
+        return new AssetPairResponse(assetIds, idAssets, assets, jsonResponse, request, timestamp, RequestStatus.success());
     }
 }
