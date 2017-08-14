@@ -26,12 +26,21 @@ public class CandleCatcher extends Strategy {
     // Sleep and move the trades as needed.
     // Log the orderid of the trades we've made.
 
+
+    // Then place a new trade.
+//                    tr = new TradeRequest(getTradeForFraction(highestBid, order.getValue(), quoteAmountPerFraction));
+//                    do {
+//                        r = p.processMarketRequest(tr);
+//                        System.out.println(r.getJsonResponse());
+//                        sleep(350);
+//                    } while (!r.isSuccess());
+//                    newOrders.put(((TradeResponse) r).getOrderNumber(), order.getValue());
+
     private static final AccountType ACCOUNT_TYPE = AccountType.EXCHANGE;
     private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 //    private static final double AMOUNT_PER_FRACTION = 1; // Amount in Quote currency.
-    private static final List<Double> FRACTIONS = Arrays.asList(new Double[]{ 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1 });
+    private static final List<Double> FRACTIONS = Arrays.asList(new Double[]{ 0.01, 0.015, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1 });
     private static final double SATOSHI = 0.00000001;
-    private final HashMap<String, Double> orders = new HashMap<>();
 
 
     // TODO(stfinancial): Handle edge case where order fills immediately when we place it (this may be handled automatically).
@@ -44,30 +53,35 @@ public class CandleCatcher extends Strategy {
     @Override
     public void run() {
         Poloniex p = new Poloniex(KeyManager.getCredentialsForMarket("Poloniex", KeyManager.Machine.DESKTOP));
+        Map<String, Double> orders;
+        MarketResponse r;
 
         // Get account balances
         double balance = getQuoteBalance(p, PAIR);
         double quoteAmountPerFraction = Math.max(0.0, (balance / FRACTIONS.size()) - SATOSHI);
 
-        // Get ticker and highest bid
+        // Get ticker and highest bid then place trades
         double highestBid = getHighestBid(p, PAIR);
+        orders = placeTrades(p, highestBid, quoteAmountPerFraction);
 
-        // Get trades and place them
-        for (double fraction : FRACTIONS) {
-            Trade t = getTradeForFraction(highestBid, fraction, quoteAmountPerFraction);
-            TradeRequest r = new TradeRequest(t);
-            MarketResponse resp;
-            do {
-                resp = p.processMarketRequest(r);
-                sleep(350);
-            } while (!resp.isSuccess());
-            orders.put(((TradeResponse) resp).getOrderNumber(), fraction);
-        }
-
+        // Whether a placed order was filled.
+        boolean fillFound = false;
         // Loop perpetually
         while (true) {
-            System.out.println("Running...");
-            MarketResponse r;
+            if (fillFound) {
+                fillFound = false;
+                // Sleep until we've given a chance for the counter-orders to fill.
+                System.out.println("Sleeping while waiting for counter-orders to fill.");
+                sleep(60000);
+                System.out.println("Canceling remaining buy orders.");
+                // TODO(stfinancial): Handle the case where a buy order filled in the time that we were waiting.
+                cancelAllOrders(p, orders);
+                quoteAmountPerFraction = Math.max(0.0, (getQuoteBalance(p, PAIR) / FRACTIONS.size()) - SATOSHI);
+                highestBid = getHighestBid(p, PAIR);
+                System.out.println("Current highest bid at: " + highestBid + ". Placing new trades.");
+                orders = placeTrades(p, highestBid, quoteAmountPerFraction);
+                continue;
+            }
 
             // TODO(stfinancial): Need to account for the balances that are in trades as well.
 //            balance = getQuoteBalance(p, PAIR);
@@ -77,90 +91,93 @@ public class CandleCatcher extends Strategy {
 
             // Check that none of our orders got filled.
             HashMap<String, Double> newOrders = new HashMap<>();
+            List<String> ordersToRemove = new ArrayList<>();
             for (Map.Entry<String, Double> order : orders.entrySet()) {
                 OrderTradesRequest t = new OrderTradesRequest(order.getKey());
                 r = p.processMarketRequest(t);
                 sleep(350);
-                System.out.println(r.getJsonResponse());
                 if (r.isSuccess() && ((OrderTradesResponse) r).getTrades().size() != 0) {
-                    System.out.println("Order was at least partially filled: " + r.getJsonResponse());
-                    // Cancel the remainder of the order
-                    CancelRequest c = new CancelRequest(order.getKey(), CancelRequest.CancelType.TRADE);
-                    do {
-                        r = p.processMarketRequest(c);
-                        sleep(350);
-                    } while (!r.isSuccess());
-                    System.out.println(r.getJsonResponse());
-                    // Now look at the trades executed by this order
-                    do {
-                        r = p.processMarketRequest(t);
-                        sleep(350);
-                    } while (!r.isSuccess());
-                    double amountFilled = 0.0;
-                    for (CompletedTrade trade : ((OrderTradesResponse) r).getTrades()) {
-                        amountFilled += trade.getTrade().getAmount();
-                    }
-                    // Sell this amount at some specified level
-                    // TODO(stfinancial): Figure out how best to do this. Make fraction a constant.
-                    TradeRequest tr = new TradeRequest(new Trade(amountFilled, highestBid * (1 - 0.01), PAIR, TradeType.SELL));
-                    do {
-                        r = p.processMarketRequest(tr);
-                        sleep(1000);
-                    } while (!r.isSuccess());
-
-                    // Then place a new trade.
-                    tr = new TradeRequest(getTradeForFraction(highestBid, order.getValue(), quoteAmountPerFraction));
-                    do {
-                        r = p.processMarketRequest(tr);
-                        sleep(350);
-                    } while (!r.isSuccess());
-                    newOrders.put(((TradeResponse) r).getOrderNumber(), order.getValue());
-                } else {
-                    System.out.println("No fills found, moving.");
+                    fillFound = true;
+//                    System.out.println("Order with fraction " + order.getValue() + " was at least partially filled: " + r.getJsonResponse());
+//                    // Cancel the remainder of the order... if it exists.
+//                    OpenOrderRequest o = new OpenOrderRequest(PAIR);
+//                    r = processRequest(o, p, 350, true);
+//                    if (((OpenOrderResponse) r).getOpenOrdersById().containsKey(order.getKey())) {
+//                        System.out.println("Canceling remainder of order.");
+//                        // Cancel the remainder of the order.
+//                        processRequest(new CancelRequest(order.getKey(), CancelRequest.CancelType.TRADE), p, 350, true);
+//                    }
+//                    // Now look at the trades executed by this order
+//                    r = processRequest(t, p, 350, true);
+//
+//                    // Figure out how much of the order was filled and the amount of fees charged.
+//                    double amountFilled = 0.0;
+//                    double totalFees = 0.0; // fees assessed in base currency.
+//                    for (CompletedTrade trade : ((OrderTradesResponse) r).getTrades()) {
+//                        totalFees += trade.getFee();
+//                        amountFilled += trade.getTrade().getAmount();
+//                    }
+//
+//                    // Sell this amount at some specified level
+//                    // TODO(stfinancial): Figure out how best to do this. Make fraction a constant.
+//                    double price = highestBid * (1 - 0.002);
+//                    double amt = (quoteAmountPerFraction / price) - amountFilled - totalFees - SATOSHI - SATOSHI;
+//                    TradeRequest tr = new TradeRequest(new Trade(amt, highestBid * (1 - 0.002), PAIR, TradeType.SELL));
+//                    System.out.println("Amount filled: " + amountFilled + "\tFees: " + totalFees + "\tNew Trade: " + tr.toString());
+//                    processRequest(tr, p, 500, true);
+//                    ordersToRemove.add(order.getKey());
+                } else if (!fillFound) {
+                    System.out.println("No fills found. Moving fraction: " + order.getValue());
                     // Move the trade
                     double movePrice = highestBid * (1 - order.getValue());
                     MoveOrderRequest m = new MoveOrderRequest(order.getKey(), movePrice);
                     m.setAmount(((quoteAmountPerFraction) / movePrice) - SATOSHI);
-                    do {
-                        r = p.processMarketRequest(m);
-                        System.out.println(r.getJsonResponse());
-                        sleep(350);
-                    } while (!r.isSuccess());
+                    r = processRequest(m, p, 350, false);
                     newOrders.put(((MoveOrderResponse) r).getOrderNumber(), order.getValue());
                 }
             }
-            orders.clear();
-            orders.putAll(newOrders);
+            if (!fillFound) {
+                orders.clear();
+                orders.putAll(newOrders);
+            } else {
+                orders.clear();
+                cancelOrdersAndSellBase(p);
+            }
         }
     }
 
-//    private MarketResponse retryWithDelay
-
-    private Trade getTradeForFraction(double highestBid, double fraction, double quoteAmountPerFraction) {
-        double price = highestBid * (1 - fraction);
-        double amount = (quoteAmountPerFraction / price) - SATOSHI;
-        return new Trade(amount, price, PAIR, TradeType.BUY);
+    private Map<String, Double> placeTrades(Poloniex p, double highestBid, double quoteAmountPerFraction) {
+        double price;
+        double amount;
+        MarketResponse r;
+        Map<String, Double> orders = new HashMap<>();
+        for (double fraction : FRACTIONS) {
+            price = highestBid * (1 - fraction);
+            amount = (quoteAmountPerFraction / price) - SATOSHI;
+            TradeRequest tr = new TradeRequest(new Trade(amount, price, PAIR, TradeType.BUY));
+            r = processRequest(tr, p, 350, false);
+            orders.put(((TradeResponse) r).getOrderNumber(), fraction);
+        }
+        return orders;
     }
 
     private double getQuoteBalance(Poloniex p, CurrencyPair pair) {
-        MarketResponse response;
         AccountBalanceRequest accountBalanceRequest = new AccountBalanceRequest(ACCOUNT_TYPE);
-        do {
-            response = p.processMarketRequest(accountBalanceRequest);
-            sleep(350);
-        } while (!response.isSuccess());
-        return ((AccountBalanceResponse) response).getBalances().getOrDefault(ACCOUNT_TYPE, Collections.emptyMap()).getOrDefault(pair.getQuote(), 0.0);
+        MarketResponse r = processRequest(accountBalanceRequest, p, 350, false);
+        return ((AccountBalanceResponse) r).getBalances().getOrDefault(ACCOUNT_TYPE, Collections.emptyMap()).getOrDefault(pair.getQuote(), 0.0);
     }
 
     private double getHighestBid(Poloniex p, CurrencyPair pair) {
         TickerRequest tickerRequest = new TickerRequest(Arrays.asList(pair));
-        MarketResponse response;
-        do {
-            response = p.processMarketRequest(tickerRequest);
-            System.out.println(response.getJsonResponse());
-            sleep(350);
-        } while (!response.isSuccess());
-        return ((TickerResponse) response).getTickers().get(pair).getHighestBid();
+        MarketResponse r = processRequest(tickerRequest, p, 350, false);
+        return ((TickerResponse) r).getTickers().get(pair).getHighestBid();
+    }
+
+    private void cancelAllOrders(Poloniex p, Map<String, Double> orders) {
+        orders.forEach((id, f) -> {
+            MarketResponse r = processRequest(new CancelRequest(id, CancelRequest.CancelType.TRADE), p , 200, true);
+            System.out.println("Canceling order " + id + ": " + r.getJsonResponse());
+        });
     }
 
     private void sleep(long millis) {
@@ -169,5 +186,15 @@ public class CandleCatcher extends Strategy {
         } catch (InterruptedException e) {
             System.out.println("Interrupted in CandleCatcher...");
         }
+    }
+
+    private MarketResponse processRequest(MarketRequest request, Poloniex p, long delay, boolean printOutput) {
+        MarketResponse r;
+        do {
+            r = p.processMarketRequest(request);
+            if (printOutput) System.out.println(r.getJsonResponse());
+            sleep(delay);
+        } while (!r.isSuccess());
+        return r;
     }
 }

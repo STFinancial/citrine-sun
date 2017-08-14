@@ -138,7 +138,7 @@ public final class Poloniex extends Market { //implements Tradable {
         if (!args.isPrivate()) {
             // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
             httpRequest = new HttpGet(args.asUrl(true));
-            System.out.println("URL: " + args.asUrl(true));
+//            System.out.println("URL: " + args.asUrl(true));
         } else {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
 //            args.refreshNonce();
