@@ -75,9 +75,6 @@ final class PoloniexUtils {
         // TODO(stfinancial): Enum map perhaps?
         String result;
         switch (type) {
-            case ALL:
-                result = "INVALID";
-                break;
             case LOAN:
                 result = "lending";
                 break;
@@ -107,7 +104,6 @@ final class PoloniexUtils {
         }
     }
 
-
     // TODO(stfinancial): Perhaps optimize by using MarginType.valueOf ... or making MarginType.LONG the else...?
     @Nullable
     static MarginType getMarginTypeFromString(String type) {
@@ -120,23 +116,15 @@ final class PoloniexUtils {
         }
     }
 
-    // TODO(stfinancial): Refactor this to be "convertTimestamp", write the javadoc.
-    static long getTimestampFromPoloTimestamp(String poloTimestamp) {
+    /**
+     * Converts a timestamp {@code String} as returned by {@link Poloniex} into a UNIX timestamp.
+     * @param poloTimestamp The timestamp {@code String} as returned by {@code Poloniex}.
+     * @return The equivalent UNIX timestamp.
+     */
+    static long convertTimestamp(String poloTimestamp) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT).withZone(ZoneId.of("UTC"));
-//        DateFormat format = new SimpleDateFormat(DATE_FORMAT);
         LocalDateTime d = LocalDateTime.from(formatter.parse(poloTimestamp));
         return d.atZone(ZoneOffset.UTC).toEpochSecond();
-//        System.out.println("Printing this ridiculous thing: " + d.toEpochSecond(ZoneOffset.UTC));
-//        System.out.println("Current time millis: \t\t\t" + System.currentTimeMillis());
-
-        // TODO(stfinancial): Go to DateTimeFormat if this becomes to cumbersome.
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DATE_FORMAT);
-//        DateTime
-//        LocalDateTime date = LocalDateTime.parse(poloTimestamp, formatter);
-//        System.out.println(date.toString());
-//        return 0;
-
-//        long timestamp = DateFormat.getDateTimeInstance();
     }
 
     @Nullable
@@ -147,7 +135,7 @@ final class PoloniexUtils {
             return null;
         }
         // Poloniex API does not conform to the CurrencyPair representation standard.
-        return CurrencyPair.of(Currency.getCanonicalRepresentation(currencies[1]), Currency.getCanonicalRepresentation(currencies[0]));
+        return CurrencyPair.of(Currency.getCanonicalName(currencies[1]), Currency.getCanonicalName(currencies[0]));
     }
 
     /**

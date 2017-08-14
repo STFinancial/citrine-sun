@@ -10,15 +10,14 @@ import java.util.List;
  * {@link CurrencyPair Currency Pairs}, if any.
  */
 public class TickerRequest extends MarketRequest {
-    // TODO(stfinancial): If Poloniex is the only market supporting getting every/multiple ticker, then consider maybe making this a single pair.
     private List<CurrencyPair> pairs;
 
     public TickerRequest() {
-        // TODO(stfinancial): How do we handle this for markets which do not support obtaining all tickers? Implicitly ask for all of them?
         pairs = Collections.emptyList();
     }
 
     public TickerRequest(List<CurrencyPair> pairs) {
+        // TODO(stfinancial): Is this excessive?
         this.pairs = Collections.unmodifiableList(pairs);
     }
 

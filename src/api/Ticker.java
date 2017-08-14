@@ -11,11 +11,11 @@ public class Ticker {
     private final double percentChange;
     private final double baseVolume;
     private final double quoteVolume;
+    private final double high24hr;
+    private final double low24hr;
 
     // TODO(stfinancial)
     // isFrozen
-    // high24hr
-    // low24hr
 
     private Ticker(Builder builder) {
         this.pair = builder.pair;
@@ -25,8 +25,11 @@ public class Ticker {
         this.percentChange = builder.percentChange;
         this.baseVolume = builder.baseVolume;
         this.quoteVolume = builder.quoteVolume;
+        this.high24hr = builder.high24hr;
+        this.low24hr = builder.low24hr;
     }
 
+    // TODO(stfinancial): How do these getters work if they may not be provided by the market?
     public CurrencyPair getPair() { return pair; }
     public double getLast() { return last; }
     public double getLowestAsk() { return lowestAsk; }
@@ -47,6 +50,8 @@ public class Ticker {
         sb.append("\tpercentChange: ").append(percentChange).append("\n");
         sb.append("\tbaseVolume: ").append(baseVolume).append("\n");
         sb.append("\tquoteVolume: ").append(quoteVolume).append("\n");
+        sb.append("\thigh24hr: ").append(high24hr).append("\n");
+        sb.append("\tlow24hr: ").append(low24hr).append("\n");
         sb.append("}\n");
         return sb.toString();
     }
@@ -60,6 +65,8 @@ public class Ticker {
         private double percentChange;
         private double baseVolume;
         private double quoteVolume;
+        private double high24hr;
+        private double low24hr;
 
         public Builder(CurrencyPair pair, double last, double lowestAsk, double highestBid) {
             this.pair = pair;
@@ -73,6 +80,10 @@ public class Ticker {
         public Builder baseVolume(double baseVolume) { this.baseVolume = baseVolume; return this; }
 
         public Builder quoteVolume(double quoteVolume) { this.quoteVolume = quoteVolume; return this; }
+
+        public Builder high24hr(double high24hr) { this.high24hr = high24hr; return this; }
+
+        public Builder low24hr(double low24hr) { this.low24hr = low24hr; return this; }
 
         public Ticker build() {
             return new Ticker(this);

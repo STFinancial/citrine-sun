@@ -10,17 +10,12 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Generic class containing information about constructing an {@link org.apache.http.HttpRequest}. Contains URL, http
  * request type, and request body as a {@link JsonNode} or {@link NameValuePair}.
  */
 public final class RequestArgs {
-    // TODO(stfinancial): Review the thread safety of this object.
-    // TODO(stfinancial): This should be provided by the market on a per market basis.
-    private static final ObjectMapper mapper = new ObjectMapper();
-
     // TODO(stfinancial): Potentially move this into its own class.
     public enum HttpRequestType {
         GET, POST, DELETE;
@@ -143,7 +138,7 @@ public final class RequestArgs {
         }
     }
 
-    public JsonNode asJson() {
+    public JsonNode asJson(ObjectMapper mapper) {
         if (json != null && !json.isNull()) {
             return json;
         }
@@ -180,7 +175,7 @@ public final class RequestArgs {
         private List<String> resources;
         private List<RequestParam> params;
         // TODO(stfinancial): Make type and isPrivate part of the constructor?
-        private HttpRequestType type = HttpRequestType.GET; // TODO(stfinancial): Could this be a part of the market request?
+        private HttpRequestType type = HttpRequestType.GET;
         private boolean isPrivate = false;
 
         public Builder(String uri) {

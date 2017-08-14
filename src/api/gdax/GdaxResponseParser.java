@@ -11,20 +11,17 @@ import com.fasterxml.jackson.databind.JsonNode;
 import java.util.*;
 
 /**
- * Created by Timothy on 4/23/17.
+ * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Gdax} into a
+ * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class GdaxResponseParser {
+final class GdaxResponseParser implements ResponseParser {
 
-    // TODO(stfinancial): Take in isError for now until we switch to using the http response.
-    static MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }
         // TODO(stfinancial): Get the request status here.
-
-        if (isError) {
-            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
-        }
         if (request instanceof TradeRequest) {
             return createTradeResponse(jsonResponse, (TradeRequest) request, timestamp);
         } else if (request instanceof OrderBookRequest) {
@@ -49,7 +46,7 @@ final class GdaxResponseParser {
 
     // TODO(stfinancial): Think carefully about what is at stake for returning MarketResponse vs. the specific response type.
 
-    private static MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
+    private MarketResponse createTradeResponse(JsonNode jsonResponse, TradeRequest request, long timestamp) {
         if (jsonResponse.has("status") && jsonResponse.get("status").asText().equals("rejected")) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("reject_reason").asText()));
         }
@@ -60,12 +57,12 @@ final class GdaxResponseParser {
         return new TradeResponse(jsonResponse.get("id").asText(), jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
+    private MarketResponse createCancelResponse(JsonNode jsonResponse, CancelRequest request, long timestamp) {
         return new MarketResponse(jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
-        CurrencyPair pair = request.getCurrencyPair().get();
+    private MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
+        CurrencyPair pair = request.getCurrencyPair();
         Map<CurrencyPair, List<Trade>> asksSet = new HashMap<>();
         Map<CurrencyPair, List<Trade>> bidsSet = new HashMap<>();
         List<Trade> asks = new ArrayList<>();
@@ -81,19 +78,19 @@ final class GdaxResponseParser {
         return new OrderBookResponse(asksSet, bidsSet, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
+    private MarketResponse createOrderTradesResponse(JsonNode jsonResponse, OrderTradesRequest request, long timestamp) {
         List<CompletedTrade> trades = new ArrayList<>();
         System.out.println("CreateOrderTradesResponse - GDAX: " + jsonResponse);
         jsonResponse.forEach((trade) -> {
             // TODO(stfinancial): Clean this up, refactor to utils class for constructing trade from json
             // TODO(stfinancial): See if different markets need to have different interpretations of the fee parameter.
             // TODO(stfinancial): Make sure created_at means what we think it means.
-            trades.add(new CompletedTrade.Builder(new Trade(jsonResponse.get("amount").asDouble(), jsonResponse.get("price").asDouble(), GdaxUtils.parseCurrencyPair(jsonResponse.get("product_id").asText()), GdaxUtils.getTradeTypeFromString(jsonResponse.get("side").asText())), jsonResponse.get("trade_id").asText(), GdaxUtils.getTimestampFromGdaxTimestamp(jsonResponse.get("created_at").asText())).fee(jsonResponse.get("fee").asDouble()).build());
+            trades.add(new CompletedTrade.Builder(new Trade(jsonResponse.get("amount").asDouble(), jsonResponse.get("price").asDouble(), GdaxUtils.parseCurrencyPair(jsonResponse.get("product_id").asText()), GdaxUtils.getTradeTypeFromString(jsonResponse.get("side").asText())), jsonResponse.get("trade_id").asText(), GdaxUtils.convertTimestamp(jsonResponse.get("created_at").asText())).fee(jsonResponse.get("fee").asDouble()).build());
         });
         return new OrderTradesResponse(trades, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
+    private MarketResponse createTickerResponse(JsonNode jsonResponse, TickerRequest request, long timestamp) {
         Ticker.Builder ticker = new Ticker.Builder(request.getPairs().get(0), jsonResponse.get("price").asDouble(), jsonResponse.get("ask").asDouble(), jsonResponse.get("bid").asDouble());
         ticker.baseVolume(jsonResponse.get("volume").asDouble());
         // TODO(stfinancial): Look at all the problems this stupid optional list is causing.
@@ -102,16 +99,16 @@ final class GdaxResponseParser {
         return new TickerResponse(tickers, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
+    private MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         Map<AccountType, Map<Currency, Double>> balances = new HashMap<>();
         Map<Currency, Double> exchangeBalances = new HashMap<>();
         Map<Currency, Double> marginBalances = new HashMap<>();
         // TODO(stfinancial): Maybe make a Balance class that has available and total balances as well as other info.
         jsonResponse.forEach((balance) -> {
             if (balance.has("margin_enabled") && balance.get("margin_enabled").asBoolean()) {
-                marginBalances.put(Currency.getCanonicalRepresentation(balance.get("currency").asText()), balance.get("available").asDouble());
+                marginBalances.put(Currency.getCanonicalName(balance.get("currency").asText()), balance.get("available").asDouble());
             } else {
-                exchangeBalances.put(Currency.getCanonicalRepresentation(balance.get("currency").asText()), balance.get("available").asDouble());
+                exchangeBalances.put(Currency.getCanonicalName(balance.get("currency").asText()), balance.get("available").asDouble());
             }
         });
         balances.put(AccountType.EXCHANGE, exchangeBalances);
@@ -119,7 +116,7 @@ final class GdaxResponseParser {
         return new AccountBalanceResponse(balances, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
-    private static MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
+    private MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
         System.out.println(jsonResponse);
         Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
         jsonResponse.elements().forEachRemaining((trade) -> {
@@ -128,7 +125,7 @@ final class GdaxResponseParser {
                 completedTrades.put(pair, new ArrayList<>());
             }
             // TODO(stfinancial): I'm not sure that "created_at" is the same as what we want. Is this when the "fill" was created? or when the order was placed?
-            CompletedTrade.Builder b = new CompletedTrade.Builder(new Trade(trade.get("size").asDouble(), trade.get("price").asDouble(), pair, GdaxUtils.getTradeTypeFromString(trade.get("side").asText())), trade.get("trade_id").asText(), GdaxUtils.getTimestampFromGdaxTimestamp(trade.get("created_at").asText()));
+            CompletedTrade.Builder b = new CompletedTrade.Builder(new Trade(trade.get("size").asDouble(), trade.get("price").asDouble(), pair, GdaxUtils.getTradeTypeFromString(trade.get("side").asText())), trade.get("trade_id").asText(), GdaxUtils.convertTimestamp(trade.get("created_at").asText()));
             b.fee(trade.get("fee").asDouble());
             b.isMake(trade.get("liquidity").asText("").equals("M"));
             // TODO(stfinancial): order_id?
@@ -139,7 +136,7 @@ final class GdaxResponseParser {
         return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 
-    private static MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
+    private MarketResponse createFeeResponse(JsonNode jsonResponse, FeeRequest request, long timestamp) {
         // TODO(stfinancial): This method is a mess... clean up.
         Map<CurrencyPair, FeeInfo> fees = new HashMap<>();
         if (!request.getPairs().isEmpty()) {
@@ -158,12 +155,12 @@ final class GdaxResponseParser {
         }
     }
 
-    private static AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
+    private MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
         // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
         // TODO(stfinancial): Create the map to market name.
         List<CurrencyPair> assets = new ArrayList<>();
         jsonResponse.forEach((assetPair) -> {
-            assets.add(CurrencyPair.of(Currency.getCanonicalRepresentation(assetPair.get("base_currency").asText()), Currency.getCanonicalRepresentation(assetPair.get("quote_currency").asText())));
+            assets.add(CurrencyPair.of(Currency.getCanonicalName(assetPair.get("base_currency").asText()), Currency.getCanonicalName(assetPair.get("quote_currency").asText())));
         });
         return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }

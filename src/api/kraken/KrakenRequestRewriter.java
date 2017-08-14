@@ -2,13 +2,14 @@ package api.kraken;
 
 import api.CurrencyPair;
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.AssetPairRequest;
 import api.request.*;
 
 /**
- * Created by Timothy on 3/7/17.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Kraken} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class KrakenRequestRewriter {
+final class KrakenRequestRewriter implements RequestRewriter {
     private static final String API_ENDPOINT = "https://api.kraken.com";
     private final Kraken kraken;
 
@@ -17,7 +18,8 @@ final class KrakenRequestRewriter {
         this.kraken = kraken;
     }
 
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof OrderBookRequest) {
@@ -67,11 +69,11 @@ final class KrakenRequestRewriter {
     }
 
     private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
-        if (!request.getCurrencyPair().isPresent()) {
+        if (request.getCurrencyPair() == null) {
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
-        builder.withParam("pair", KrakenUtils.formatCurrencyPair(request.getCurrencyPair().get(), true));
+        builder.withParam("pair", KrakenUtils.formatCurrencyPair(request.getCurrencyPair(), true));
         builder.withParam("count", String.valueOf(request.getDepth()));
         builder.withResource("0");
         builder.withResource("public");
@@ -134,7 +136,7 @@ final class KrakenRequestRewriter {
 
     private RequestArgs rewriteAccountBalanceRequest(AccountBalanceRequest request) {
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
-        // TODO(stfinancial): Check account types.
+        // TODO(stfinancial): Check account types. How do we handle MARGIN when margin and exchange balances are shared?
         builder.withResource("0");
         builder.withResource("private");
         builder.withResource("Balance");

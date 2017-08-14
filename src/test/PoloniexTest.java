@@ -21,12 +21,13 @@ public class PoloniexTest {
 
     public void run() {
         Poloniex p = new Poloniex(Credentials.fromFileString(KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP)));
+        AccountBalanceRequest r = new AccountBalanceRequest();
 //        TradeHistoryRequest r = new TradeHistoryRequest(0, 0);
 
-        TradeRequest r = new TradeRequest(new Trade(1, 0.1, CurrencyPair.of(Currency.XMR, Currency.BTC), TradeType.BUY));
-        r.setIsMargin(true);
+//        TradeRequest r = new TradeRequest(new Trade(1, 0.1, CurrencyPair.of(Currency.XMR, Currency.BTC), TradeType.BUY));
+//        r.setIsMargin(true);
         MarketResponse resp = p.processMarketRequest(r);
-        resp = p.processMarketRequest(new OrderTradesRequest(((TradeResponse) resp).getOrderNumber()));
+//        resp = p.processMarketRequest(new OrderTradesRequest(((TradeResponse) resp).getOrderNumber()));
 //        System.out.println(resp.getJsonResponse());
 //        resp = p.processMarketRequest(new MoveOrderRequest(((TradeResponse) resp).getOrderNumber(), 0.2));
         System.out.println(resp.getJsonResponse());

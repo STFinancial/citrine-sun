@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Created by Timothy on 1/30/17.
+ * {@code MarketResponse} containing the available account balances for a {@link api.Market Market}.
  */
 public class AccountBalanceResponse extends MarketResponse {
     // TODO(stfinancial): Abstraction for this?
@@ -23,9 +23,12 @@ public class AccountBalanceResponse extends MarketResponse {
         this.balances = Collections.unmodifiableMap(balances);
     }
 
+    // TODO(stfinancial): Should they even have access to this directly?
     public Map<AccountType, Map<Currency, Double>> getBalances() {
         return balances;
     }
 
-    // TODO(pallarino): Maybe allow specifying account type or account type/currency as getters.
+    public Double getBalance(AccountType type, Currency c) {
+        return balances.getOrDefault(type, Collections.emptyMap()).getOrDefault(c, 0.0);
+    }
 }

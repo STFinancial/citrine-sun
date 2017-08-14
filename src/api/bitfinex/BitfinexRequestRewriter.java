@@ -1,15 +1,17 @@
 package api.bitfinex;
 
 import api.RequestArgs;
+import api.RequestRewriter;
 import api.request.*;
 
 /**
- * Created by Timothy on 4/13/17.
+ * Converts a {@link MarketRequest} into a {@link api.RequestArgs} specific to {@link Bitfinex} which can be used to construct an {@link org.apache.http.HttpRequest} and access the API of the website.
  */
-final class BitfinexRequestRewriter {
+final class BitfinexRequestRewriter implements RequestRewriter {
     private static final String API_ENDPOINT = "https://api.bitfinex.com";
 
-    RequestArgs rewriteRequest(MarketRequest request) {
+    @Override
+    public RequestArgs rewriteRequest(MarketRequest request) {
         if (request instanceof TradeRequest) {
             return rewriteTradeRequest((TradeRequest) request);
         } else if (request instanceof OrderBookRequest) {
@@ -27,13 +29,13 @@ final class BitfinexRequestRewriter {
     }
 
     private RequestArgs rewriteOrderBookRequest(OrderBookRequest request) {
-        if (!request.getCurrencyPair().isPresent()) {
+        if (request.getCurrencyPair() == null) {
             return RequestArgs.unsupported();
         }
         RequestArgs.Builder builder = new RequestArgs.Builder(API_ENDPOINT);
         builder.withResource("v2");
         builder.withResource("book");
-        builder.withResource(BitfinexUtils.formatCurrencyPair(request.getCurrencyPair().get()));
+        builder.withResource(BitfinexUtils.formatCurrencyPair(request.getCurrencyPair()));
         builder.withResource("P0");
         builder.withParam("len", String.valueOf(request.getDepth()));
         builder.httpRequestType(RequestArgs.HttpRequestType.GET);

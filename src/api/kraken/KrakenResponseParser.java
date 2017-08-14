@@ -1,9 +1,7 @@
 package api.kraken;
 
-import api.AccountType;
+import api.*;
 import api.Currency;
-import api.CurrencyPair;
-import api.Ticker;
 import api.request.AssetPairRequest;
 import api.request.AssetPairResponse;
 import api.request.*;
@@ -16,9 +14,10 @@ import util.PriceUtil;
 import java.util.*;
 
 /**
- * Created by Timothy on 6/3/17.
+ * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Kraken} into a
+ * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class KrakenResponseParser {
+final class KrakenResponseParser implements ResponseParser {
     // TODO(stfinancial): NOTE - Kraken treats order Ids and TxIds separately. Txids start with a T and Order Ids start with an O (so it appears).
 
     private final Kraken kraken;
@@ -27,17 +26,15 @@ final class KrakenResponseParser {
         this.kraken = kraken;
     }
 
-    // TODO(stfinancial): Take in isError for now until we switch to using the http response.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         // TODO(stfinancial): Check "error" field to see if the result is an empty array.
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }
         // TODO(stfinancial): Get the request status here.
 
-        if (isError) {
-            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
-        }
+
         if (jsonResponse.get("error").has(0) && !jsonResponse.get("error").get(0).asText().isEmpty()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get("error").get(0).asText()));
         }
@@ -81,7 +78,7 @@ final class KrakenResponseParser {
 
     private OrderBookResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
         System.out.println(jsonResponse);
-        CurrencyPair pair = request.getCurrencyPair().get();
+        CurrencyPair pair = request.getCurrencyPair();
         // TODO(stfinancial): We check that there is a currency pair in the request, does it make sense to be defensive and check here as well?
         JsonNode j = jsonResponse.get("result").get(KrakenUtils.formatCurrencyPair(pair, true));
         Map<CurrencyPair, List<Trade>> askMap = new HashMap<>();
@@ -89,7 +86,7 @@ final class KrakenResponseParser {
         j.get("asks").elements().forEachRemaining((order) -> {
             asks.add(new Trade(order.get(1).asDouble(), order.get(0).asDouble(), pair, TradeType.SELL));
         });
-        askMap.put(request.getCurrencyPair().get(), asks);
+        askMap.put(request.getCurrencyPair(), asks);
         Map<CurrencyPair, List<Trade>> bidMap = new HashMap<>();
         List<Trade> bids = new ArrayList<>();
         j.get("bids").elements().forEachRemaining((order) -> {
@@ -169,16 +166,16 @@ final class KrakenResponseParser {
         Map<String, CurrencyPair> assetPairNames = new HashMap<>();
         Map<CurrencyPair, String> assetPairKeys = new HashMap<>();
         jsonResponse.get("result").fields().forEachRemaining((assetPair)->{
-            Currency base = Currency.getCanonicalRepresentation(assetPair.getValue().get("base").asText());
+            Currency base = Currency.getCanonicalName(assetPair.getValue().get("base").asText());
             if (base == null) {
-                base = Currency.getCanonicalRepresentation(assetPair.getValue().get("base").asText().substring(1));
+                base = Currency.getCanonicalName(assetPair.getValue().get("base").asText().substring(1));
             }
             if (base == null) {
                 System.out.println("Could not find base currency for: " + assetPair.getValue().get("base").asText());
                 return;
             }
             // Remove the currency namespace
-            Currency quote = Currency.getCanonicalRepresentation(assetPair.getValue().get("quote").asText().substring(1));
+            Currency quote = Currency.getCanonicalName(assetPair.getValue().get("quote").asText().substring(1));
             if (quote == null) {
                 System.out.println("Could not find quote currency for: " + assetPair.getValue().get("quote").asText());
                 return;

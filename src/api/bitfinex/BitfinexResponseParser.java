@@ -1,9 +1,6 @@
 package api.bitfinex;
 
-import api.AccountType;
-import api.Currency;
-import api.CurrencyPair;
-import api.Ticker;
+import api.*;
 import api.request.*;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeType;
@@ -15,20 +12,17 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Created by Timothy on 4/13/17.
+ * Converts a {@link com.fasterxml.jackson.databind.JsonNode JsonNode} response from {@link Bitfinex} into a
+ * {@link api.Market} agnostic {@link api.request.MarketResponse}.
  */
-final class BitfinexResponseParser {
-    // TODO(stfinancial): This logic is basically shared with all other markets, maybe reuse it somehow.
-    // TODO(stfinancial): Have constructMarketResponse in Market, and have ResponseParser be an interface, call the respective methods.
-    MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp, boolean isError) {
+final class BitfinexResponseParser implements ResponseParser {
+    @Override
+    public MarketResponse constructMarketResponse(JsonNode jsonResponse, MarketRequest request, long timestamp) {
         if (jsonResponse.isNull()) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.UNPARSABLE_RESPONSE));
         }
         // TODO(stfinancial): Get the request status here.
 
-        if (isError) {
-            return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.asText()));
-        }
         if (jsonResponse.has("error") || jsonResponse.get(0).asText("").equals("error")) {
             return new MarketResponse(jsonResponse, request, timestamp, new RequestStatus(StatusType.MARKET_ERROR, jsonResponse.get(2).asText("")));
         }
@@ -45,8 +39,8 @@ final class BitfinexResponseParser {
     }
 
     private MarketResponse createOrderBookResponse(JsonNode jsonResponse, OrderBookRequest request, long timestamp) {
-        // TODO(stfinancial): Again, should we check the optional here to be defensive? Or assume it's caught in the request rewriter?
-        CurrencyPair pair = request.getCurrencyPair().get();
+        // TODO(stfinancial): Again, should we check the null here to be defensive? Or assume it's caught in the request rewriter?
+        CurrencyPair pair = request.getCurrencyPair();
         Map<CurrencyPair, List<Trade>> bids = new HashMap<>();
         List<Trade> orders = new ArrayList<>(request.getDepth());
         JsonNode j;
@@ -82,12 +76,12 @@ final class BitfinexResponseParser {
 
     private MarketResponse createAccountBalanceResponse(JsonNode jsonResponse, AccountBalanceRequest request, long timestamp) {
         // TODO(stfinancial): Does it make sense to respect the account types in the request?
-        Map<AccountType, Map<Currency, Double>> accounts = new HashMap<>();
+        HashMap<AccountType, Map<Currency, Double>> accounts = new HashMap<>();
         accounts.put(AccountType.EXCHANGE, new HashMap<>());
         accounts.put(AccountType.LOAN, new HashMap<>());
         accounts.put(AccountType.MARGIN, new HashMap<>());
         jsonResponse.forEach((b) -> {
-            accounts.get(BitfinexUtils.parseAccountType(b.get(0).asText())).put(Currency.getCanonicalRepresentation(b.get(1).asText()), b.get(4).asDouble(0.0));
+            accounts.get(BitfinexUtils.parseAccountType(b.get(0).asText())).put(Currency.getCanonicalName(b.get(1).asText()), b.get(4).asDouble(0.0));
         });
         return new AccountBalanceResponse(accounts, jsonResponse, request, timestamp, RequestStatus.success());
     }

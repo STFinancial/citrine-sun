@@ -12,7 +12,6 @@ public final class OpenOrderRequest extends MarketRequest {
 
     public OpenOrderRequest() {}
 
-    // TODO(stfinancial): How do we want to handle null values of currency pair?
     /**
      * Returns all open {@link api.tmp_trade.TradeOrder TradeOrders}.
      * @param currencyPair The {@code CurrencyPair} for which to get the market data. If null, return all open orders.
@@ -21,7 +20,6 @@ public final class OpenOrderRequest extends MarketRequest {
         this.currencyPair = currencyPair;
     }
 
-    // TODO(stfinancial): Convert this to optional. Maybe...
     @Nullable
     public CurrencyPair getCurrencyPair() {
         return currencyPair;

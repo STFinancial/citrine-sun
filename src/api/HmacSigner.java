@@ -19,15 +19,15 @@ public final class HmacSigner {
     private boolean status;
 
     // TODO(stfinancial): More graceful way of handling whether we need to decode the secret key (some may need to be decoded in hex, base64, etc.)
-    public HmacSigner(HmacAlgorithm algorithm, String secretKey, boolean decode) {
+    public HmacSigner(HmacAlgorithm algorithm, Credentials credentials, boolean decode) {
         this.algorithm = algorithm;
         try {
             mac = Mac.getInstance(algorithm.getStandardName());
             SecretKeySpec sk;
             if (decode) {
-                sk = new SecretKeySpec(Base64.decodeBase64(secretKey), algorithm.getStandardName());
+                sk = new SecretKeySpec(Base64.decodeBase64(credentials.getSecretKey()), algorithm.getStandardName());
             } else {
-                sk = new SecretKeySpec(secretKey.getBytes(), algorithm.getStandardName());
+                sk = new SecretKeySpec(credentials.getSecretKey().getBytes(), algorithm.getStandardName());
             }
             mac.init(sk);
         } catch (NoSuchAlgorithmException e) {
