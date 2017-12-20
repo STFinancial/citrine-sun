@@ -148,7 +148,7 @@ final class PoloniexResponseParser implements ResponseParser {
             });
             completedTradeMap.put(pair, completedTrades);
         });
-        System.out.println(jsonResponse.toString());
+//        System.out.println(jsonResponse.toString());
         return new MoveOrderResponse(jsonResponse.get("orderNumber").asText(), completedTradeMap, jsonResponse, request, timestamp, RequestStatus.success());
     }
 
@@ -430,7 +430,8 @@ final class PoloniexResponseParser implements ResponseParser {
             CompletedTrade.Builder b = new CompletedTrade.Builder(PoloniexUtils.getTradeFromJson(t, PoloniexUtils.parseCurrencyPair(t.get("currencyPair").asText())), t.get("tradeID").asText(), PoloniexUtils.convertTimestamp(t.get("date").asText()));
 //            b.category(PoloniexUtils.parseCategory(t.get("category").asText()));
             b.globalTradeId(t.get("globalTradeID").asText());
-//                b.fee(t.get("fee").asDouble()); // TODO(stfinancial): Decide whether to convert this to quote or base currency.
+            // Fee is given in base for now.
+            b.fee(t.get("fee").asDouble()); // TODO(stfinancial): Decide whether to convert this to quote or base currency.
             // TODO(stfinancial): Infer isMake from the fee and our fee rate.
             trades.add(b.build());
         });

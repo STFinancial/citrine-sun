@@ -135,6 +135,9 @@ public final class Poloniex extends Market {
     @Override
     protected HttpUriRequest constructHttpRequest(RequestArgs args) {
         HttpUriRequest httpRequest;
+        String responseString;
+        JsonNode jsonResponse;
+        long timestamp = System.currentTimeMillis();
         // TODO(stfinancial): Does it make sense to check the http type anyway to be defensive?
         if (args.isPrivate()) {
             // TODO(stfinancial): Decide if there are cases where we want to refresh nonce. OR just make the nonce here.
