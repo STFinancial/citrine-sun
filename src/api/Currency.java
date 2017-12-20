@@ -116,7 +116,8 @@ public enum Currency {
     XPM(Arrays.asList("XPM"), "X"),
     XRP(Arrays.asList("XRP"), "X"), // Ripple
     XVC(Arrays.asList("XVC"), "X"),
-    ZEC(Arrays.asList("ZEC"), "X"); // Zcash
+    ZEC(Arrays.asList("ZEC"), "X"), // Zcash
+    ZRX(Arrays.asList("ZRX"), "X"); // 0x
 
     /** Contains the canonical currency for a specific coin alias. E.g. "XBT" -> BTC */
     private static final Map<String, Currency> ALIAS_MAP;

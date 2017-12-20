@@ -89,19 +89,19 @@ public final class Poloniex extends Market {
             System.out.println(r.getJsonResponse());
             data = new PoloniexData(((AssetPairResponse) r).getAssetIds(), ((AssetPairResponse) r).getIdAssets());
         }
-        ObjectNode root = JsonNodeFactory.instance.objectNode();
-        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-        String payload = timestamp + "GET" + "/users/self";
-        root.put("command", "subscribe");
-        root.set("channel", JsonNodeFactory.instance.arrayNode().add("1002").add("marketChannel"));
-//        root.put("channel", "1002");
-//        root.put()
-        try {
-            PoloniexSocketClient socket = new PoloniexSocketClient(root, data);
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-        }
+//        ObjectNode root = JsonNodeFactory.instance.objectNode();
+//        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+//        String payload = timestamp + "GET" + "/users/self";
+//        root.put("command", "subscribe");
+//        root.set("channel", JsonNodeFactory.instance.arrayNode().add("1002").add("marketChannel"));
+////        root.put("channel", "1002");
+////        root.put()
+//        try {
+//            PoloniexSocketClient socket = new PoloniexSocketClient(root, data);
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.out.println(e.getMessage());
+//        }
     }
 
     @Override
