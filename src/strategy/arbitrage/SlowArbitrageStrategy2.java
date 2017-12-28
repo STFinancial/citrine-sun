@@ -35,6 +35,7 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
     private static final String POLO_KEY = KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP);
+    private static final String BITTREX_KEY = KeyManager.getKeyForMarket("Bittrex", KeyManager.Machine.LAPTOP);
     private static final String GDAX_KEY = KeyManager.getKeyForMarket("Gdax", KeyManager.Machine.LAPTOP);
 
     // TODO(stfinancial): Replace this with an amount based on account balance.

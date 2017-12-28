@@ -90,7 +90,7 @@ public final class Gdax extends Market {
             System.out.println(json);
             String what;
             if (args.getHttpRequestType() != RequestArgs.HttpRequestType.POST || json.isNull()) {
-                if (args.getQueryString() != null || !args.getQueryString().isEmpty()) {
+                if (args.getQueryString() != null && !args.getQueryString().isEmpty()) {
                     what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + "?" + args.getQueryString();
                 } else {
                     what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath();
