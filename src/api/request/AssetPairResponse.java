@@ -12,6 +12,8 @@ import java.util.Map;
  */
 // TODO(stfinancial): Rename to CurrencyPairResponse?
 public class AssetPairResponse extends MarketResponse {
+    // TODO(stfinancial): Change this to return AssetPair
+
     // TODO(stfinancial): Figure out how to handle this for various markets.
     // TODO(stfinanical): Possibly separate into many requests, each for their respective market.
 

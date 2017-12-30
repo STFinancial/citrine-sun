@@ -5,5 +5,5 @@ package api.binance;
  */
 final class BinanceData {
 
-    private final assetPairNames
+//    private final assetPairNames
 }

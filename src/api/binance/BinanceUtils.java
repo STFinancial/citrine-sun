@@ -9,8 +9,8 @@ import com.sun.istack.internal.Nullable;
  */
 final class BinanceUtils {
 
-    @Nullable
-    static CurrencyPair parseCurrencyPair(String pair) {
-
-    }
+//    @Nullable
+//    static CurrencyPair parseCurrencyPair(String pair) {
+//
+//    }
 }

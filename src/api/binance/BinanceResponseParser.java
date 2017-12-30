@@ -16,6 +16,8 @@ final class BinanceResponseParser implements ResponseParser {
         }
         if (request instanceof TickerRequest) {
             return createTickerResponse(json, (TickerRequest) request, timestamp);
+        } else if (request instanceof AssetPairRequest) {
+            return createAssetPairResponse(json, (AssetPairRequest) request, timestamp);
         }
 //        // TODO(stfinancial): Get the request status here.
 //        if (request instanceof TradeRequest) {
@@ -40,7 +42,7 @@ final class BinanceResponseParser implements ResponseParser {
         return new MarketResponse(json, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 
-    private TickerResponse createTickerResponse(JsonNode json, TickerRequest request, long timestamp) {
+    private MarketResponse createTickerResponse(JsonNode json, TickerRequest request, long timestamp) {
         if (request.getPairs().isEmpty()) {
             json.elements().forEachRemaining((t) -> {
 //                Ticker.Builder b = new Ticker.Builder()
@@ -49,6 +51,14 @@ final class BinanceResponseParser implements ResponseParser {
 
         }
         System.out.println(json.toString());
-        return null;
+        return new MarketResponse(json, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
+    }
+
+    private MarketResponse createAssetPairResponse(JsonNode json, AssetPairRequest request, long timestamp) {
+        json.get("symbols").elements().forEachRemaining((s) -> {
+            
+        });
+        System.out.println(json.toString());
+        return new MarketResponse(json, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
     }
 }
