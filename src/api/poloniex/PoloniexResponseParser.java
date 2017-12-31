@@ -453,16 +453,12 @@ final class PoloniexResponseParser implements ResponseParser {
     }
 
     private MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
-        Map<CurrencyPair, Integer> assetIds = new HashMap<>();
-        Map<Integer, CurrencyPair> idAssets = new HashMap<>();
-        List<CurrencyPair> assets = new ArrayList<>();
+        List<AssetPair> assets = new ArrayList<>();
         jsonResponse.fields().forEachRemaining((cp) -> {
             CurrencyPair pair = PoloniexUtils.parseCurrencyPair(cp.getKey());
             int id = cp.getValue().get("id").asInt();
-            assetIds.put(pair, id);
-            idAssets.put(id, pair);
-            assets.add(pair);
+            assets.add((new AssetPair.Builder(pair, cp.getKey())).id(id).build());
         });
-        return new AssetPairResponse(assetIds, idAssets, assets, jsonResponse, request, timestamp, RequestStatus.success());
+        return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }
 }

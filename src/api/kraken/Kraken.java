@@ -63,10 +63,10 @@ public final class Kraken extends Market {
             r = processMarketRequest(apr);
         }
         if (!r.isSuccess()) {
-            data = new KrakenData(Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+            data = new KrakenData(Collections.emptyList());
         } else {
             System.out.println(r.getJsonResponse());
-            data = new KrakenData(((AssetPairResponse) r).getAssetPairs(), ((AssetPairResponse) r).getAssetPairNames(), ((AssetPairResponse) r).getAssetPairKeys());
+            data = new KrakenData(((AssetPairResponse) r).getAssetPairs());
         }
     }
 

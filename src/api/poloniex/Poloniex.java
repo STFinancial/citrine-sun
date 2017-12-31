@@ -84,10 +84,10 @@ public final class Poloniex extends Market {
             r = processMarketRequest(apr);
         }
         if (!r.isSuccess()) {
-            data = new PoloniexData(Collections.emptyMap(), Collections.emptyMap());
+            data = new PoloniexData(Collections.emptyList());
         } else {
             System.out.println(r.getJsonResponse());
-            data = new PoloniexData(((AssetPairResponse) r).getAssetIds(), ((AssetPairResponse) r).getIdAssets());
+            data = new PoloniexData(((AssetPairResponse) r).getAssetPairs());
         }
 //        ObjectNode root = JsonNodeFactory.instance.objectNode();
 //        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);

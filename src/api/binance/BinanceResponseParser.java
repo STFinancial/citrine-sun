@@ -56,7 +56,7 @@ final class BinanceResponseParser implements ResponseParser {
 
     private MarketResponse createAssetPairResponse(JsonNode json, AssetPairRequest request, long timestamp) {
         json.get("symbols").elements().forEachRemaining((s) -> {
-            
+
         });
         System.out.println(json.toString());
         return new MarketResponse(json, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
