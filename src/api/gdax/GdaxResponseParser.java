@@ -158,9 +158,10 @@ final class GdaxResponseParser implements ResponseParser {
     private MarketResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
         // TODO(stfinancial): base_min_size, base_max_size. Make a AssetPairInfo class or something.
         // TODO(stfinancial): Create the map to market name.
-        List<CurrencyPair> assets = new ArrayList<>();
+        List<AssetPair> assets = new ArrayList<>();
         jsonResponse.forEach((assetPair) -> {
-            assets.add(CurrencyPair.of(Currency.getCanonicalName(assetPair.get("base_currency").asText()), Currency.getCanonicalName(assetPair.get("quote_currency").asText())));
+            AssetPair.Builder ap = new AssetPair.Builder(GdaxUtils.parseCurrencyPair(assetPair.get("id").asText()), assetPair.get("id").asText());
+            assets.add(ap.build());
         });
         return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());
     }
