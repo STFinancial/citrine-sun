@@ -135,6 +135,7 @@ final class PoloniexUtils {
             return null;
         }
         // Poloniex API does not conform to the CurrencyPair representation standard.
+        System.out.println(pair);
         return CurrencyPair.of(Currency.getCanonicalName(currencies[1]), Currency.getCanonicalName(currencies[0]));
     }
 

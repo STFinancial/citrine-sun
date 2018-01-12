@@ -31,27 +31,27 @@ public final class Gdax extends Market {
         }
         this.requestRewriter = new GdaxRequestRewriter();
         this.responseParser = new GdaxResponseParser();
-        ObjectNode root = JsonNodeFactory.instance.objectNode();
-        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
-        String payload = timestamp + "GET" + "/users/self";
-        root.put("type", "subscribe");
-        root.set("product_ids", JsonNodeFactory.instance.arrayNode().add("BTC-USD"));
-        root.put("signature", signer.getBase64Digest(payload.getBytes()));
-        root.put("key", getApiKey());
-        root.put("passphrase", passphrase);
-        root.put("timestamp", timestamp);
-//        root.put()
-        try {
-            GdaxSocketClient socket = new GdaxSocketClient(new URI(WS_ENDPOINT), root);
-//            socket.
-//            socket.connect();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-        } catch (IOException e) {
-            e.printStackTrace();
-            System.out.println(e.getMessage());
-        }
+//        ObjectNode root = JsonNodeFactory.instance.objectNode();
+//        String timestamp = String.valueOf(System.currentTimeMillis() / 1000);
+//        String payload = timestamp + "GET" + "/users/self";
+//        root.put("type", "subscribe");
+//        root.set("product_ids", JsonNodeFactory.instance.arrayNode().add("BTC-USD"));
+//        root.put("signature", signer.getBase64Digest(payload.getBytes()));
+//        root.put("key", getApiKey());
+//        root.put("passphrase", passphrase);
+//        root.put("timestamp", timestamp);
+////        root.put()
+//        try {
+//            GdaxSocketClient socket = new GdaxSocketClient(new URI(WS_ENDPOINT), root);
+////            socket.
+////            socket.connect();
+//        } catch (URISyntaxException e) {
+//            e.printStackTrace();
+//            System.out.println(e.getMessage());
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//            System.out.println(e.getMessage());
+//        }
     }
 
     @Override
@@ -90,7 +90,8 @@ public final class Gdax extends Market {
             System.out.println(json);
             String what;
             if (args.getHttpRequestType() != RequestArgs.HttpRequestType.POST || json.isNull()) {
-                if (args.getQueryString() != null || !args.getQueryString().isEmpty()) {
+                if (/* args.getQueryString() != null || */!args.getQueryString().isEmpty()) {
+                    System.out.println("Getting here.");
                     what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath() + "?" + args.getQueryString();
                 } else {
                     what = String.valueOf(CB_ACCESS_TIMESTAMP) + args.getHttpRequestType().toString().toUpperCase() + args.getResourcePath();

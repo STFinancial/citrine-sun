@@ -73,7 +73,7 @@ public abstract class Market {
             System.out.println("Private methods cannot be accessed with public only Credentials.");
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST, "This request is not available for public only access."));
         }
-        System.out.println("Json: " + args.asJson(mapper).toString());
+//        System.out.println("Json: " + args.asJson(mapper).toString());
 
         final HttpUriRequest httpRequest = constructHttpRequest(args);
         // TODO(stfinancial): Switch to throws instead, maybe. What do we throw for invalid http type... a general exception?
@@ -81,7 +81,7 @@ public abstract class Market {
         if (httpRequest == null) {
             return new MarketResponse(NullNode.getInstance(), request, timestamp, new RequestStatus(StatusType.MALFORMED_REQUEST, "Invalid HttpRequestType: " + args.getHttpRequestType()));
         }
-        System.out.println("HttpRequest: " + httpRequest.toString());
+//        System.out.println("HttpRequest: " + httpRequest.toString());
         try {
             CloseableHttpResponse response = httpClient.execute(httpRequest);
             statusCode = response.getStatusLine().getStatusCode();

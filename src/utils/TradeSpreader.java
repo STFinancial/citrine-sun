@@ -22,15 +22,15 @@ public class TradeSpreader {
     // TODO(stfinancial): This needs to be looked at. It doesn't seem to be working correctly. (Still not working quite right. XLM 0.0000098 and 0.0000002)
 
     // The maximum amount that is allowed of the primary currency for a run of this. This flag prevents accidentally mispricing, or selling the wrong asset.
-    private static final double PRIMARY_LIMIT = 22;
+    private static final double PRIMARY_LIMIT = 40000;
     // If true, allows the spreader (at trade calculation time) to run even though a resulting trade will be a market taker
     // Setting this to false is a safeguard against mispricings.
     private static final boolean ALLOW_MARKET_TAKES = true;
     private static final double RANDOMIZER_RATE = 0.25;
 
-    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
+//    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/main_key.txt";
     private static final String EXCHANGE = "Poloniex";
-//    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
+    private static final String API_KEYS = "F:\\Users\\Zarathustra\\Documents\\main_key.txt";
     private static final int ROUND_DECIMALS = 8;
 //    private static final String API_KEYS = "/Users/Timothy/Documents/Keys/gdax_key.txt";
 //    private static final String EXCHANGE = "Gdax";
@@ -57,24 +57,24 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 200;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, USD);
 
-//    private static final double PRICE = 0.0000655;
-//    private static final double RANGE = 0.0000015;
-//    private static final double AMOUNT = 70000;
+//    private static final double PRICE = 0.000075;
+//    private static final double RANGE = 0.000005;
+//    private static final double AMOUNT = 75244;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XRP, BTC);
 
-    private static final double PRICE = 0.011;
-    private static final double RANGE = 0.002;
-    private static final double AMOUNT = 1920;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+//    private static final double PRICE = 0.0188;
+//    private static final double RANGE = 0.0003;
+//    private static final double AMOUNT = 378;
+//    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
 
 //    private static final double PRICE = 0.077;
 //    private static final double RANGE = 0.003;
 //    private static final double AMOUNT = 47;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(ETH, BTC);
 
-//    private static final double PRICE = 0.0026;
-//    private static final double RANGE = 0.0002;
-//    private static final double AMOUNT = 1239;
+//    private static final double PRICE = 0.00231;
+//    private static final double RANGE = 0.0006;
+//    private static final double AMOUNT = 4330;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(CLAM, BTC);
 
 //    private static final double PRICE = 0.0074;
@@ -82,15 +82,20 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 397;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(FCT, BTC);
 
-//    private static final double PRICE = 0.000225;
-//    private static final double RANGE = 0.000065;
-//    private static final double AMOUNT = 163000;
+//    private static final double PRICE = 0.000217;
+//    private static final double RANGE = 0.00005;
+//    private static final double AMOUNT = 281500;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 
-//    private static final double PRICE = 0.025;
-//    private static final double RANGE = 0.005;
-//    private static final double AMOUNT = 1490;
+//    private static final double PRICE = 0.02325;
+//    private static final double RANGE = 0.002;
+//    private static final double AMOUNT = 610;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(XMR, BTC);
+
+    private static final double PRICE = 640;
+    private static final double RANGE = 80;
+    private static final double AMOUNT = 55.5;
+    private static final CurrencyPair PAIR = CurrencyPair.of(BCH, USDT);
 
 //    private static final double PRICE = 0.0000090;
 //    private static final double RANGE = 0.0000005;
@@ -102,9 +107,9 @@ public class TradeSpreader {
 //    private static final double AMOUNT = 176282;
 //    private static final CurrencyPair PAIR = CurrencyPair.of(BTS, BTC);
 
-    private static final int BUCKETS = 255;
-    private static final TradeType TYPE = TradeType.BUY;
-    private static final boolean IS_MARGIN = true;
+    private static final int BUCKETS = 99;
+    private static final TradeType TYPE = TradeType.SELL;
+    private static final boolean IS_MARGIN = false;
 
     // TODO(stfinancial): Analyze trade order timestamps to construct a tree to tell me how many of a given order have been sold, so I can rebuy the same amount, for example.
 
@@ -168,11 +173,11 @@ public class TradeSpreader {
                 try {
                     // TODO(stfinancial): Need to make sure that if this fails with jsonMappingException that the trade didn't go through and the error wasn't somewhere else.
                     System.out.println("Failed request, sleeping... : " + r.getJsonResponse());
-                    Thread.sleep(1000);
+                    Thread.sleep(5888);
                 } catch (InterruptedException e) {}
             }
             try {
-                Thread.sleep(250);
+                Thread.sleep(200);
             } catch (InterruptedException e) {}
         }
     }

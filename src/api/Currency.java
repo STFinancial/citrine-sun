@@ -32,6 +32,7 @@ public enum Currency {
     CAD(Arrays.asList("CAD"), "Z"), // Canadian Dollar
     CLAM(Arrays.asList("CLAM"), "X"),
     CURE(Arrays.asList("CURE"), "X"),
+    CVC(Arrays.asList("CVC"), "X"), // Civic
     DAO(Arrays.asList("DAO"), "X"), // The DAO tokens.
     DASH(Arrays.asList("DASH","DSH"), "X"), // Dash
     DCR(Arrays.asList("DCR"), "X"), // Decred
@@ -46,7 +47,9 @@ public enum Currency {
     FCT(Arrays.asList("FCT"), "X"), // Factom
     FLDC(Arrays.asList("FLDC"), "X"), // Folding Coin
     FLO(Arrays.asList("FLO"), "X"),
+    FUN(Arrays.asList("FUN"), "X"), // Funfair
     GAME(Arrays.asList("GAME"), "X"), // Game Credits
+    GAS(Arrays.asList("GAS"), "X"), // NEO Gas
     GBP(Arrays.asList("GBP"), "Z"), // British Pound
     GBYTE(Arrays.asList("GBYTE"), "X"), // Byteball
     GNO(Arrays.asList("GNO"), "X"), // Gnosis
@@ -58,6 +61,7 @@ public enum Currency {
     IOC(Arrays.asList("IOC"), "X"),
     IOTA(Arrays.asList("IOTA","IOT"), "X"), // Iota
     JPY(Arrays.asList("JPY"), "X"), // Japanese Yen
+    KNC(Arrays.asList("KNC"), "X"), // Kyber Network Token
     LBC(Arrays.asList("LBC"), "X"), // Library Credits
     LSK(Arrays.asList("LSK"), "X"), // Lisk
     LTC(Arrays.asList("LTC"), "X"), // Litecoin
@@ -86,15 +90,18 @@ public enum Currency {
     QTL(Arrays.asList("QTL"), "X"),
     QTUM(Arrays.asList("QTUM"), "X"), // Qtum
     PIVX(Arrays.asList("PIVX"), "X"), // Pivx
+    PPT(Arrays.asList("PPT"), "PPT"), // Populous
     RADS(Arrays.asList("RADS"), "X"),
     RBY(Arrays.asList("RBY"), "X"),
+    RDN(Arrays.asList("RDN"), "X"), // Raiden Network Token
     REP(Arrays.asList("REP"), "X"), // Augur
     RIC(Arrays.asList("RIC"), "X"),
     RRT(Arrays.asList("RRT"), "X"),
     SBD(Arrays.asList("SBD"), "X"),
     SC(Arrays.asList("SC"), "X"), // Siacoin
     SDC(Arrays.asList("SDC"), "X"),
-    SJCX(Arrays.asList("SJCX"), "X"), // Storjcoin
+    SJCX(Arrays.asList("SJCX"), "X"), // Storjcoin (Counterparty Asset)
+    STORJ(Arrays.asList("STORJ"), "X"), // Storjcoin (Ethereum Asset)
     SNT(Arrays.asList("SNT"), "X"), // Status Network Token
     STEEM(Arrays.asList("STEEM"), "X"), // Steem
     STRAT(Arrays.asList("STRAT"), "X"), // Stratis
@@ -116,7 +123,8 @@ public enum Currency {
     XPM(Arrays.asList("XPM"), "X"),
     XRP(Arrays.asList("XRP"), "X"), // Ripple
     XVC(Arrays.asList("XVC"), "X"),
-    ZEC(Arrays.asList("ZEC"), "X"); // Zcash
+    ZEC(Arrays.asList("ZEC"), "X"), // Zcash
+    ZRX(Arrays.asList("ZRX"), "X"); // 0x
 
     /** Contains the canonical currency for a specific coin alias. E.g. "XBT" -> BTC */
     private static final Map<String, Currency> ALIAS_MAP;

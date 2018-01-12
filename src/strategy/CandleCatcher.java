@@ -10,6 +10,8 @@ import api.tmp_trade.CompletedTrade;
 import api.tmp_trade.Trade;
 import api.tmp_trade.TradeOrder;
 import api.tmp_trade.TradeType;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import keys.KeyManager;
 
 import java.util.*;
@@ -37,9 +39,9 @@ public class CandleCatcher extends Strategy {
 //                    newOrders.put(((TradeResponse) r).getOrderNumber(), order.getValue());
 
     private static final AccountType ACCOUNT_TYPE = AccountType.EXCHANGE;
-    private static final CurrencyPair PAIR = CurrencyPair.of(LTC, BTC);
+    private static final CurrencyPair PAIR = CurrencyPair.of(MAID, BTC);
 //    private static final double AMOUNT_PER_FRACTION = 1; // Amount in Quote currency.
-    private static final List<Double> FRACTIONS = Arrays.asList(new Double[]{ 0.01, 0.015, 0.02, 0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1 });
+    private static final List<Double> FRACTIONS = Arrays.asList(new Double[]{ 0.025, 0.03, 0.04, 0.05, 0.06, 0.07, 0.08, 0.09, 0.1, 0.11, 0.12, 0.15, 0.25, 0.30 });
     private static final double SATOSHI = 0.00000001;
 
 
@@ -72,7 +74,7 @@ public class CandleCatcher extends Strategy {
                 fillFound = false;
                 // Sleep until we've given a chance for the counter-orders to fill.
                 System.out.println("Sleeping while waiting for counter-orders to fill.");
-                sleep(60000);
+                sleep(10000);
                 System.out.println("Canceling remaining buy orders.");
                 // TODO(stfinancial): Handle the case where a buy order filled in the time that we were waiting.
                 cancelAllOrders(p, orders);
@@ -95,10 +97,10 @@ public class CandleCatcher extends Strategy {
             for (Map.Entry<String, Double> order : orders.entrySet()) {
                 OrderTradesRequest t = new OrderTradesRequest(order.getKey());
                 r = p.processMarketRequest(t);
-                sleep(350);
+                sleep(1000);
                 if (r.isSuccess() && ((OrderTradesResponse) r).getTrades().size() != 0) {
                     fillFound = true;
-//                    System.out.println("Order with fraction " + order.getValue() + " was at least partially filled: " + r.getJsonResponse());
+                    System.out.println("Order with fraction " + order.getValue() + " was at least partially filled: " + r.getJsonResponse());
 //                    // Cancel the remainder of the order... if it exists.
 //                    OpenOrderRequest o = new OpenOrderRequest(PAIR);
 //                    r = processRequest(o, p, 350, true);
@@ -132,8 +134,14 @@ public class CandleCatcher extends Strategy {
                     double movePrice = highestBid * (1 - order.getValue());
                     MoveOrderRequest m = new MoveOrderRequest(order.getKey(), movePrice);
                     m.setAmount(((quoteAmountPerFraction) / movePrice) - SATOSHI);
-                    r = processRequest(m, p, 350, false);
-                    newOrders.put(((MoveOrderResponse) r).getOrderNumber(), order.getValue());
+                    r = processRequest(m, p, 300, true, 5);
+                    if (!r.isSuccess()) {
+                        System.out.println("Cannot move order, assuming fill found: " + r.getJsonResponse());
+                        fillFound = true;
+                        newOrders.put(order.getKey(), order.getValue());
+                    } else {
+                        newOrders.put(((MoveOrderResponse) r).getOrderNumber(), order.getValue());
+                    }
                 }
             }
             if (!fillFound) {
@@ -143,6 +151,27 @@ public class CandleCatcher extends Strategy {
                 orders.clear();
                 cancelOrdersAndSellBase(p);
             }
+        }
+    }
+
+    private void cancelOrdersAndSellBase(Poloniex p) {
+        System.out.println("Canceling orders and selling base.");
+        MarketResponse r;
+        // Cancel remaining open orders
+        r = processRequest(new OpenOrderRequest(PAIR), p, 300, true);
+        ((OpenOrderResponse) r).getOpenOrdersById().forEach((id, o) -> processRequest(new CancelRequest(id, CancelRequest.CancelType.TRADE), p, 300, true, 5));
+        sleep(15000);
+        // Place a sell order for the amount of base currency we had.
+        // TODO(stfinancial): Maybe reuse the highestBid from when the order was placed. Then we don't need to wait 15 seconds after canceling.
+        double highestBid = getHighestBid(p, PAIR);
+        System.out.println("Highest Bid: " + highestBid);
+        r = processRequest(new AccountBalanceRequest(AccountType.EXCHANGE), p, 300, true);
+        double baseBalance = ((AccountBalanceResponse) r).getBalance(AccountType.EXCHANGE, PAIR.getBase());
+        if (baseBalance > 0.0001) {
+            // TODO(stfinancial): Usually after a stop is hit, we see a small retrace in the other direction. Maybe raise the price?
+            r = processRequest(new TradeRequest(new Trade(baseBalance, highestBid * (1 - 0.002), PAIR, TradeType.SELL)), p, 300, true);
+            // Wait
+            sleep(30000);
         }
     }
 
@@ -196,5 +225,21 @@ public class CandleCatcher extends Strategy {
             sleep(delay);
         } while (!r.isSuccess());
         return r;
+    }
+
+    private MarketResponse processRequest(MarketRequest request, Poloniex p, long delay, boolean printOutput, int retries) {
+        int attempt = 0;
+        MarketResponse r;
+        do {
+            r = p.processMarketRequest(request);
+            if (printOutput) System.out.println(r.getJsonResponse());
+            sleep(delay);
+            ++attempt;
+        } while (!r.isSuccess() && attempt < retries);
+        if (!r.isSuccess()) {
+            return new MarketResponse(NullNode.getInstance(), request, System.currentTimeMillis(), new RequestStatus(StatusType.MARKET_ERROR));
+        } else {
+            return r;
+        }
     }
 }

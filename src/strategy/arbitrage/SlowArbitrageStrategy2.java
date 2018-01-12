@@ -34,16 +34,16 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     // TODO(stfinancial): When there are multiple markets and currency pairs. Apply the adjustments to find the highest expected profit.
 
-    private static final String POLO_KEY = KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.LAPTOP);
-    private static final String GDAX_KEY = KeyManager.getKeyForMarket("Gdax", KeyManager.Machine.LAPTOP);
+    private static final String POLO_KEY = KeyManager.getKeyForMarket("Poloniex", KeyManager.Machine.DESKTOP);
+    private static final String GDAX_KEY = KeyManager.getKeyForMarket("Gdax", KeyManager.Machine.DESKTOP);
 
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
-        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.0);
-//        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.15);
+//        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.0);
+        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.25);
     }});
     // TODO(stfinancial): Make this per-exchange?
-    private static final double MIN_AMOUNT = 0.01;
+    private static final double MIN_AMOUNT = 0.005;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 25;
 
     private static final FeeRequest FEE_REQUEST = new FeeRequest();
@@ -87,7 +87,7 @@ class SlowArbitrageStrategy2 extends Strategy {
         MarketInfo askSide;
         MarketInfo bidSide;
         while (true) {
-            ArbitrageUtils.sleep(250);
+            ArbitrageUtils.sleep(350);
             if (!maybeUpdateFeesAndBalances(markets)) { continue; }
 
             /* Get new order books */
@@ -122,7 +122,7 @@ class SlowArbitrageStrategy2 extends Strategy {
                 arbRatioMA500.add(arbitrageRatio);
                 ArbitrageUtils.logAtLevel(String.valueOf(arbRatioMA500.getMovingAverage()), 4);
                 maybeDoArbitrage(bidSide, askSide, pair, arbitrageRatio);
-                ArbitrageUtils.sleep(250);
+                ArbitrageUtils.sleep(350);
             }
         }
     }
