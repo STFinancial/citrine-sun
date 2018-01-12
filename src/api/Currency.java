@@ -105,7 +105,7 @@ public enum Currency {
     LTC(Arrays.asList("LTC"), "X"), // Litecoin
     LUN(Arrays.asList("LUN"), "X"), // Lunyr
     MAID(Arrays.asList("MAID"), "X"), // Maidsafe Coin
-    MANA(Arrays.asList("MANA"), "X"), // Decentraland MANA
+    MANA(Arrays.asList("MANA", "MNA"), "X"), // Decentraland MANA
     MCO(Arrays.asList("MCO"), "X"), // Monaco
     MDA(Arrays.asList("MDA"), "X"), // Moeda Loyalty Points
     MLN(Arrays.asList("MLN"), "X"), // Melonport
@@ -138,6 +138,7 @@ public enum Currency {
     PPC(Arrays.asList("PPC"), "X"),
     PPT(Arrays.asList("PPT"), "X"), // Populous
     PTOY(Arrays.asList("PTOY"), "X"), // Patientory
+    QASH(Arrays.asList("QASH"), "X"), // Qash
     QBK(Arrays.asList("QBK"), "X"),
     QORA(Arrays.asList("QORA"), "X"),
     QSP(Arrays.asList("QSP"), "X"), // Quantstamp
@@ -193,7 +194,7 @@ public enum Currency {
     XVC(Arrays.asList("XVC"), "X"),
     XVG(Arrays.asList("XVG"), "X"), // Verge
     XZC(Arrays.asList("XZC"), "X"), // Zcoin
-    YOYO(Arrays.asList("YOYO"), "X"), // YOYOW
+    YOYO(Arrays.asList("YOYO", "YYW"), "X"), // YOYOW
     ZEC(Arrays.asList("ZEC"), "X"), // Zcash
     ZRX(Arrays.asList("ZRX"), "X"); // 0x
 
