@@ -12,8 +12,10 @@ public enum Currency {
 
     // TODO(stfinancial): Add human readable names.
     // TODO(stfinancial): Make sure that there are no duplicate names here. If there is, we may have to disambiguate with exchange names.
+    ADA(Arrays.asList("ADA"), "X"), // Cardano
     AMP(Arrays.asList("AMP"), "X"), // Synereo AMP
     ARDR(Arrays.asList("ARDR"), "X"), // Ardor
+    ARK(Arrays.asList("ARK"), "X"), // Ark
     BBR(Arrays.asList("BBR"), "X"), // Boolberry
     // TODO(stfinancial): BCC is both Bitconnect and Bitcoin Cash in some markets, need to find a way to handle this.
     BCH(Arrays.asList("BCH", "BCC"), "X"), // Bitcoin Cash
@@ -56,6 +58,7 @@ public enum Currency {
     GNT(Arrays.asList("GNT"), "X"), // Golem Network Token
     GRC(Arrays.asList("GRC"), "X"), // Gridcoin
     HUC(Arrays.asList("HUC"), "X"), // Huntercoin
+    HSR(Arrays.asList("HSR"), "X"), // Hshare
     HZ(Arrays.asList("HZ"), "X"),
     ICN(Arrays.asList("ICN"), "X"),
     IOC(Arrays.asList("IOC"), "X"),
@@ -67,6 +70,7 @@ public enum Currency {
     LTC(Arrays.asList("LTC"), "X"), // Litecoin
     MAID(Arrays.asList("MAID"), "X"), // Maidsafe Coin
     MLN(Arrays.asList("MLN"), "X"), // Melonport
+    MTH(Arrays.asList("MTH"), "X"), // Monetha
     MYR(Arrays.asList("MYR"), "X"),
     NAUT(Arrays.asList("NAUT"), "X"),
     NAV(Arrays.asList("NAV"), "X"),
@@ -82,21 +86,24 @@ public enum Currency {
     OMNI(Arrays.asList("OMNI"), "X"),
     PASC(Arrays.asList("PASC"), "X"), // Pascal
     PINK(Arrays.asList("PINK"), "X"),
+    PIVX(Arrays.asList("PIVX"), "X"), // Pivx
     POT(Arrays.asList("POT"), "X"), // Potcoin
+    POWR(Arrays.asList("POWR"), "X"), // PowerLedger
     PPC(Arrays.asList("PPC"), "X"),
+    PPT(Arrays.asList("PPT"), "X"), // Populous
     PTOY(Arrays.asList("PTOY"), "X"), // Patientory
     QBK(Arrays.asList("QBK"), "X"),
     QORA(Arrays.asList("QORA"), "X"),
     QTL(Arrays.asList("QTL"), "X"),
     QTUM(Arrays.asList("QTUM"), "X"), // Qtum
-    PIVX(Arrays.asList("PIVX"), "X"), // Pivx
-    PPT(Arrays.asList("PPT"), "PPT"), // Populous
     RADS(Arrays.asList("RADS"), "X"),
     RBY(Arrays.asList("RBY"), "X"),
     RDN(Arrays.asList("RDN"), "X"), // Raiden Network Token
     REP(Arrays.asList("REP"), "X"), // Augur
+    REQ(Arrays.asList("REQ"), "X"), // Request Network
     RIC(Arrays.asList("RIC"), "X"),
     RRT(Arrays.asList("RRT"), "X"),
+    SALT(Arrays.asList("SALT"), "X"), // Salt Lending
     SBD(Arrays.asList("SBD"), "X"),
     SC(Arrays.asList("SC"), "X"), // Siacoin
     SDC(Arrays.asList("SDC"), "X"),
@@ -105,7 +112,9 @@ public enum Currency {
     SNT(Arrays.asList("SNT"), "X"), // Status Network Token
     STEEM(Arrays.asList("STEEM"), "X"), // Steem
     STRAT(Arrays.asList("STRAT"), "X"), // Stratis
+    SUB(Arrays.asList("SUB"), "X"), // Substratum
     SYS(Arrays.asList("SYS"), "X"), // Syscoin
+    TRX(Arrays.asList("TRX"), "X"), // Tron
     UNITY(Arrays.asList("UNITY"), "X"),
     USDT(Arrays.asList("USDT"), "X"), // USD Tether
     USD(Arrays.asList("USD"), "Z"), // United States Dollar
@@ -114,6 +123,7 @@ public enum Currency {
     VRC(Arrays.asList("VRC"), "X"),
     VTC(Arrays.asList("VTC"), "X"),
     WAVES(Arrays.asList("WAVES"), "X"), // Waves
+    WTC(Arrays.asList("WTC"), "X"), // Waltonchain
     XBC(Arrays.asList("XBC"), "X"),
     XCP(Arrays.asList("XCP"), "X"), // Counterparty
     XEM(Arrays.asList("XEM"), "X"), // New Economy Movement
@@ -123,6 +133,7 @@ public enum Currency {
     XPM(Arrays.asList("XPM"), "X"),
     XRP(Arrays.asList("XRP"), "X"), // Ripple
     XVC(Arrays.asList("XVC"), "X"),
+    XVG(Arrays.asList("XVG"), "X"), // Verge
     ZEC(Arrays.asList("ZEC"), "X"), // Zcash
     ZRX(Arrays.asList("ZRX"), "X"); // 0x
 

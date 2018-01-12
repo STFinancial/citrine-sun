@@ -149,7 +149,7 @@ public class CandleCatcher extends Strategy {
                 orders.putAll(newOrders);
             } else {
                 orders.clear();
-                cancelOrdersAndSellBase(p);
+//                cancelOrdersAndSellBase(p);
             }
         }
     }

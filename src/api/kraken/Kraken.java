@@ -22,6 +22,8 @@ import java.util.Collections;
  * Class representing the Kraken {@code Market}.
  */
 public final class Kraken extends Market {
+    // TODO(stfinancial): Kraken is basically broken. I wouldn't even bother with this.
+
     // TODO(stfinancial): Kraken has a nonce window depending on the api key.
 
     private static final String NAME = "Kraken";
@@ -63,10 +65,10 @@ public final class Kraken extends Market {
             r = processMarketRequest(apr);
         }
         if (!r.isSuccess()) {
-            data = new KrakenData(Collections.emptyList(), Collections.emptyMap(), Collections.emptyMap());
+            data = new KrakenData(Collections.emptyList());
         } else {
             System.out.println(r.getJsonResponse());
-            data = new KrakenData(((AssetPairResponse) r).getAssetPairs(), ((AssetPairResponse) r).getAssetPairNames(), ((AssetPairResponse) r).getAssetPairKeys());
+            data = new KrakenData(((AssetPairResponse) r).getAssetPairs());
         }
     }
 

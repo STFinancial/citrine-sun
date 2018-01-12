@@ -127,7 +127,7 @@ final class KrakenResponseParser implements ResponseParser {
     private MarketResponse createTradeHistoryResponse(JsonNode jsonResponse, TradeHistoryRequest request, long timestamp) {
         Map<CurrencyPair, List<CompletedTrade>> completedTrades = new HashMap<>();
         jsonResponse.get("result").get("trades").fields().forEachRemaining((trade) -> {
-            CurrencyPair pair = kraken.getData().getAssetPairNames().get(trade.getValue().get("pair").asText());
+            CurrencyPair pair = kraken.getData().getAssetPairNames().get(trade.getValue().get("pair").asText()).getPair();
             if (!completedTrades.containsKey(pair)) {
                 completedTrades.put(pair, new ArrayList<>());
             }
@@ -162,10 +162,10 @@ final class KrakenResponseParser implements ResponseParser {
     }
 
     private AssetPairResponse createAssetPairResponse(JsonNode jsonResponse, AssetPairRequest request, long timestamp) {
-        List<CurrencyPair> assetPairs = new ArrayList<>();
+        List<AssetPair> assetPairs = new ArrayList<>();
         Map<String, CurrencyPair> assetPairNames = new HashMap<>();
         Map<CurrencyPair, String> assetPairKeys = new HashMap<>();
-        jsonResponse.get("result").fields().forEachRemaining((assetPair)->{
+        jsonResponse.get("result").fields().forEachRemaining((assetPair) -> {
             Currency base = Currency.getCanonicalName(assetPair.getValue().get("base").asText());
             if (base == null) {
                 base = Currency.getCanonicalName(assetPair.getValue().get("base").asText().substring(1));
@@ -187,12 +187,11 @@ final class KrakenResponseParser implements ResponseParser {
             if (!assetPair.getKey().endsWith(".d")) {
                 assetPairKeys.put(pair, assetPair.getKey());
             }
-            assetPairs.add(pair);
-            assetPairNames.put(assetPair.getValue().get("altname").asText(), pair);
-            assetPairNames.put(base.toString() + quote.toString(), pair);
-            assetPairNames.put(assetPair.getKey(), pair);
-            assetPairNames.put(base.getIsoNamespace() + base.toString() + quote.getIsoNamespace() + quote.toString(), pair);
+            assetPairs.add((new AssetPair.Builder(pair, assetPair.getValue().get("altname").asText())).build());
+            assetPairs.add((new AssetPair.Builder(pair, base.toString() + quote.toString())).build());
+            assetPairs.add((new AssetPair.Builder(pair, assetPair.getKey())).build());
+            assetPairs.add((new AssetPair.Builder(pair, base.getIsoNamespace() + base.toString() + quote.getIsoNamespace() + quote.toString())).build());
         });
-        return new AssetPairResponse(assetPairs, assetPairNames, assetPairKeys, jsonResponse, request, timestamp, RequestStatus.success());
+        return new AssetPairResponse(assetPairs, jsonResponse, request, timestamp, RequestStatus.success());
     }
 }
