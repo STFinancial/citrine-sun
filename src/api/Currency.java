@@ -92,6 +92,7 @@ public enum Currency {
     HZ(Arrays.asList("HZ"), "X"),
     ICN(Arrays.asList("ICN"), "X"), // Iconomi
     ICX(Arrays.asList("ICX"), "X"), // Icon
+    INS(Arrays.asList("INS"), "X"), // INS Ecosystem
     IOC(Arrays.asList("IOC"), "X"),
     IOTA(Arrays.asList("IOTA","IOT"), "X"), // Iota
     JPY(Arrays.asList("JPY"), "X"), // Japanese Yen
@@ -151,6 +152,7 @@ public enum Currency {
     REP(Arrays.asList("REP"), "X"), // Augur
     REQ(Arrays.asList("REQ"), "X"), // Request Network
     RIC(Arrays.asList("RIC"), "X"),
+    RLC(Arrays.asList("RLC"), "X"), // iExec RLC
     RRT(Arrays.asList("RRT"), "X"),
     SALT(Arrays.asList("SALT"), "X"), // Salt Lending
     SBD(Arrays.asList("SBD"), "X"),
@@ -172,6 +174,8 @@ public enum Currency {
     UNITY(Arrays.asList("UNITY"), "X"),
     USD(Arrays.asList("USD"), "Z"), // United States Dollar
     USDT(Arrays.asList("USDT"), "X"), // USD Tether
+    // TODO(stfinancial): Figure out how this is actually going to work.
+    USD_ARB(Arrays.asList("USD_ARB", "USDT"), "X"), // USD,USDT bridge currency for programmatically arbitraging USD and USDT
     VEN(Arrays.asList("VEN"), "X"), // VeChain
     VIA(Arrays.asList("VIA"), "X"),
     VIB(Arrays.asList("VIB"), "X"), // Viberate
