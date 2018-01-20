@@ -15,6 +15,7 @@ import java.util.Map;
 final class PoloniexData {
     // TODO(stfinancial): Maybe allow direct access to this for speed.
     // TODO(stfinancial): Not happy with the naming of these, nor of the objects in the constructor.
+    // TODO(stfinancial): Why is Data class doing what Utils class is doing?
     private final Map<CurrencyPair, AssetPair> assets;
     private final Map<Integer, AssetPair> ids;
 

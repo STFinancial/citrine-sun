@@ -21,8 +21,8 @@ public class BinanceTest {
     private void test() {
         Binance b = new Binance(Credentials.publicOnly());
         MarketResponse r;
-//        r = b.processMarketRequest(new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.BTC, Currency.RDN))));
-        r = b.processMarketRequest(new AssetPairRequest());
+        r = b.processMarketRequest(new TickerRequest(Arrays.asList(CurrencyPair.of(Currency.BTC, Currency.RDN))));
+//        r = b.processMarketRequest(new AssetPairRequest());
 //        System.out.println(r.toString());
         System.out.println(r.getJsonResponse().toString());
     }

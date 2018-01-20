@@ -1,9 +1,11 @@
 package api.binance;
 
-import api.ResponseParser;
-import api.Ticker;
+import api.*;
 import api.request.*;
 import com.fasterxml.jackson.databind.JsonNode;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Timothy on 12/23/17.
@@ -45,7 +47,7 @@ final class BinanceResponseParser implements ResponseParser {
     private MarketResponse createTickerResponse(JsonNode json, TickerRequest request, long timestamp) {
         if (request.getPairs().isEmpty()) {
             json.elements().forEachRemaining((t) -> {
-//                Ticker.Builder b = new Ticker.Builder()
+                Ticker.Builder b = new Ticker.Builder()
             });
         } else {
 
@@ -55,10 +57,12 @@ final class BinanceResponseParser implements ResponseParser {
     }
 
     private MarketResponse createAssetPairResponse(JsonNode json, AssetPairRequest request, long timestamp) {
+        List<AssetPair> assetPairs = new ArrayList<>();
         json.get("symbols").elements().forEachRemaining((s) -> {
-
+            CurrencyPair pair = CurrencyPair.of(Currency.getCanonicalName(s.get("baseAsset").asText()), Currency.getCanonicalName(s.get("quoteAsset").asText()));
+            AssetPair.Builder ap = new AssetPair.Builder(pair, s.get("symbol").asText());
+            assetPairs.add(ap.build());
         });
-        System.out.println(json.toString());
-        return new MarketResponse(json, request, timestamp, new RequestStatus(StatusType.UNSUPPORTED_REQUEST));
+        return new AssetPairResponse(assetPairs, json, request, timestamp, RequestStatus.success());
     }
 }
