@@ -41,7 +41,8 @@ class SlowArbitrageStrategy2 extends Strategy {
     // TODO(stfinancial): Replace this with an amount based on account balance.
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
 //        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.0);
-        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.25);
+//        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.25);
+        put(CurrencyPair.of(Currency.ETH, Currency.USD_ARB), 5.0);
     }});
     // TODO(stfinancial): Make this per-exchange?
     private static final double MIN_AMOUNT = 0.005;
@@ -61,22 +62,7 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     @Override
     public void run() {
-        MarketInfo polo = new MarketInfo();
-        polo.market = new Poloniex(Credentials.fromFileString(POLO_KEY));
-        polo.priority = 5;
-        MarketInfo gdax = new MarketInfo();
-        gdax.market = new Gdax(Credentials.fromFileString(GDAX_KEY));
-        gdax.priority = 1;
-        PAIRS.forEach((pair, amt) -> {
-            CurrencyPairInfo c = new CurrencyPairInfo();
-            c.minAmount = 0.005;
-            polo.currencyPairInfos.put(pair, c);
-            c = new CurrencyPairInfo();
-            c.minAmount = 0.01;
-            gdax.currencyPairInfos.put(pair, c);
-
-        });
-        checkForArbitrage(Arrays.asList(polo, gdax));
+        checkForArbitrage(initializeMarkets());
     }
 
     public void checkForArbitrage(List<MarketInfo> markets) {
@@ -376,6 +362,7 @@ class SlowArbitrageStrategy2 extends Strategy {
                 try {
                     m.currencyPairInfos.get(pair).takerFee = feeResponse.getFeeInfo(pair).getTakerFee();
                 } catch (NullPointerException e) {
+                    System.out.println("Could not get fee info.");
                     m.currencyPairInfos.get(pair).takerFee = 0.003;
                 }
 
@@ -399,5 +386,26 @@ class SlowArbitrageStrategy2 extends Strategy {
         }
         feeAndBalanceCount = 0;
         return true;
+    }
+
+    private List<MarketInfo> initializeMarkets() {
+        MarketInfo polo = new MarketInfo();
+        polo.market = new Poloniex(Credentials.fromFileString(POLO_KEY));
+        polo.priority = 5;
+        polo.usdArbitrageCurrency = Currency.USDT;
+        MarketInfo gdax = new MarketInfo();
+        gdax.market = new Gdax(Credentials.fromFileString(GDAX_KEY));
+        gdax.priority = 1;
+        gdax.usdArbitrageCurrency = Currency.USD;
+
+        PAIRS.forEach((pair, amt) -> {
+            CurrencyPairInfo c = new CurrencyPairInfo();
+            c.minAmount = 0.005;
+            polo.currencyPairInfos.put(pair, c);
+            c = new CurrencyPairInfo();
+            c.minAmount = 0.01;
+            gdax.currencyPairInfos.put(pair, c);
+        });
+        return Arrays.asList(polo, gdax);
     }
 }

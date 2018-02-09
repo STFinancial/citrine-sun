@@ -114,6 +114,7 @@ public enum Currency {
     MTH(Arrays.asList("MTH"), "X"), // Monetha
     MTL(Arrays.asList("MTL"), "X"), // Metal
     MYR(Arrays.asList("MYR"), "X"),
+    NANO(Arrays.asList("NANO", "XRB"), "X"), // Nano/Raiblocks
     NAUT(Arrays.asList("NAUT"), "X"),
     NAV(Arrays.asList("NAV"), "X"), // Navcoin
     NEBL(Arrays.asList("NEBL"), "X"), // Neblio
@@ -175,7 +176,7 @@ public enum Currency {
     USD(Arrays.asList("USD"), "Z"), // United States Dollar
     USDT(Arrays.asList("USDT"), "X"), // USD Tether
     // TODO(stfinancial): Figure out how this is actually going to work.
-    USD_ARB(Arrays.asList("USD_ARB", "USDT"), "X"), // USD,USDT bridge currency for programmatically arbitraging USD and USDT
+    USD_ARB(Arrays.asList("USD_ARB"), "X"), // USD, USDT bridge currency for programmatically arbitraging USD and USDT
     VEN(Arrays.asList("VEN"), "X"), // VeChain
     VIA(Arrays.asList("VIA"), "X"),
     VIB(Arrays.asList("VIB"), "X"), // Viberate

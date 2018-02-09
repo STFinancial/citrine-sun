@@ -29,6 +29,10 @@ final class BitfinexUtils {
     static String getCurrencyString(Currency c) {
         // TODO(stfinancial): There is probably a better way to do it than this.
         switch (c) {
+            case USD_ARB:
+                return "USD";
+            case USDT:
+                return "USD";
             case DASH:
                 return "DSH";
             case IOTA:

@@ -58,6 +58,8 @@ final class BittrexUtils {
 
     static String getCurrencyString(Currency c) {
         switch (c) {
+            case USD_ARB:
+                return "USDT";
             default:
                 return c.toString();
         }

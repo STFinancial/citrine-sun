@@ -161,6 +161,8 @@ final class GdaxResponseParser implements ResponseParser {
         List<AssetPair> assets = new ArrayList<>();
         jsonResponse.forEach((assetPair) -> {
             AssetPair.Builder ap = new AssetPair.Builder(GdaxUtils.parseCurrencyPair(assetPair.get("id").asText()), assetPair.get("id").asText());
+            ap.baseMaxSize(assetPair.get("base_max_size").asDouble(0.0));
+            ap.baseMinSize(assetPair.get("base_min_size").asDouble(0.0));
             assets.add(ap.build());
         });
         return new AssetPairResponse(assets, jsonResponse, request, timestamp, RequestStatus.success());

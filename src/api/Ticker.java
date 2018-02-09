@@ -4,6 +4,7 @@ package api;
  * Contains Ticker information for a {@link CurrencyPair}.
  */
 public class Ticker {
+    // TODO(stfinancial): Expand ticker fields to include things from every market... e.g. bidquantity, askquantity, wtdavgprice, lastqty
     private final CurrencyPair pair;
     private final double last;
     private final double lowestAsk;

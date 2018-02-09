@@ -155,10 +155,27 @@ final class PoloniexUtils {
     static String getCurrencyString(Currency currency) {
         // TODO(stfinancial): There has to be a more elegant solution than a giant switch statement. Maybe an enummap or something.
         switch (currency) {
+            case USD_ARB:
+                return "USDT";
             case XLM:
                 return "STR";
             default:
                 return currency.toString();
         }
     }
+
+    static double getMinimumForQuoteCurrency(Currency currency) {
+        switch (currency) {
+            case BTC:
+                return 0.0001;
+            case USDT:
+                return 1;
+            default:
+                return 0;
+        }
+    }
+
+//    static double getMaximumForBaseCurrency(Currency currency) {
+//
+//    }
 }

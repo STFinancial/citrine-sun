@@ -106,6 +106,8 @@ final class GdaxUtils {
     static String getCurrencyString(Currency currency) {
         // TODO(stfinancial): There has to be a more elegant solution than a giant switch statement. Maybe an enummap or something.
         switch (currency) {
+            case USD_ARB:
+                return "USD";
             default:
                 return currency.toString();
         }

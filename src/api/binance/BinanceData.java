@@ -1,7 +1,6 @@
 package api.binance;
 
 import api.AssetPair;
-import api.Currency;
 import api.CurrencyPair;
 import com.sun.istack.internal.Nullable;
 
