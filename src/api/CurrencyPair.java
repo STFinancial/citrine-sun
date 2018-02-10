@@ -61,6 +61,8 @@ public final class CurrencyPair {
         return pairList;
     }
 
+    public boolean contains(Currency currency) { return base == currency || quote == currency; }
+
     @Override
     public String toString() {
         return base.toString() + "-" + quote.toString();

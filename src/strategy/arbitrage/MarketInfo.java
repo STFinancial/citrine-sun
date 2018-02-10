@@ -17,4 +17,14 @@ class MarketInfo {
     int priority;
     CurrencyPair focusPair; // Set to whatever we've recently been arbitraging on. Checking other order books less frequently.
     Currency usdArbitrageCurrency; // Whether this exchange uses USD or USDT when arbitraging
+
+    CurrencyPair adjustPair(CurrencyPair pair) {
+        if (pair.getBase() == Currency.USD_ARB) {
+            return CurrencyPair.of(usdArbitrageCurrency, pair.getQuote());
+        } else if (pair.getQuote() == Currency.USD_ARB) {
+            return CurrencyPair.of(pair.getBase(), usdArbitrageCurrency);
+        } else {
+            return pair;
+        }
+    }
 }

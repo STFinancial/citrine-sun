@@ -84,19 +84,19 @@ class SlowArbitrageStrategy2 extends Strategy {
             for (CurrencyPair pair : PAIRS.keySet()) {
                 ArbitrageUtils.logAtLevel("Pair: " + pair.toString(), 1);
                 for (MarketInfo market : markets) {
-                    while (!(response = market.market.processMarketRequest(new OrderBookRequest(pair, 20))).isSuccess()) {
+                    while (!(response = market.market.processMarketRequest(new OrderBookRequest(market.adjustPair(pair), 20))).isSuccess()) {
                         ArbitrageUtils.logAtLevel("(" + market.market.getName() + ") " + "Failed Orderbook Request, Sleeping...: " + response.getJsonResponse(), 1);
                         ArbitrageUtils.sleep(500);
                     }
                     orderBookResponse = (OrderBookResponse) response;
                     // TODO(stfinancial): What is the guarantee of this method if we don't get a proper order book.
-                    market.currencyPairInfos.get(pair).bids = orderBookResponse.getBids().get(pair);
-                    market.currencyPairInfos.get(pair).asks = orderBookResponse.getAsks().get(pair);
+                    market.currencyPairInfos.get(market.adjustPair(pair)).bids = orderBookResponse.getBids().get(market.adjustPair(pair));
+                    market.currencyPairInfos.get(market.adjustPair(pair)).asks = orderBookResponse.getAsks().get(market.adjustPair(pair));
                 }
                 /* Check for arbitrages */
                 // TODO(stfinancial): Need a more generic way to do this in the future, especially with futures and sockets and such.
-                arbitrageRatio1 = ArbitrageUtils.getArbitrageRatio(market1.currencyPairInfos.get(pair), market2.currencyPairInfos.get(pair));
-                arbitrageRatio2 = ArbitrageUtils.getArbitrageRatio(market2.currencyPairInfos.get(pair), market1.currencyPairInfos.get(pair));
+                arbitrageRatio1 = ArbitrageUtils.getArbitrageRatio(market1.currencyPairInfos.get(market1.adjustPair(pair)), market2.currencyPairInfos.get(market2.adjustPair(pair)));
+                arbitrageRatio2 = ArbitrageUtils.getArbitrageRatio(market2.currencyPairInfos.get(market2.adjustPair(pair)), market1.currencyPairInfos.get(market1.adjustPair(pair)));
                 if (arbitrageRatio1 >= arbitrageRatio2) {
                     arbitrageRatio = arbitrageRatio1;
                     bidSide = market1;
@@ -116,8 +116,8 @@ class SlowArbitrageStrategy2 extends Strategy {
 
     private void maybeDoArbitrage(MarketInfo bidSide, MarketInfo askSide, CurrencyPair pair, double arbitrageRatio) {
         if (arbitrageRatio > 1) {
-            CurrencyPairInfo bidSidePairInfo = bidSide.currencyPairInfos.get(pair);
-            CurrencyPairInfo askSidePairInfo = askSide.currencyPairInfos.get(pair);
+            CurrencyPairInfo bidSidePairInfo = bidSide.currencyPairInfos.get(bidSide.adjustPair(pair));
+            CurrencyPairInfo askSidePairInfo = askSide.currencyPairInfos.get(askSide.adjustPair(pair));
             Trade lowestAsk = askSidePairInfo.asks.get(0);
             Trade highestBid = bidSidePairInfo.bids.get(0);
             ArbitrageUtils.logAtLevel("Arbitrage Found with Ratio: " + arbitrageRatio + " on pair " + pair.toString(), 2);
@@ -128,13 +128,13 @@ class SlowArbitrageStrategy2 extends Strategy {
 
             double askSideTradeAmount = lowestAsk.getAmount();
             // TODO(stfinancial): Make sure this is updated when we search more than 1 order deep.
-            double askSideBalanceAmount = Math.floor((askSide.balances.get(pair.getQuote()) / lowestAsk.getRate()) * HUNDRED_MILLION) / HUNDRED_MILLION; // Round the decimal down.
+            double askSideBalanceAmount = Math.floor((askSide.balances.get(askSide.adjustPair(pair).getQuote()) / lowestAsk.getRate()) * HUNDRED_MILLION) / HUNDRED_MILLION; // Round the decimal down.
             double askSideMinAmount = Math.min(scaledAmount, Math.min(askSideBalanceAmount, askSideTradeAmount));
             double askSidePostFeeMinAmount = askSideMinAmount * (1 - askSidePairInfo.takerFee);
 
 
             double bidSideTradeAmount = highestBid.getAmount();
-            double bidSideBalanceAmount = Math.floor(bidSide.balances.get(pair.getBase()) * HUNDRED_MILLION) / HUNDRED_MILLION; // Round the decimal down.
+            double bidSideBalanceAmount = Math.floor(bidSide.balances.get(bidSide.adjustPair(pair).getBase()) * HUNDRED_MILLION) / HUNDRED_MILLION; // Round the decimal down.
             double bidSideMinAmount = Math.min(scaledAmount, Math.min(bidSideTradeAmount, bidSideBalanceAmount));
             double bidSidePostFeeMinAmount = bidSideMinAmount * (1 - bidSidePairInfo.takerFee);
 
@@ -165,12 +165,12 @@ class SlowArbitrageStrategy2 extends Strategy {
 
                 /* Make the trades */
             if (askSide.priority > bidSide.priority) {
-                if (!placeTrades(askSide, new Trade(askAmount, lowestAsk.getRate(), pair, TradeType.BUY), bidSide, new Trade(bidAmount, highestBid.getRate(), pair, TradeType.SELL))) {
+                if (!placeTrades(askSide, new Trade(askAmount, lowestAsk.getRate(), askSide.adjustPair(pair), TradeType.BUY), bidSide, new Trade(bidAmount, highestBid.getRate(), bidSide.adjustPair(pair), TradeType.SELL))) {
                     ArbitrageUtils.logAtLevel("Failure placing trades. Stopping.", 1);
                     return;
                 }
             } else {
-                if (!placeTrades(bidSide, new Trade(bidAmount, highestBid.getRate(), pair, TradeType.SELL), askSide, new Trade(askAmount, lowestAsk.getRate(), pair, TradeType.BUY))) {
+                if (!placeTrades(bidSide, new Trade(bidAmount, highestBid.getRate(), bidSide.adjustPair(pair), TradeType.SELL), askSide, new Trade(askAmount, lowestAsk.getRate(), askSide.adjustPair(pair), TradeType.BUY))) {
                     ArbitrageUtils.logAtLevel("Failure placing trades. Stopping.", 1);
                     return;
                 }
@@ -181,9 +181,10 @@ class SlowArbitrageStrategy2 extends Strategy {
     private boolean placeTrades(MarketInfo priority, Trade priorityTrade, MarketInfo secondary, Trade secondaryTrade) {
         MarketResponse response;
         TradeResponse tradeResponse;
-        CurrencyPair pair = priorityTrade.getPair();
-        CurrencyPairInfo prioritySidePairInfo = priority.currencyPairInfos.get(pair);
-        CurrencyPairInfo secondarySidePairInfo = secondary.currencyPairInfos.get(pair);
+        CurrencyPair primaryPair = priorityTrade.getPair();
+        CurrencyPair secondaryPair = secondaryTrade.getPair();
+        CurrencyPairInfo prioritySidePairInfo = priority.currencyPairInfos.get(primaryPair);
+        CurrencyPairInfo secondarySidePairInfo = secondary.currencyPairInfos.get(secondaryPair);
 
         TradeRequest request = new TradeRequest(priorityTrade);
         request.setPriority(5);
@@ -198,11 +199,11 @@ class SlowArbitrageStrategy2 extends Strategy {
         }
         tradeResponse = (TradeResponse) response;
         if (priorityTrade.getType() == TradeType.BUY) {
-            priority.balances.put(pair.getBase(), priority.balances.getOrDefault(pair.getBase(), 0.0) + tradeResponse.getBaseAmountFilled());
-            priority.balances.put(pair.getQuote(), priority.balances.getOrDefault(pair.getQuote(), 0.0) - tradeResponse.getQuoteAmountFilled());
+            priority.balances.put(primaryPair.getBase(), priority.balances.getOrDefault(primaryPair.getBase(), 0.0) + tradeResponse.getBaseAmountFilled());
+            priority.balances.put(primaryPair.getQuote(), priority.balances.getOrDefault(primaryPair.getQuote(), 0.0) - tradeResponse.getQuoteAmountFilled());
         } else {
-            priority.balances.put(pair.getBase(), priority.balances.getOrDefault(pair.getBase(), 0.0) - tradeResponse.getBaseAmountFilled());
-            priority.balances.put(pair.getQuote(), priority.balances.getOrDefault(pair.getQuote(), 0.0) + tradeResponse.getQuoteAmountFilled());
+            priority.balances.put(primaryPair.getBase(), priority.balances.getOrDefault(primaryPair.getBase(), 0.0) - tradeResponse.getBaseAmountFilled());
+            priority.balances.put(primaryPair.getQuote(), priority.balances.getOrDefault(primaryPair.getQuote(), 0.0) + tradeResponse.getQuoteAmountFilled());
         }
         double filledAmount = tradeResponse.getBaseAmountFilled();
         ArbitrageUtils.logAtLevel("Amount filled on " + priority.market.getName() + ": " + filledAmount, 2);
@@ -221,11 +222,11 @@ class SlowArbitrageStrategy2 extends Strategy {
                 return false;
             }
             if (secondaryTrade.getType() == TradeType.BUY) {
-                secondary.balances.put(pair.getBase(), secondary.balances.getOrDefault(pair.getBase(), 0.0) + secondaryTrade.getAmount());
-                secondary.balances.put(pair.getQuote(), secondary.balances.getOrDefault(pair.getQuote(), 0.0) - (secondaryTrade.getAmount() * secondaryTrade.getRate()));
+                secondary.balances.put(secondaryPair.getBase(), secondary.balances.getOrDefault(secondaryPair.getBase(), 0.0) + secondaryTrade.getAmount());
+                secondary.balances.put(secondaryPair.getQuote(), secondary.balances.getOrDefault(secondaryPair.getQuote(), 0.0) - (secondaryTrade.getAmount() * secondaryTrade.getRate()));
             } else {
-                secondary.balances.put(pair.getBase(), secondary.balances.getOrDefault(pair.getBase(), 0.0) - secondaryTrade.getAmount());
-                secondary.balances.put(pair.getQuote(), secondary.balances.getOrDefault(pair.getQuote(), 0.0) + (secondaryTrade.getAmount() * secondaryTrade.getRate()));
+                secondary.balances.put(secondaryPair.getBase(), secondary.balances.getOrDefault(secondaryPair.getBase(), 0.0) - secondaryTrade.getAmount());
+                secondary.balances.put(secondaryPair.getQuote(), secondary.balances.getOrDefault(secondaryPair.getQuote(), 0.0) + (secondaryTrade.getAmount() * secondaryTrade.getRate()));
             }
             // TODO(stfinancial): Check that we filled the right amount?
             return true;
@@ -255,11 +256,11 @@ class SlowArbitrageStrategy2 extends Strategy {
                 return false;
             }
             if (secondaryTrade.getType() == TradeType.BUY) {
-                secondary.balances.put(pair.getBase(), secondary.balances.getOrDefault(pair.getBase(), 0.0) + revisedTrade.getAmount());
-                secondary.balances.put(pair.getQuote(), secondary.balances.getOrDefault(pair.getQuote(), 0.0) - (revisedTrade.getAmount() * revisedTrade.getRate()));
+                secondary.balances.put(secondaryPair.getBase(), secondary.balances.getOrDefault(secondaryPair.getBase(), 0.0) + revisedTrade.getAmount());
+                secondary.balances.put(secondaryPair.getQuote(), secondary.balances.getOrDefault(secondaryPair.getQuote(), 0.0) - (revisedTrade.getAmount() * revisedTrade.getRate()));
             } else {
-                secondary.balances.put(pair.getBase(), secondary.balances.getOrDefault(pair.getBase(), 0.0) - revisedTrade.getAmount());
-                secondary.balances.put(pair.getQuote(), secondary.balances.getOrDefault(pair.getQuote(), 0.0) + (revisedTrade.getAmount() * revisedTrade.getRate()));
+                secondary.balances.put(secondaryPair.getBase(), secondary.balances.getOrDefault(secondaryPair.getBase(), 0.0) - revisedTrade.getAmount());
+                secondary.balances.put(secondaryPair.getQuote(), secondary.balances.getOrDefault(secondaryPair.getQuote(), 0.0) + (revisedTrade.getAmount() * revisedTrade.getRate()));
             }
             return true;
         }
@@ -286,11 +287,11 @@ class SlowArbitrageStrategy2 extends Strategy {
                 return false;
             }
             if (secondaryTrade.getType() == TradeType.BUY) {
-                secondary.balances.put(pair.getBase(), secondary.balances.getOrDefault(pair.getBase(), 0.0) + secondaryTrade.getAmount());
-                secondary.balances.put(pair.getQuote(), secondary.balances.getOrDefault(pair.getQuote(), 0.0) - (secondaryTrade.getAmount() * secondaryTrade.getRate()));
+                secondary.balances.put(secondaryPair.getBase(), secondary.balances.getOrDefault(secondaryPair.getBase(), 0.0) + secondaryTrade.getAmount());
+                secondary.balances.put(secondaryPair.getQuote(), secondary.balances.getOrDefault(secondaryPair.getQuote(), 0.0) - (secondaryTrade.getAmount() * secondaryTrade.getRate()));
             } else {
-                secondary.balances.put(pair.getBase(), secondary.balances.getOrDefault(pair.getBase(), 0.0) - secondaryTrade.getAmount());
-                secondary.balances.put(pair.getQuote(), secondary.balances.getOrDefault(pair.getQuote(), 0.0) + (secondaryTrade.getAmount() * secondaryTrade.getRate()));
+                secondary.balances.put(secondaryPair.getBase(), secondary.balances.getOrDefault(secondaryPair.getBase(), 0.0) - secondaryTrade.getAmount());
+                secondary.balances.put(secondaryPair.getQuote(), secondary.balances.getOrDefault(secondaryPair.getQuote(), 0.0) + (secondaryTrade.getAmount() * secondaryTrade.getRate()));
             }
             // TODO(stfinancial): Check that we filled the right amount?
             return true;
@@ -301,23 +302,23 @@ class SlowArbitrageStrategy2 extends Strategy {
     }
 
     private double getMultiplier(MarketInfo bidSide, MarketInfo askSide, CurrencyPair pair, double arbitrageRatio) {
-        CurrencyPairInfo askPairInfo = askSide.currencyPairInfos.get(pair);
-        CurrencyPairInfo bidPairInfo = bidSide.currencyPairInfos.get(pair);
+        CurrencyPairInfo askPairInfo = askSide.currencyPairInfos.get(askSide.adjustPair(pair));
+        CurrencyPairInfo bidPairInfo = bidSide.currencyPairInfos.get(bidSide.adjustPair(pair));
 //        double amount = STANDARD_AMOUNT;
         // TODO(stfinancial): Not sure it makes a lot of sense to use fees here. This ratio increases as fees are lower, which we don't necessarily want.
         double arbitrageMultiplier = Math.pow((arbitrageRatio - ((1 - bidPairInfo.takerFee) * (1 - askPairInfo.takerFee))) * 100, 2);
         ArbitrageUtils.logAtLevel("ArbitrageMultiplier: " + arbitrageMultiplier, 3);
 
-        double bidBase = bidSide.balances.get(pair.getBase()) * bidPairInfo.bids.get(0).getRate();
-        double bidQuote = bidSide.balances.get(pair.getQuote());
+        double bidBase = bidSide.balances.get(bidSide.adjustPair(pair).getBase()) * bidPairInfo.bids.get(0).getRate();
+        double bidQuote = bidSide.balances.get(bidSide.adjustPair(pair).getQuote());
         if (bidQuote == 0) {
             ArbitrageUtils.logAtLevel("Bid Side Quote Balance is 0. Setting max adjustment ratio.", 3);
             return MAX_ACCOUNT_ADJUSTMENT_RATIO;
         }
         double bidRatio = bidBase / bidQuote;
 
-        double askBase = askSide.balances.get(pair.getBase()) * askPairInfo.asks.get(0).getRate();
-        double askQuote = askSide.balances.get(pair.getQuote());
+        double askBase = askSide.balances.get(askSide.adjustPair(pair).getBase()) * askPairInfo.asks.get(0).getRate();
+        double askQuote = askSide.balances.get(askSide.adjustPair(pair).getQuote());
         if (askBase == 0) {
             ArbitrageUtils.logAtLevel("Ask Side Base Balance is 0. Setting max adjustment ratio.", 3);
             return MAX_ACCOUNT_ADJUSTMENT_RATIO;
@@ -360,10 +361,10 @@ class SlowArbitrageStrategy2 extends Strategy {
                 System.out.println(feeResponse.getJsonResponse());
                 // TODO(stfinancial): Instability at this line, need to figure out why or use optional.
                 try {
-                    m.currencyPairInfos.get(pair).takerFee = feeResponse.getFeeInfo(pair).getTakerFee();
+                    m.currencyPairInfos.get(m.adjustPair(pair)).takerFee = feeResponse.getFeeInfo(m.adjustPair(pair)).getTakerFee();
                 } catch (NullPointerException e) {
                     System.out.println("Could not get fee info.");
-                    m.currencyPairInfos.get(pair).takerFee = 0.003;
+                    m.currencyPairInfos.get(m.adjustPair(pair)).takerFee = 0.003;
                 }
 
             }
@@ -376,11 +377,11 @@ class SlowArbitrageStrategy2 extends Strategy {
             Map<Currency, Double> balances = ((AccountBalanceResponse) response).getBalances().get(AccountType.EXCHANGE);
             m.balances = balances;
             for (CurrencyPair pair : PAIRS.keySet()) {
-                if (!m.balances.containsKey(pair.getBase())) {
-                    m.balances.put(pair.getBase(), 0.0);
+                if (!m.balances.containsKey(m.adjustPair(pair).getBase())) {
+                    m.balances.put(m.adjustPair(pair).getBase(), 0.0);
                 }
-                if (!m.balances.containsKey(pair.getQuote())) {
-                    m.balances.put(pair.getQuote(), 0.0);
+                if (!m.balances.containsKey(m.adjustPair(pair).getQuote())) {
+                    m.balances.put(m.adjustPair(pair).getQuote(), 0.0);
                 }
             }
         }
@@ -401,10 +402,10 @@ class SlowArbitrageStrategy2 extends Strategy {
         PAIRS.forEach((pair, amt) -> {
             CurrencyPairInfo c = new CurrencyPairInfo();
             c.minAmount = 0.005;
-            polo.currencyPairInfos.put(pair, c);
+            polo.currencyPairInfos.put(polo.adjustPair(pair), c);
             c = new CurrencyPairInfo();
             c.minAmount = 0.01;
-            gdax.currencyPairInfos.put(pair, c);
+            gdax.currencyPairInfos.put(gdax.adjustPair(pair), c);
         });
         return Arrays.asList(polo, gdax);
     }
