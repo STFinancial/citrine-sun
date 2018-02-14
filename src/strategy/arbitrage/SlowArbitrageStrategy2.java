@@ -42,10 +42,10 @@ class SlowArbitrageStrategy2 extends Strategy {
     private static final Map<CurrencyPair, Double> PAIRS = Collections.unmodifiableMap(new HashMap<CurrencyPair, Double>() {{
 //        put(CurrencyPair.of(Currency.LTC, Currency.BTC), 3.0);
 //        put(CurrencyPair.of(Currency.ETH, Currency.BTC), 0.25);
-        put(CurrencyPair.of(Currency.ETH, Currency.USD_ARB), 5.0);
+        put(CurrencyPair.of(Currency.LTC, Currency.USD_ARB), 1.0);
     }});
     // TODO(stfinancial): Make this per-exchange?
-    private static final double MIN_AMOUNT = 0.005;
+    private static final double MIN_AMOUNT = 0.1;
     private static final double MAX_ACCOUNT_ADJUSTMENT_RATIO = 25;
 
     private static final FeeRequest FEE_REQUEST = new FeeRequest();
@@ -125,6 +125,8 @@ class SlowArbitrageStrategy2 extends Strategy {
             ArbitrageUtils.logAtLevel("Sell (" + bidSide.market.getName() + ") - " + highestBid.getAmount() + " - " + highestBid.getRate(), 2);
 
             double scaledAmount = Math.max(askSidePairInfo.minAmount, Math.max(bidSidePairInfo.minAmount, Math.floor(PAIRS.get(pair) * getMultiplier(bidSide, askSide, pair, arbitrageRatio) * HUNDRED_MILLION) / HUNDRED_MILLION));
+            ArbitrageUtils.logAtLevel("Scaled Amount: " + scaledAmount, 5);
+
 
             double askSideTradeAmount = lowestAsk.getAmount();
             // TODO(stfinancial): Make sure this is updated when we search more than 1 order deep.
@@ -358,7 +360,7 @@ class SlowArbitrageStrategy2 extends Strategy {
             }
             FeeResponse feeResponse = (FeeResponse) response;
             for (CurrencyPair pair : PAIRS.keySet()) {
-                System.out.println(feeResponse.getJsonResponse());
+                System.out.println("Fee Response: " + feeResponse.getJsonResponse());
                 // TODO(stfinancial): Instability at this line, need to figure out why or use optional.
                 try {
                     m.currencyPairInfos.get(m.adjustPair(pair)).takerFee = feeResponse.getFeeInfo(m.adjustPair(pair)).getTakerFee();
@@ -401,10 +403,10 @@ class SlowArbitrageStrategy2 extends Strategy {
 
         PAIRS.forEach((pair, amt) -> {
             CurrencyPairInfo c = new CurrencyPairInfo();
-            c.minAmount = 0.005;
+            c.minAmount = 0.05;
             polo.currencyPairInfos.put(polo.adjustPair(pair), c);
             c = new CurrencyPairInfo();
-            c.minAmount = 0.01;
+            c.minAmount = 0.1;
             gdax.currencyPairInfos.put(gdax.adjustPair(pair), c);
         });
         return Arrays.asList(polo, gdax);
